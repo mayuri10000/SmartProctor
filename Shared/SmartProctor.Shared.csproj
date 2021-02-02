@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Remove="Android" />
+    <SupportedPlatform Remove="iOS" />
+    <SupportedPlatform Remove="macOS" />
+    <SupportedPlatform Remove="Linux" />
+    <SupportedPlatform Remove="Windows" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Requests" />
+    <Folder Include="Responses" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,64 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.0.0
+MinimumVisualStudioVersion = 16.0.0.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartProctor.Server", "Server\SmartProctor.Server.csproj", "{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartProctor.Client", "Client\SmartProctor.Client.csproj", "{E273BB1F-85D7-411A-A85F-2060F445A68D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartProctor.Shared", "Shared\SmartProctor.Shared.csproj", "{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Debug|x64.Build.0 = Debug|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Debug|x86.Build.0 = Debug|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Release|x64.ActiveCfg = Release|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Release|x64.Build.0 = Release|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Release|x86.ActiveCfg = Release|Any CPU
+		{E273BB1F-85D7-411A-A85F-2060F445A68D}.Release|x86.Build.0 = Release|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Debug|x64.Build.0 = Debug|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Debug|x86.Build.0 = Debug|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Release|x64.ActiveCfg = Release|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Release|x64.Build.0 = Release|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Release|x86.ActiveCfg = Release|Any CPU
+		{F9E07BAE-C806-433D-99C0-A0823ED8AF2A}.Release|x86.Build.0 = Release|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Debug|x64.Build.0 = Debug|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Debug|x86.Build.0 = Debug|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Release|x64.ActiveCfg = Release|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Release|x64.Build.0 = Release|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Release|x86.ActiveCfg = Release|Any CPU
+		{5C19CEC5-AF18-4DD3-B212-8AE84C097A58}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A70FEA55-CFC1-4B13-80E2-4C6A8A857908}
+	EndGlobalSection
+EndGlobal
