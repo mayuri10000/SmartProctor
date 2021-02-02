@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
+using SmartProctor.Server.Services;
 
 namespace SmartProctor.Server
 {
@@ -41,6 +42,9 @@ namespace SmartProctor.Server
             services.AddTransient<IExamUserRepository, ExamUserRepository>();
             services.AddTransient<IQuestionRepository, QuestionRepository>();
             services.AddTransient<IAnswerRepository, AnswerRepository>();
+            
+            // Services
+            services.AddTransient<IUserServices, UserServices>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
