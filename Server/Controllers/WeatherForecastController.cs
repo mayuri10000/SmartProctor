@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SmartProctor.Server.Data.Entities;
+using SmartProctor.Server.Data.Repositories;
 using SmartProctor.Shared;
 
 namespace SmartProctor.Server.Controllers
@@ -12,17 +14,18 @@ namespace SmartProctor.Server.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
+        private IUserRepository _repo;
+
+        public WeatherForecastController(IUserRepository repo)
+        {
+            _repo = repo;
+        }
+        
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-        }
+        
 
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()

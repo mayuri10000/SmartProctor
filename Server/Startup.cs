@@ -31,8 +31,8 @@ namespace SmartProctor.Server
 
             // DbContext
             services.AddDbContext<SmartProctorDbContext>(
-                db => db.UseMySql("server=localhost;user id=root;password=Mayuri;database=smartproctor",
-                    x => x.ServerVersion("8.0.23-mysql")));
+                db => db.UseMySql("server=localhost;user id=root;password=Mayuri;database=smartproctor", 
+                    ServerVersion.FromString("8.0.23-mysql")));
 
             // Repositories
             services.AddTransient<IUserRepository, UserRepository>();
