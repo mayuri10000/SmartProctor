@@ -1,0 +1,54 @@
+﻿@page "/User/Login"
+@using SmartProctor.Shared.Requests
+@using SmartProctor.Shared.Responses
+@layout LoginLayout
+@inject HttpClient Http
+@inject ModalService Modal
+
+<Form Model="@model"
+      OnFinish="OnFinish"
+      OnFinishFailed="OnFinishFailed">
+    <Paragraph Class="text-center">User Login</Paragraph>
+    <FormItem>
+        <Input @bind-Value="@context.UserName" Placeholder="Username/Phone/Email"/>
+    </FormItem>
+    <FormItem>
+        <InputPassword @bind-Value="@context.Password" Placeholder="Password"/>
+    </FormItem>
+    <FormItem WrapperColOffset="8" WrapperColSpan="16">
+        <Button Type="@ButtonType.Primary" HtmlType="submit">
+            Submit
+        </Button>
+    </FormItem>
+</Form>
+
+@code {
+    private LoginRequestModel model = new LoginRequestModel();
+    string ss { get; set; }
+    
+    private void OnFinishFailed(EditContext editContext)
+    {
+    }
+
+    private async Task OnFinish(EditContext editContext)
+    {
+        var result = await Http.PostAsJsonAsync("api/user/Login", model);
+        var response = await result.Content.ReadFromJsonAsync<BaseResponseModel>();
+
+        if (response.Code != 0)
+        {
+            Modal.Error(new ConfirmOptions()
+            {
+                Title = "Login failed",
+                Content = response.Message
+            });
+        }
+        else
+        {
+            Modal.Success(new ConfirmOptions()
+            {
+                Content = "Login OK"
+            });
+        }
+    }
+}
