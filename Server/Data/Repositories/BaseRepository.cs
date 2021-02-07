@@ -15,8 +15,8 @@ namespace SmartProctor.Server.Data.Repositories
         IQueryable<T> GeAll<TK>(Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
         T GetObjectByKeys(params object[] keys);
 
-        PagedList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
-            OrderingType orderingType, int pageIndex, int pageCount, string[] includes = null);
+        IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
+            OrderingType orderingType, string[] includes = null);
 
         T GetFirstOrDefaultObject(Expression<Func<T, bool>> where, string[] includes = null);
 
@@ -66,27 +66,17 @@ namespace SmartProctor.Server.Data.Repositories
                 .OrderBy(orderBy, orderingType).AsQueryable();
         }
 
-        public virtual PagedList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
-            OrderingType orderingType, int pageIndex, int pageCount, string[] includes = null)
+        public virtual IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
+            OrderingType orderingType, string[] includes = null)
         {
-            int skipCount = PagedList<T>.GetSkipRecord(pageIndex, pageCount);
-            int totalCount = -1;
             List<T> result = null;
             IQueryable<T> resultList = DbContext.Set<T>()
                 .Includes(includes)
                 .Where(where)
                 .OrderBy(orderBy, orderingType); //.Includes(includes);
-            if (pageCount > 0 && pageIndex > 0)
-            {
-                resultList = resultList.Skip(skipCount).Take(pageCount);
-                totalCount = ObjectCount(where, null); //whereList.Count();
-            }
-            
             result = resultList.ToList();
             
-
-            PagedList<T> list = new PagedList<T>(result, pageIndex, pageCount, totalCount, skipCount);
-            return list;
+            return result;
         }
 
         public virtual T GetFirstOrDefaultObject(Expression<Func<T, bool>> where, string[] includes = null)

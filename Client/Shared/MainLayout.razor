@@ -1,17 +1,27 @@
 @inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <div class="main">
-        <div class="top-row px-4">
-            <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-        </div>
-
-        <div class="content px-4">
-            @Body
-        </div>
-    </div>
-</div>
+<Layout Style="position: fixed; height: 100%; width: 100%">
+    @Body
+    <Footer Style="text-align: center; ">Powered by Ant Design Blazor</Footer>
+</Layout>
+<style>
+    .logo {
+        font-style: italic;
+        font-size: 30px;
+        color: #ffffff;
+        float: left;
+    }
+    
+    .site-layout-background {
+        background: #fff;
+    }
+    ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+        background-color: #ffffffff;
+    }
+    ::-webkit-scrollbar-thumb:vertical{
+        background-color: #77777777;
+        border-radius:2px;
+    }
+</style>

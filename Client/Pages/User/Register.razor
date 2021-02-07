@@ -1,4 +1,4 @@
-﻿@page "/User/Login"
+﻿@page "/User/Register"
 @using SmartProctor.Shared.Requests
 @using SmartProctor.Shared.Responses
 @layout LoginLayout
@@ -8,39 +8,51 @@
 
 <Form Model="@model"
       OnFinish="OnFinish">
-    <Paragraph Class="text-center">User Login</Paragraph>
+    <Paragraph Class="text-center">User Register</Paragraph>
     <FormItem>
-        <Input @bind-Value="@context.UserName" Placeholder="Username/Phone/Email"/>
+        <Input @bind-Value="@context.Id" Placeholder="User Name"/>
     </FormItem>
+    <FormItem>
+        <Input @bind-Value="@context.Nickname" Placeholder="Nickname"/>
+        </FormItem>
     <FormItem>
         <InputPassword @bind-Value="@context.Password" Placeholder="Password"/>
     </FormItem>
+    <FormItem>
+        <InputPassword @bind-Value="@context.PasswordConfirm" Placeholder="Confirm Password"/>
+    </FormItem>
+    <FormItem>
+        <Input @bind-Value="@context.Email" Placeholder="Email Address"/>
+    </FormItem>
+    <FormItem>
+        <Input @bind-Value="@context.Phone" Placeholder="Phone number"/>
+    </FormItem>
     <FormItem WrapperColOffset="8" WrapperColSpan="16">
         <Button Type="@ButtonType.Primary" HtmlType="submit">
-            Login
+            Register
         </Button>
-        <Button Type="link" OnClick="OnRegister">Register</Button>
+        <Button Type="link" OnClick="OnLogin">Login</Button>
     </FormItem>
 </Form>
 
 @code {
-    private LoginRequestModel model = new LoginRequestModel();
+    private RegisterRequestModel model = new RegisterRequestModel();
 
-    private void OnRegister()
+    private void OnLogin()
     {
-        NavManager.NavigateTo("/User/Register");
+        NavManager.NavigateTo("/User/Login");
     }
 
     private async Task OnFinish(EditContext editContext)
     {
-        var result = await Http.PostAsJsonAsync("api/user/Login", model);
+        var result = await Http.PostAsJsonAsync("api/user/Register", model);
         var response = await result.Content.ReadFromJsonAsync<BaseResponseModel>();
 
         if (response.Code != 0)
         {
             Modal.Error(new ConfirmOptions()
             {
-                Title = "Login failed",
+                Title = "Register failed",
                 Content = response.Message
             });
         }
@@ -48,8 +60,9 @@
         {
             Modal.Success(new ConfirmOptions()
             {
-                Content = "Login OK"
+                Content = "Register OK"
             });
         }
     }
+
 }

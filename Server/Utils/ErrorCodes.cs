@@ -13,6 +13,12 @@ namespace SmartProctor.Server.Utils
         public const int PhoneExists = 1004;
         public const int OldPasswordMismatch = 1005;
 
+        public const int ExamNotExist = 2000;
+        public const int ExamNotPermitToTake = 2001;
+        public const int ExamNotPermitToProctor = 2002;
+        public const int ExamNotBegin = 2003;
+        public const int ExamExpired = 2004;
+
         public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
         {
             { 0000, "Success" },
@@ -22,7 +28,13 @@ namespace SmartProctor.Server.Utils
             { 1002, "User name already exists" },
             { 1003, "Email already exists" },
             { 1004, "Phone already exists" },
-            { 1005, "Old Password Wrong"}
+            { 1005, "Old Password Wrong"},
+            
+            { 2000, "This exam does not exist"},
+            { 2001, "You have no permission to take this exam"},
+            { 2002, "You have no permission to proctor this exam"},
+            { 2003, "This exam have not begin yet."},
+            { 2004, "This exam has expired"}
         };
 
         public static BaseResponseModel CreateSimpleResponse(int errorCode)

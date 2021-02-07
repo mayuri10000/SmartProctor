@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
+using SmartProctor.Server.Hubs;
 using SmartProctor.Server.Services;
 
 namespace SmartProctor.Server
@@ -26,9 +27,16 @@ namespace SmartProctor.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // enable signalR and increase frame size limit (since the following two hubs will used to forward video frames
+            services.AddSignalR()
+                .AddHubOptions<ScreenCaptureHub>(options => { options.MaximumReceiveMessageSize = 102400000; })
+                .AddHubOptions<DeepLensHub>(options => { options.MaximumReceiveMessageSize = 102400000; });
+            
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSession();
+            
+            // For dependency injection
             // DbContext
             services.AddDbContext<SmartProctorDbContext>(
                 db => db.UseMySql("server=localhost;user id=root;password=Mayuri;database=smartproctor", 
@@ -44,6 +52,7 @@ namespace SmartProctor.Server
             
             // Services
             services.AddTransient<IUserServices, UserServices>();
+            services.AddTransient<IExamServices, ExamServices>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,6 +81,9 @@ namespace SmartProctor.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHub<MessageHub>("/hubs/message");
+                endpoints.MapHub<DeepLensHub>("/hubs/deeplens");
+                endpoints.MapHub<ScreenCaptureHub>("/hubs/screenshot");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

@@ -16,8 +16,7 @@ namespace SmartProctor.Server.Services
         T GetObject(params object[] keys);
         T GetObject(Expression<Func<T, bool>> where, string[] includes = null);
         T GetObject<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
-        PagedList<T> GetFullList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
-        PagedList<T> GetObjectList<TK>(int pageIndex, int pageCount, Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
+        IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
         int GetCount(Expression<Func<T, bool>> where, string[] includes = null);
         decimal GetSum(Expression<Func<T, bool>> where, Func<T, decimal> sum, string[] includes = null);
         void TryDetectChange(T obj);
@@ -56,15 +55,10 @@ namespace SmartProctor.Server.Services
         {
             return BaseRepository.GetFirstOrDefaultObject(where, orderBy, orderingType, includes);
         }
-
-        public PagedList<T> GetFullList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null)
+        
+        public virtual IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null)
         {
-            return this.GetObjectList(0, 0, where, orderBy, orderingType, includes);
-        }
-
-        public virtual PagedList<T> GetObjectList<TK>(int pageIndex, int pageCount, Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null)
-        {
-            return BaseRepository.GetObjectList(where, orderBy, orderingType, pageIndex, pageCount, includes);
+            return BaseRepository.GetObjectList(where, orderBy, orderingType, includes);
         }
 
         public virtual int GetCount(Expression<Func<T, bool>> where, string[] includes = null)

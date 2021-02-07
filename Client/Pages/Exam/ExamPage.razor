@@ -1,0 +1,57 @@
+﻿@page "/Exam/Exam/{examId}"
+@inject NavigationManager NavManager
+@inject HttpClient Http
+@inject ModalService Modal
+
+<Header Class="header">
+@if (examDetails != null)
+{
+    <div class="logo">@examDetails.Name</div>
+}
+    <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
+        <Popover Placement="@PlacementType.BottomRight" Title="DeepLens Capture" Content="// TODO">
+            <Icon Type="video-camera" Theme="outline" Style="font-size: 20px; width: 30px; color: green;"/>
+        </Popover>
+        <Popover Placement="@PlacementType.BottomRight" Title="Screen Capture" Content="// TODO">
+            <Icon Type="desktop" Theme="outline" Style="font-size: 20px; width: 30px;"/>
+        </Popover>
+    </Menu>
+</Header>
+<Content Style="padding: 0 50px">
+    <Breadcrumb Style=" margin: 16px 0">
+
+    </Breadcrumb>
+    <Layout Class="site-layout-background" Style="padding: 24px 0; height: 100%;">
+
+        <Sider Class="site-layout-background" Width="200" Style="margin-bottom: 50px;">
+            @if (examDetails != null)
+            {
+                <CountDown Title="Time remaining" Format="hh:mm:ss" Value="examDetails.StartTime.AddSeconds(examDetails.Duration)" OnFinish="OnFinish" Style="margin-left: 40px"/>
+            }
+            <Menu Mode="MenuMode.Inline"
+                  DefaultSelectedKeys=@(new[] {"1"})
+                  DefaultOpenKeys=@(new[] {"sub1"})
+                  Style="height: 100%; overflow: auto">
+                <SubMenu Key="sub1" Title="Section A">
+                    <MenuItem Key="1">option1</MenuItem>
+                    <MenuItem Key="2">option2</MenuItem>
+                    <MenuItem Key="3">option3</MenuItem>
+                    <MenuItem Key="4">option4</MenuItem>
+                </SubMenu>
+                <SubMenu Key="sub2" Title=sub2Title>
+                    <MenuItem Key="5">option5</MenuItem>
+                    <MenuItem Key="6">option6</MenuItem>
+                    <MenuItem Key="7">option7</MenuItem>
+                    <MenuItem Key="8">option8</MenuItem>
+                </SubMenu>
+                <SubMenu Key="sub3" Title=sub3Title>
+                    <MenuItem Key="9">option9</MenuItem>
+                    <MenuItem Key="10">option10</MenuItem>
+                    <MenuItem Key="11">option11</MenuItem>
+                    <MenuItem Key="12">option12</MenuItem>
+                </SubMenu>
+            </Menu>
+        </Sider>
+        <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">// TODO: Add test questions here</Content>
+    </Layout>
+</Content>

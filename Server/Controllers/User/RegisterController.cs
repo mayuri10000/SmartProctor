@@ -20,7 +20,7 @@ namespace SmartProctor.Server.Controllers.User
         [HttpPost]
         public BaseResponseModel Post(RegisterRequestModel model)
         {
-            return ErrorCodes.CreateSimpleResponse(_services.Register(model.Id, model.NickName, model.Password,
+            return ErrorCodes.CreateSimpleResponse(_services.Register(model.Id, model.Nickname, model.Password,
                 model.Email, model.Phone));
         }
     }
