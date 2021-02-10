@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using SmartProctor.Server.Data;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
 using SmartProctor.Server.Utils;
