@@ -52,7 +52,7 @@ namespace SmartProctor.Server.Hubs
             }
         }
 
-        public async override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
                 .SendAsync("ExamTakerLeave", Context.Items["uid"]);

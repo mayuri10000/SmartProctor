@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AntDesign;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.SignalR.Client;
 using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -16,6 +17,8 @@ namespace SmartProctor.Client.Pages.Exam
         private int currentQuestionNum = 1;
 
         private ExamDetailsResponseModel examDetails;
+        
+        private HubConnection hubConnection;
 
         protected async override Task OnInitializedAsync()
         {
@@ -36,6 +39,7 @@ namespace SmartProctor.Client.Pages.Exam
                     Title = "Enter test failed",
                     Content = result.Message
                 });
+                NavManager.NavigateTo("/");
             }
             else
             {
@@ -45,12 +49,28 @@ namespace SmartProctor.Client.Pages.Exam
                 {
                     examDetails = details;
                 }
-                
+
+                await SetupSignalRClientAsync();
                 StateHasChanged();
             }
         }
 
-        public void OnFinish()
+        private void OnNextQuestion()
+        {
+            ToQuestion(++currentQuestionNum);
+        }
+
+        private void OnPreviousQuestion()
+        {
+            ToQuestion(--currentQuestionNum);
+        }
+
+        private void ToQuestion(int index)
+        {
+            // TODO: Display questions
+        }
+
+        private void OnFinish()
         {
             Modal.Warning(new ConfirmOptions()
             {
@@ -61,7 +81,26 @@ namespace SmartProctor.Client.Pages.Exam
             {
             };
         }
-        
-        
+
+        private async Task SetupSignalRClientAsync()
+        {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(NavManager.ToAbsoluteUri("/chathub"))
+                .Build();
+
+            hubConnection.On<string>("ReceiveMessage", OnReceiveMessage);
+            
+            await hubConnection.StartAsync();
+        }
+
+        private void OnReceiveMessage(string message)
+        {
+            // TODO: Process and display message
+        }
+
+        private async Task SendMessage(string message)
+        {
+            await hubConnection.SendAsync("SendMessage", message);
+        }
     }
 }

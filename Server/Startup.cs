@@ -27,10 +27,7 @@ namespace SmartProctor.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            // enable signalR and increase frame size limit (since the following two hubs will used to forward video frames
-            services.AddSignalR()
-                .AddHubOptions<ScreenCaptureHub>(options => { options.MaximumReceiveMessageSize = 102400000; })
-                .AddHubOptions<DeepLensHub>(options => { options.MaximumReceiveMessageSize = 102400000; });
+            services.AddSignalR();
             
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -81,9 +78,7 @@ namespace SmartProctor.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
-                endpoints.MapHub<MessageHub>("/hubs/message");
-                endpoints.MapHub<DeepLensHub>("/hubs/deeplens");
-                endpoints.MapHub<ScreenCaptureHub>("/hubs/screenshot");
+                endpoints.MapHub<MessageHub>("/hub");
                 endpoints.MapFallbackToFile("index.html");
             });
         }
