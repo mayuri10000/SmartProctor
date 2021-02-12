@@ -42,7 +42,11 @@ namespace SmartProctor.Server.Controllers.User
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
             
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity));
+                new ClaimsPrincipal(claimsIdentity),
+                new AuthenticationProperties
+                {
+                    IsPersistent = model.Remember
+                });
             
             return ErrorCodes.CreateSimpleResponse(ErrorCodes.Success);
         }

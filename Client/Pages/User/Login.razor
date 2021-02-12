@@ -15,6 +15,9 @@
     <FormItem>
         <InputPassword @bind-Value="@context.Password" Placeholder="Password"/>
     </FormItem>
+    <FormItem>
+        <Checkbox @bind-Value="context.Remember">Remember me</Checkbox>
+    </FormItem>
     <FormItem WrapperColOffset="8" WrapperColSpan="16">
         <Button Type="@ButtonType.Primary" HtmlType="submit">
             Login
@@ -52,4 +55,5 @@
             });
         }
     }
+
 }
