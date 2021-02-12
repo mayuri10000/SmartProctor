@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
@@ -31,7 +32,9 @@ namespace SmartProctor.Server
             
             services.AddControllersWithViews();
             services.AddRazorPages();
-            services.AddSession();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
             
             // For dependency injection
             // DbContext
@@ -67,7 +70,8 @@ namespace SmartProctor.Server
                 app.UseHsts();
             }
 
-            app.UseSession();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();

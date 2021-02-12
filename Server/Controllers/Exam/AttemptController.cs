@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using SmartProctor.Server.Services;
@@ -21,16 +22,12 @@ namespace SmartProctor.Server.Controllers.Exam
         [HttpGet("{eid}")]
         public BaseResponseModel Get(int eid)
         {
-            if (!HttpContext.Session.IsAvailable)
+            if (User.Identity?.Name == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
             }
             
-            var uid = HttpContext.Session.GetString("UID");
-            if (uid == null)
-            {
-                return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
-            }
+            var uid = User.Identity.Name;
 
             return ErrorCodes.CreateSimpleResponse(_services.Attempt(eid, uid));
         }

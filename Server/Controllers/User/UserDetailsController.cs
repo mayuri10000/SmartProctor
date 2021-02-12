@@ -20,17 +20,13 @@ namespace SmartProctor.Server.Controllers.User
         [HttpGet]
         public BaseResponseModel Get()
         {
-            if (!HttpContext.Session.IsAvailable)
-            {
-                return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
-            }
-            
-            var uid = HttpContext.Session.GetString("UID");
-            if (uid == null)
+            if (User.Identity?.Name == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
             }
 
+            var uid = User.Identity.Name;
+            
             var u = _services.GetObject(uid);
             return new UserDetailsResponseModel()
             {

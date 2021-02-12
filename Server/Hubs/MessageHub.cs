@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Services;
+using SmartProctor.Server.Utils;
 
 namespace SmartProctor.Server.Hubs
 {
@@ -19,28 +21,47 @@ namespace SmartProctor.Server.Hubs
             _userServices = userServices;
         }
 
-        public async Task ExamTakerJoin(string uid, int examId)
+        public async Task Test()
         {
-            if (_examServices.Attempt(examId, uid) != 0)
+            await Clients.Caller.SendAsync("TestBack",
+                Context.User?.Identity == null ? "null" : Context.User.Identity.Name);
+        }
+
+        public async Task ExamTakerJoin(int examId)
+        {
+            if (Context.User?.Identity?.Name == null)
             {
-                await Clients.Caller.SendAsync("ExamRejected");
+                await Clients.Caller.SendAsync("Error", ErrorCodes.NotLoggedIn);
+                return;
+            }
+
+            var ret = _examServices.Attempt(examId, Context.User.Identity.Name);
+            if (ret != 0)
+            {
+                await Clients.Caller.SendAsync("Error", ret);
             }
             else
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, examId + "-takers");
                 await Clients.Caller.SendAsync("ExamAccepted");
-                await Clients.Group(examId + "-proctors").SendAsync("ExamTakerJoined", uid);
+                await Clients.Group(examId + "-proctors").SendAsync("ExamTakerJoined", Context.User.Identity.Name);
                 
                 _userGroupDict.Add(Context.ConnectionId, examId.ToString());
-                Context.Items["uid"] = uid;
             }
         }
 
-        public async Task ProctorJoin(string uid, int examId)
+        public async Task ProctorJoin(int examId)
         {
-            if (_examServices.EnterProctor(examId, uid) != 0)
+            if (Context.User?.Identity?.Name == null)
             {
-                await Clients.Caller.SendAsync("ProctorRejected");
+                await Clients.Caller.SendAsync("Error", ErrorCodes.NotLoggedIn);
+                return;
+            }
+
+            var ret = _examServices.EnterProctor(examId, Context.User.Identity.Name);
+            if (ret != 0)
+            {
+                await Clients.Caller.SendAsync("Error", ret);
             }
             else
             {
@@ -48,26 +69,64 @@ namespace SmartProctor.Server.Hubs
                 await Clients.Caller.SendAsync("ProctorAccepted");
                 
                 _userGroupDict.Add(Context.ConnectionId, examId.ToString());
-                Context.Items["uid"] = uid;
+            }
+        }
+
+        public async Task DeepLensJoin(int examId)
+        {
+            if (Context.User?.Identity?.Name == null)
+            {
+                await Clients.Caller.SendAsync("Error", ErrorCodes.NotLoggedIn);
+                return;
+            }
+
+            var ret = _examServices.Attempt(examId, Context.User.Identity.Name);
+            if (ret != 0)
+            {
+                await Clients.Caller.SendAsync("Error", ret);
+            }
+            else
+            {
+                var un = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 9);
+                
+                await Groups.AddToGroupAsync(Context.ConnectionId, examId + "-deeplens");
+                await Clients.Caller.SendAsync("DeepLensJoined");
+                await Clients.User(un)
+                    .SendAsync("DeepLensJoined");
+                await Clients.Group(examId + "-proctors").SendAsync("DeepLensJoined", un);
+                
+                _userGroupDict.Add(Context.ConnectionId, examId.ToString());
             }
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
-                .SendAsync("ExamTakerLeave", Context.Items["uid"]);
-            _userGroupDict.Remove(Context.ConnectionId);
+            if (_userGroupDict.ContainsKey(Context.ConnectionId))
+            {
+                await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
+                    .SendAsync("ExamTakerLeave", Context.Items["uid"]);
+                _userGroupDict.Remove(Context.ConnectionId);
+            }
         }
 
         public async Task ExamTakerMessage(string message)
         {
-            await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
-                .SendAsync("ReceiveMessage", Context.Items["uid"], message);
+            if (_userGroupDict.ContainsKey(Context.ConnectionId))
+                await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
+                    .SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
         }
 
         public async Task ProctorMessage(string message, string uid)
         {
-            await Clients.User(uid).SendAsync("ReceiveMessage", "proctor", message);
+            if (_userGroupDict.ContainsKey(Context.ConnectionId))
+                await Clients.User(uid).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
+        }
+        
+        public async Task ProctorMessageGroup(string message)
+        {
+            if (_userGroupDict.ContainsKey(Context.ConnectionId))
+                await Clients.Group(_userGroupDict[Context.ConnectionId] + "-takers")
+                    .SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
         }
     }
 }

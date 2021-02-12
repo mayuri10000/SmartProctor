@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartProctor.Server.Utils;
 using SmartProctor.Shared.Responses;
@@ -10,14 +14,15 @@ namespace SmartProctor.Server.Controllers.User
     public class LogoutController : ControllerBase
     {
         [HttpGet]
-        public BaseResponseModel Get()
+        public async Task<BaseResponseModel> Get()
         {
-            if (HttpContext.Session.IsAvailable && HttpContext.Session.GetString("UID") == null)
+            if (User.Identity?.Name == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
             }
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             
-            HttpContext.Session.Remove("UID");
             return ErrorCodes.CreateSimpleResponse(ErrorCodes.Success);
         }
     }

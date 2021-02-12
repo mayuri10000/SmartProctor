@@ -1,22 +1,32 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
 @layout LoginLayout
 @inject ModalService Modal
+@inject NavigationManager NavManager
 
-<CountDown Format="hh:mm:ss" 
-           Title="多灾多难的鼠年还剩" 
-           Value="@countTo" OnFinish="OnFinish"
-           Style="text-align: center; font-size: 40px"></CountDown>
 
 @code
 {
-    private DateTime countTo = new DateTime(2021, 2, 12, 0, 0, 50);
+    private HubConnection _hubConnection;
 
-    private void OnFinish()
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavManager.ToAbsoluteUri("/hub"))
+            .Build();
+
+        _hubConnection.On<string>("TestBack", TestBack);
+            
+        await _hubConnection.StartAsync();
+
+        await _hubConnection.SendAsync("Test");
+    }
+
+    private void TestBack(string str)
     {
         Modal.Success(new ConfirmOptions()
         {
-            Title = "牛年大吉",
-            Content = "新年快乐，牛年大吉，祝同学们在新的一年里学业进步，顺利完成毕设，顺利毕业，在成功的道路上越走越远"
+            Title = str
         });
     }
 }

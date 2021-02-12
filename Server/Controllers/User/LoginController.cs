@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartProctor.Server.Services;
 using SmartProctor.Server.Utils;
@@ -19,15 +24,26 @@ namespace SmartProctor.Server.Controllers.User
         }
 
         [HttpPost]
-        public BaseResponseModel Post(LoginRequestModel model)
+        public async Task<BaseResponseModel> Post(LoginRequestModel model)
         {
             var uid = _services.Login(model.UserName, model.Password);
             if (uid == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.UserNameOrPasswordWrong);
             }
-
-            HttpContext.Session.SetString("UID", uid);
+            
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, uid),
+                new Claim(ClaimTypes.Role, "User"),
+            };
+            
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+            
             return ErrorCodes.CreateSimpleResponse(ErrorCodes.Success);
         }
     }
