@@ -1,4 +1,4 @@
-﻿var WebRtcDemo = WebRtcDemo || {};
+﻿var WebRtcApp = WebRtcApp || {};
 
 /************************************************
  ConnectionManager.js
@@ -7,38 +7,48 @@
  of the app.
  WebRTC API has been normalized using 'adapter.js'
  ************************************************/
-WebRtcDemo.ConnectionManager = (function () {
-    var _signaler,
-        _connections = {},
-        _iceServers = [{ url: 'stun:74.125.142.127:19302' }], // stun.l.google.com - Firefox does not support DNS names.
+WebRtcApp.ConnectionManager = (function () {
+    var _connections = {},
+        _iceServers = [{url: 'stun:74.125.142.127:19302'}], // stun.l.google.com - Firefox does not support DNS names.
 
         /* Callbacks */
-        _onReadyForStreamCallback = function () { console.log('UNIMPLEMENTED: _onReadyForStreamCallback'); },
-        _onStreamAddedCallback = function () { console.log('UNIMPLEMENTED: _onStreamAddedCallback'); },
-        _onStreamRemovedCallback = function () { console.log('UNIMPLEMENTED: _onStreamRemovedCallback'); },
+        _sendSignalFn = function () {
+            console.log("UNIMPLEMENTED: _sendSignalFn")
+        },
+
+        _onReadyForStreamCallback = function () {
+            console.log('UNIMPLEMENTED: _onReadyForStreamCallback');
+        },
+        _onStreamAddedCallback = function () {
+            console.log('UNIMPLEMENTED: _onStreamAddedCallback');
+        },
+        _onStreamRemovedCallback = function () {
+            console.log('UNIMPLEMENTED: _onStreamRemovedCallback');
+        },
 
         // Initialize the ConnectionManager with a signaler and callbacks to handle events
-        _initialize = function (signaler, onReadyForStream, onStreamAdded, onStreamRemoved) {
-            _signaler = signaler;
+        _initialize = function (sendSignalFn, onReadyForStream, onStreamAdded, onStreamRemoved) {
+            _sendSignalFn = sendSignalFn || _sendSignalFn;
 
             _onReadyForStreamCallback = onReadyForStream || _onReadyForStreamCallback;
             _onStreamAddedCallback = onStreamAdded || _onStreamAddedCallback;
             _onStreamRemovedCallback = onStreamRemoved || _onStreamRemovedCallback;
         },
 
+
         // Create a new WebRTC Peer Connection with the given partner
         _createConnection = function (partnerClientId) {
             console.log('WebRTC: creating connection...');
 
             // Create a new PeerConnection
-            var connection = new RTCPeerConnection({ iceServers: _iceServers });
+            var connection = new RTCPeerConnection({iceServers: _iceServers});
 
             // ICE Candidate Callback
             connection.onicecandidate = function (event) {
                 if (event.candidate) {
                     // Found a new candidate
                     console.log('WebRTC: new ICE candidate');
-                    _signaler.sendSignal(JSON.stringify({ "candidate": event.candidate }), partnerClientId);
+                    _sendSignalFn(JSON.stringify({"candidate": event.candidate}), partnerClientId);
                 } else {
                     // Null candidate means we are done collecting candidates.
                     console.log('WebRTC: ICE candidate gathering complete');
@@ -81,17 +91,18 @@ WebRtcDemo.ConnectionManager = (function () {
         // Process a newly received SDP signal
         _receivedSdpSignal = function (connection, partnerClientId, sdp) {
             console.log('WebRTC: processing sdp signal');
-            connection.setRemoteDescription(new RTCSessionDescription(sdp), function () {
-                if (connection.remoteDescription.type == "offer") {
+            connection.setRemoteDescription(new RTCSessionDescription(sdp)).then(function () {
+                if (connection.remoteDescription.type === "offer") {
                     console.log('WebRTC: received offer, sending response...');
                     _onReadyForStreamCallback(connection);
-                    connection.createAnswer(function (desc) {
-                            connection.setLocalDescription(desc, function () {
-                                _signaler.sendSignal(JSON.stringify({ "sdp": connection.localDescription }), partnerClientId);
-                            });
-                        },
-                        function (error) { console.log('Error creating session description: ' + error); });
-                } else if (connection.remoteDescription.type == "answer") {
+                    connection.createAnswer().then(function (desc) {
+                        connection.setLocalDescription(desc).then(function () {
+                            _sendSignalFn(JSON.stringify({"sdp": connection.localDescription}), partnerClientId);
+                        });
+                    }).catch(function (error) {
+                        console.log('Error creating session description: ' + error);
+                    });
+                } else if (connection.remoteDescription.type === "answer") {
                     console.log('WebRTC: received answer');
                 }
             });
@@ -120,8 +131,7 @@ WebRtcDemo.ConnectionManager = (function () {
 
         // Retreive an existing or new connection for a given partner
         _getConnection = function (partnerClientId) {
-            var connection = _connections[partnerClientId] || _createConnection(partnerClientId);
-            return connection;
+            return _connections[partnerClientId] || _createConnection(partnerClientId);
         },
 
         // Close all of our connections
@@ -157,11 +167,13 @@ WebRtcDemo.ConnectionManager = (function () {
             console.log('stream added on my end');
 
             // Send an offer for a connection
-            connection.createOffer(function (desc) {
-                connection.setLocalDescription(desc, function () {
-                    _signaler.sendSignal(JSON.stringify({ "sdp": connection.localDescription }), partnerClientId);
+            connection.createOffer().then(function (desc) {
+                connection.setLocalDescription(desc).then(function () {
+                    _sendSignalFn(JSON.stringify({"sdp": connection.localDescription}), partnerClientId);
                 });
-            }, function (error) { console.log('Error creating session description: ' + error); });
+            }).catch(function (error) {
+                console.log('Error creating session description: ' + error);
+            });
         };
 
     // Return our exposed API

@@ -85,7 +85,7 @@ namespace SmartProctor.Client.Pages.Exam
         private async Task SetupSignalRClientAsync()
         {
             hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavManager.ToAbsoluteUri("/chathub"))
+                .WithUrl(NavManager.ToAbsoluteUri("/hub"))
                 .Build();
 
             hubConnection.On<string>("ReceiveMessage", OnReceiveMessage);
