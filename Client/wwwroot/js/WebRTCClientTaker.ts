@@ -1,15 +1,4 @@
-﻿declare global {
-    // The Typescript translator won't recognize those
-    // if I do not declare this
-    interface Window {
-        SmartProctor: any;
-    }
-    
-    interface Element {
-        srcObject: any;
-    }
-}
-
+﻿// @ts-ignore
 window.SmartProctor = window.SmartProctor || {};
 
 namespace SmartProctor {
@@ -44,8 +33,10 @@ namespace SmartProctor {
         }
         
         public async startStreaming() {
-            this.stream = await navigator.mediaDevices.getUserMedia({ video : true });
+            // @ts-ignore
+            this.stream = await navigator.mediaDevices.getDisplayMedia();
             var localVideo = document.querySelector(".video.local");
+            // @ts-ignore
             localVideo.srcObject = this.stream;
             
             this.stream.getTracks().forEach((track) => {
@@ -80,6 +71,7 @@ namespace SmartProctor {
 
 var webRTCClientTaker: SmartProctor.WebRTCClientTaker;
 
+// @ts-ignore
 window.SmartProctor.getWebRTCClientTaker = () => {
     if (webRTCClientTaker == null) {
         webRTCClientTaker = new SmartProctor.WebRTCClientTaker();
