@@ -17,4 +17,13 @@
     <ProjectReference Include="..\Shared\SmartProctor.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\js\WebRtcHelper.js" />
+    <Content Remove="wwwroot\js\connectionManager.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\WebRTCClientTaker.ts" />
+  </ItemGroup>
+
 </Project>
