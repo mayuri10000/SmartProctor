@@ -8,12 +8,6 @@
         private desktopStream: MediaStream;
         public helper;
 
-        // Callbacks that will be used in .NET
-        public onIceCandidate: { (this: WebRTCClientTaker, candidate: string): void };
-        public onLocalSdp: { (this: WebRTCClientTaker, sdp: string): void };
-        public onIceConnectionStateChange: { (this: WebRTCClientTaker, state: string): void };
-        public onConnectionStateChange: { (this: WebRTCClientTaker, state: string): void };
-
         public async init(helper, proctors: string[]) {
             this.helper = helper;
             this.cameraConnection = new RTCPeerConnection();
@@ -78,6 +72,9 @@
 
         public async receivedCameraAnswerSDP(sdp: RTCSessionDescriptionInit) {
             await this.cameraConnection.setRemoteDescription(sdp);
+            let answer = await this.cameraConnection.createAnswer();
+            await this.cameraConnection.setLocalDescription(answer);
+            await this.helper.invokeMethodAsync("_onCameraSdp", answer);
         }
 
         public async receivedCameraIceCandidate(candidate: RTCIceCandidate) {
@@ -87,7 +84,7 @@
 
 }
 
-var webRTCClientTaker: SmartProctor.WebRTCClientTaker;
+let webRTCClientTaker: SmartProctor.WebRTCClientTaker;
 
 export function create(helper, proctors: string[]) {
     if (webRTCClientTaker == null) {

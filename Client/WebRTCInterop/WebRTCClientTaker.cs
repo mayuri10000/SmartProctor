@@ -12,10 +12,12 @@ namespace SmartProctor.Client.WebRTCInterop
 
         private DotNetObjectReference<WebRTCClientTaker> _dotRef;
         
-        public event EventHandler<RTCIceCandidate> OnIceCandidate;
-        public event EventHandler<RTCSessionDescriptionInit> OnLocalSdp;
-        public event EventHandler<string> OnIceConnectionStateChange;
-        public event EventHandler<string> OnConnectionStateChange;
+        public event EventHandler<RTCIceCandidate> OnCameraIceCandidate;
+        public event EventHandler<(string, RTCIceCandidate)> OnProctorIceCandidate;
+        public event EventHandler<RTCSessionDescriptionInit> OnCameraSdp;
+        public event EventHandler<(string, RTCSessionDescriptionInit)> OnProctorSdp;
+        public event EventHandler<string> OnCameraConnectionStateChange;
+        public event EventHandler<(string, string)> OnProctorConnectionStateChange;
 
         private WebRTCClientTaker(IJSRuntime jsRuntime)
         {
@@ -39,55 +41,70 @@ namespace SmartProctor.Client.WebRTCInterop
             await _jsObj.InvokeVoidAsync("startStreaming");
         }
 
-        public async ValueTask ReceivedAnswerSDP(RTCSessionDescriptionInit sdp)
+        public async ValueTask ReceivedCameraAnswerSDP(RTCSessionDescriptionInit sdp)
         {
             await Init();
             await _jsObj.InvokeVoidAsync("receivedAnswerSDP", sdp);
         }
 
-        public async ValueTask ReceivedIceCandidate(RTCIceCandidate candidate)
+        public async ValueTask ReceivedCameraIceCandidate(RTCIceCandidate candidate)
         {
             await Init();
             await _jsObj.InvokeVoidAsync("receivedIceCandidate", candidate);
         }
-
-        public async ValueTask<string> GetIceConnectionState()
+        
+        public async ValueTask ReceivedProctorAnswerSDP(string proctor, RTCSessionDescriptionInit sdp)
         {
             await Init();
-            return await _jsObj.InvokeAsync<string>("getIceConnectionState");
+            await _jsObj.InvokeVoidAsync("receivedAnswerSDP", proctor, sdp);
         }
 
-        public async ValueTask<string> GetConnectionState()
+        public async ValueTask ReceivedProctorIceCandidate(string proctor, RTCIceCandidate candidate)
         {
             await Init();
-            return await _jsObj.InvokeAsync<string>("getConnectionState");
+            await _jsObj.InvokeVoidAsync("receivedIceCandidate", proctor, candidate);
         }
 
+
         [JSInvokable]
-        public ValueTask _onIceCandidate(RTCIceCandidate candidate)
+        public ValueTask _onCameraIceCandidate(RTCIceCandidate candidate)
         {
-            OnIceCandidate?.Invoke(this, candidate);
+            OnCameraIceCandidate?.Invoke(this, candidate);
+            return ValueTask.CompletedTask;
+        }
+        
+        [JSInvokable]
+        public ValueTask _onProctorIceCandidate(string proctor, RTCIceCandidate candidate)
+        {
+            OnProctorIceCandidate?.Invoke(this, (proctor, candidate));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        public ValueTask _onIceConnectionStateChange(string iceConnectionState)
+        public ValueTask _onCameraSdp(RTCSessionDescriptionInit sdp)
         {
-            OnIceConnectionStateChange?.Invoke(this, iceConnectionState);
+            OnCameraSdp?.Invoke(this, sdp);
+            return ValueTask.CompletedTask;
+        }
+        
+        [JSInvokable]
+        public ValueTask _onProctorSdp(string proctor, RTCSessionDescriptionInit sdp)
+        {
+            OnProctorSdp?.Invoke(this, (proctor, sdp));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        public ValueTask _onLocalSdp(RTCSessionDescriptionInit sdp)
+        public ValueTask _onCameraConnectionStateChange(string connectionState)
         {
-            OnLocalSdp?.Invoke(this, sdp);
+            OnCameraConnectionStateChange?.Invoke(this, connectionState);
             return ValueTask.CompletedTask;
         }
-
+        
         [JSInvokable]
-        public ValueTask _onConnectionStateChange(string connectionState)
+        public ValueTask _onProctorConnectionStateChange(string proctor, string connectionState)
         {
-            OnConnectionStateChange?.Invoke(this, connectionState);
+            OnProctorConnectionStateChange?.Invoke(this, (proctor, connectionState));
             return ValueTask.CompletedTask;
         }
     }

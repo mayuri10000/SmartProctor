@@ -61,9 +61,9 @@
         }
         
         public async onReceivedDesktopSdp(testTaker: string, sdp: RTCSessionDescriptionInit) {
-            var conn = this.testTakerConnections[testTaker].desktopConnection;
+            let conn = this.testTakerConnections[testTaker].desktopConnection;
             await conn.setRemoteDescription(sdp);
-            var answer = await conn.createAnswer();
+            let answer = await conn.createAnswer();
             await conn.setLocalDescription(answer);
             await this.helper.invokeMethodAsync("_onDesktopSdp", testTaker, answer);
         }
@@ -73,16 +73,16 @@
         }
 
         public async onReceivedCameraSdp(testTaker: string, sdp: RTCSessionDescriptionInit) {
-            var conn = this.testTakerConnections[testTaker].cameraConnection;
+            let conn = this.testTakerConnections[testTaker].cameraConnection;
             await conn.setRemoteDescription(sdp);
-            var answer = await conn.createAnswer();
+            let answer = await conn.createAnswer();
             await conn.setLocalDescription(answer);
             await this.helper.invokeMethodAsync("_onCameraSdp", testTaker, answer);
         }
     }
 }
 
-var webRTCClientProctor: SmartProctor.WebRTCClientProctor;
+let webRTCClientProctor: SmartProctor.WebRTCClientProctor;
 
 export function create(helper, testTakers: string[]) {
     if (webRTCClientProctor == null) {
