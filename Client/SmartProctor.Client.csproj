@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\WebRTCClientProctor.ts" />
     <TypeScriptCompile Include="wwwroot\js\WebRTCClientTaker.ts" />
   </ItemGroup>
 
