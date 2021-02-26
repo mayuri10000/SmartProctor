@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using BrowserInterop.Extensions;
 using Microsoft.JSInterop;
+using SmartProctor.Shared.WebRTC;
 
 namespace SmartProctor.Client.WebRTCInterop
 {

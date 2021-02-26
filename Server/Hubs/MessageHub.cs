@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Services;
 using SmartProctor.Server.Utils;
+using SmartProctor.Shared.WebRTC;
 
 namespace SmartProctor.Server.Hubs
 {
@@ -87,7 +88,7 @@ namespace SmartProctor.Server.Hubs
             }
             else
             {
-                var un = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 9);
+                var un = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 4);
                 
                 await Groups.AddToGroupAsync(Context.ConnectionId, examId + "-deeplens");
                 await Clients.Caller.SendAsync("DeepLensJoined");
@@ -127,6 +128,33 @@ namespace SmartProctor.Server.Hubs
             if (_userGroupDict.ContainsKey(Context.ConnectionId))
                 await Clients.Group(_userGroupDict[Context.ConnectionId] + "-takers")
                     .SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
+        }
+
+        public async Task DesktopOffer(string proctor, RTCSessionDescriptionInit sdp)
+        {
+            await Clients.User(proctor).SendAsync("ReceivedDesktopOffer", Context.UserIdentifier, sdp);
+        }
+
+        public async Task DesktopAnswer(string testTaker, RTCSessionDescriptionInit sdp)
+        {
+            await Clients.User(testTaker).SendAsync("ReceivedDesktopAnswer", Context.UserIdentifier, sdp);
+        }
+
+        public async Task SendDesktopIceCandidate(string testTaker, RTCIceCandidate candidate)
+        {
+            await Clients.User(testTaker).SendAsync("ReceivedDesktopIceCandidate", Context.UserIdentifier, candidate);
+        }
+
+        public async Task CameraOfferToTaker(RTCSessionDescriptionInit sdp)
+        {
+            var user = Context.UserIdentifier.Substring(0, Context.UserIdentifier.Length - 4);
+            await Clients.User(user).SendAsync("CameraOfferToTaker", sdp);
+        }
+        
+        public async Task CameraAnswerFromTaker(RTCSessionDescriptionInit sdp)
+        {
+            var user = Context.UserIdentifier + "_cam";
+            await Clients.User(user).SendAsync("CameraAnswerFromTaker", sdp);
         }
     }
 }

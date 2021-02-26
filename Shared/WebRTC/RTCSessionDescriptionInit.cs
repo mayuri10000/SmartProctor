@@ -1,4 +1,4 @@
-﻿namespace SmartProctor.Client.WebRTCInterop
+﻿namespace SmartProctor.Shared.WebRTC
 {
     public class RTCSessionDescriptionInit
     {
