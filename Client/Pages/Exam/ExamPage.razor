@@ -2,18 +2,30 @@
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject ModalService Modal
+@inject IJSRuntime JsRuntime
 
 <Header Class="header">
-@if (examDetails != null)
-{
-    <div class="logo">@examDetails.Name</div>
-}
+    @if (examDetails != null)
+    {
+        <div class="logo">@examDetails.Name</div>
+    }
     <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
-        <Popover Placement="@PlacementType.BottomRight" Title="DeepLens Capture" Content="// TODO">
-            <Icon Type="video-camera" Theme="outline" Style="font-size: 20px; width: 30px; color: green;"/>
+        <Popover Placement="@PlacementType.BottomRight" Title="Camera Capture" OnVisibleChange="OnCameraVideoVisibleChange">
+            <ContentTemplate>
+                <video id="local-camera" autoplay style="max-width: 320px; max-height: 240px;"></video>
+            </ContentTemplate>
+            <ChildContent>
+                <Icon Type="video-camera" Theme="outline" Style="font-size: 20px; width: 30px;"/>
+            </ChildContent>
         </Popover>
-        <Popover Placement="@PlacementType.BottomRight" Title="Screen Capture" Content="// TODO">
-            <Icon Type="desktop" Theme="outline" Style="font-size: 20px; width: 30px;"/>
+
+        <Popover Placement="@PlacementType.BottomRight" Title="Screen Capture" OnVisibleChange="OnDesktopVideoVisibleChange">
+            <ContentTemplate>
+                <video id="local-desktop" autoplay style="max-width: 320px; max-height: 240px;"></video>
+            </ContentTemplate>
+            <ChildContent>
+                <Icon Type="desktop" Theme="outline" Style="font-size: 20px; width: 30px;"/>
+            </ChildContent>
         </Popover>
     </Menu>
 </Header>
@@ -31,11 +43,11 @@
             <Menu Mode="MenuMode.Inline"
                   DefaultSelectedKeys=@(new[] {"1"})
                   Style="height: 100%; overflow: auto">
-                    <MenuItem Key="1">// TODO:</MenuItem>
-                    <MenuItem Key="2">Display</MenuItem>
-                    <MenuItem Key="3">Question</MenuItem>
-                    <MenuItem Key="4">Numbers</MenuItem>
-                    <MenuItem Key="5">Here</MenuItem>
+                <MenuItem Key="1">// TODO:</MenuItem>
+                <MenuItem Key="2">Display</MenuItem>
+                <MenuItem Key="3">Question</MenuItem>
+                <MenuItem Key="4">Numbers</MenuItem>
+                <MenuItem Key="5">Here</MenuItem>
             </Menu>
         </Sider>
         <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">// TODO: Add test questions here</Content>

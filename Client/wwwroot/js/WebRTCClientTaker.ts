@@ -6,6 +6,7 @@
         private proctorConnections: { [userName: string]: RTCPeerConnection } = {};
         private cameraConnection: RTCPeerConnection;
         private desktopStream: MediaStream;
+        private cameraStream: MediaStream;
         public helper;
 
         public async init(helper, proctors: string[]) {
@@ -21,9 +22,7 @@
             };
             
             this.cameraConnection.ontrack = async (e) => {
-                // @ts-ignore
-                document.getElementById("local-desktop").srcObject = e.streams[0];
-                this.desktopStream = e.streams[0];
+                this.cameraStream = e.streams[0];
             }
 
             for (let proctor in proctors) {
@@ -40,13 +39,9 @@
             }
         }
 
-        public async startStreaming() {
+        public async startStreamingDesktop() {
             // @ts-ignore
             this.desktopStream = await navigator.mediaDevices.getDisplayMedia();
-            let localVideo = document.querySelector(".video.local");
-            // @ts-ignore
-            localVideo.srcObject = this.desktopStream;
-            
 
             for (let proctor in this.proctorConnections) {
                 let conn = this.proctorConnections[proctor];
@@ -60,6 +55,18 @@
                 // Send the local SDP through SignalR in .NET
                 await this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer);
             }
+        }
+        
+        public setDesktopVideoElement(elementId: string) {
+            let localVideo = document.getElementById(elementId);
+            // @ts-ignore
+            localVideo.srcObject = this.desktopStream;
+        }
+        
+        public setCameraVideoElement(elementId: string) {
+            let localVideo = document.getElementById(elementId);
+            // @ts-ignore
+            localVideo.srcObject = this.cameraStream;
         }
 
         public async receivedProctorAnswerSDP(proctor: string, sdp: RTCSessionDescriptionInit) {

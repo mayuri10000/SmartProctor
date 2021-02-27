@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -35,8 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.create = void 0;
 var SmartProctor;
 (function (SmartProctor) {
     /**
@@ -75,9 +72,7 @@ var SmartProctor;
                     }); };
                     this.cameraConnection.ontrack = function (e) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
-                            // @ts-ignore
-                            document.getElementById("local-desktop").srcObject = e.streams[0];
-                            this.desktopStream = e.streams[0];
+                            this.cameraStream = e.streams[0];
                             return [2 /*return*/];
                         });
                     }); };
@@ -113,9 +108,9 @@ var SmartProctor;
                 });
             });
         };
-        WebRTCClientTaker.prototype.startStreaming = function () {
+        WebRTCClientTaker.prototype.startStreamingDesktop = function () {
             return __awaiter(this, void 0, void 0, function () {
-                var _a, localVideo, _loop_2, this_2, _b, _c, _i, proctor;
+                var _a, _loop_2, this_2, _b, _c, _i, proctor;
                 var _this = this;
                 return __generator(this, function (_d) {
                     switch (_d.label) {
@@ -126,9 +121,6 @@ var SmartProctor;
                         case 1:
                             // @ts-ignore
                             _a.desktopStream = _d.sent();
-                            localVideo = document.querySelector(".video.local");
-                            // @ts-ignore
-                            localVideo.srcObject = this.desktopStream;
                             _loop_2 = function (proctor) {
                                 var conn, offer;
                                 return __generator(this, function (_a) {
@@ -174,6 +166,16 @@ var SmartProctor;
                 });
             });
         };
+        WebRTCClientTaker.prototype.setDesktopVideoElement = function (elementId) {
+            var localVideo = document.getElementById(elementId);
+            // @ts-ignore
+            localVideo.srcObject = this.desktopStream;
+        };
+        WebRTCClientTaker.prototype.setCameraVideoElement = function (elementId) {
+            var localVideo = document.getElementById(elementId);
+            // @ts-ignore
+            localVideo.srcObject = this.cameraStream;
+        };
         WebRTCClientTaker.prototype.receivedProctorAnswerSDP = function (proctor, sdp) {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
@@ -200,10 +202,20 @@ var SmartProctor;
         };
         WebRTCClientTaker.prototype.receivedCameraAnswerSDP = function (sdp) {
             return __awaiter(this, void 0, void 0, function () {
+                var answer;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, this.cameraConnection.setRemoteDescription(sdp)];
                         case 1:
+                            _a.sent();
+                            return [4 /*yield*/, this.cameraConnection.createAnswer()];
+                        case 2:
+                            answer = _a.sent();
+                            return [4 /*yield*/, this.cameraConnection.setLocalDescription(answer)];
+                        case 3:
+                            _a.sent();
+                            return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraSdp", answer)];
+                        case 4:
                             _a.sent();
                             return [2 /*return*/];
                     }
@@ -227,12 +239,11 @@ var SmartProctor;
     SmartProctor.WebRTCClientTaker = WebRTCClientTaker;
 })(SmartProctor || (SmartProctor = {}));
 var webRTCClientTaker;
-function create(helper, proctors) {
+export function create(helper, proctors) {
     if (webRTCClientTaker == null) {
         webRTCClientTaker = new SmartProctor.WebRTCClientTaker();
         webRTCClientTaker.init(helper, proctors);
     }
     return webRTCClientTaker;
 }
-exports.create = create;
 //# sourceMappingURL=WebRTCClientTaker.js.map

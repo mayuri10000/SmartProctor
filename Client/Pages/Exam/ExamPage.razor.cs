@@ -5,6 +5,7 @@ using AntDesign;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.SignalR.Client;
+using SmartProctor.Client.WebRTCInterop;
 using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -17,11 +18,16 @@ namespace SmartProctor.Client.Pages.Exam
         private int currentQuestionNum = 1;
 
         private ExamDetailsResponseModel examDetails;
+        private WebRTCClientTaker _webRtcClient;
         
         private HubConnection hubConnection;
 
-        protected async override Task OnInitializedAsync()
+        private bool localDesktopVideoLoaded = false;
+        private bool localCameraVideoLoded = false;
+
+        protected override async Task OnInitializedAsync()
         {
+            /*
             var result = await Http.GetFromJsonAsync<BaseResponseModel>("api/exam/Attempt/" + ExamId);
 
             if (result.Code == 1000)
@@ -52,6 +58,35 @@ namespace SmartProctor.Client.Pages.Exam
 
                 await SetupSignalRClientAsync();
                 StateHasChanged();
+            }
+            */
+            
+            _webRtcClient = new WebRTCClientTaker(JsRuntime, new [] { "1" });
+            _webRtcClient.OnProctorSdp += (sender, tuple) =>
+            {
+                Modal.Success(new ConfirmOptions()
+                {
+                    Title = tuple.Item2.Type,
+                    Content = tuple.Item2.Sdp
+                });
+            };
+            await _webRtcClient.StartStreamingDesktop();
+
+        }
+
+        private async Task OnDesktopVideoVisibleChange(bool visible)
+        {
+            if (visible && !localDesktopVideoLoaded)
+            {
+                await _webRtcClient.SetDesktopVideoElement("local-desktop");
+            }
+        }
+
+        private async Task OnCameraVideoVisibleChange(bool visible)
+        {
+            if (visible && !localCameraVideoLoded)
+            {
+                await _webRtcClient.SetCameraVideoElement("local-camera");
             }
         }
 

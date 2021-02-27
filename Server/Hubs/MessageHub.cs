@@ -132,28 +132,28 @@ namespace SmartProctor.Server.Hubs
 
         public async Task DesktopOffer(string proctor, RTCSessionDescriptionInit sdp)
         {
-            await Clients.User(proctor).SendAsync("ReceivedDesktopOffer", Context.UserIdentifier, sdp);
+            await Clients.User(proctor).SendAsync("ReceivedDesktopOffer", Context.User.Identity.Name, sdp);
         }
 
         public async Task DesktopAnswer(string testTaker, RTCSessionDescriptionInit sdp)
         {
-            await Clients.User(testTaker).SendAsync("ReceivedDesktopAnswer", Context.UserIdentifier, sdp);
+            await Clients.User(testTaker).SendAsync("ReceivedDesktopAnswer", Context.User.Identity.Name, sdp);
         }
 
         public async Task SendDesktopIceCandidate(string testTaker, RTCIceCandidate candidate)
         {
-            await Clients.User(testTaker).SendAsync("ReceivedDesktopIceCandidate", Context.UserIdentifier, candidate);
+            await Clients.User(testTaker).SendAsync("ReceivedDesktopIceCandidate", Context.User.Identity.Name, candidate);
         }
 
         public async Task CameraOfferToTaker(RTCSessionDescriptionInit sdp)
         {
-            var user = Context.UserIdentifier.Substring(0, Context.UserIdentifier.Length - 4);
+            var user = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 4);
             await Clients.User(user).SendAsync("CameraOfferToTaker", sdp);
         }
         
         public async Task CameraAnswerFromTaker(RTCSessionDescriptionInit sdp)
         {
-            var user = Context.UserIdentifier + "_cam";
+            var user = Context.User.Identity.Name + "_cam";
             await Clients.User(user).SendAsync("CameraAnswerFromTaker", sdp);
         }
     }

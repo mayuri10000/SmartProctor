@@ -12,6 +12,7 @@ namespace SmartProctor.Client.WebRTCInterop
         private IJSObjectReference _jsObj;
 
         private DotNetObjectReference<WebRTCClientTaker> _dotRef;
+        private string[] _proctors;
         
         public event EventHandler<RTCIceCandidate> OnCameraIceCandidate;
         public event EventHandler<(string, RTCIceCandidate)> OnProctorIceCandidate;
@@ -20,9 +21,10 @@ namespace SmartProctor.Client.WebRTCInterop
         public event EventHandler<string> OnCameraConnectionStateChange;
         public event EventHandler<(string, string)> OnProctorConnectionStateChange;
 
-        private WebRTCClientTaker(IJSRuntime jsRuntime)
+        public WebRTCClientTaker(IJSRuntime jsRuntime, string[] proctors)
         {
             _jsRuntime = jsRuntime;
+            _proctors = proctors;
         }
 
         private async ValueTask Init()
@@ -32,14 +34,26 @@ namespace SmartProctor.Client.WebRTCInterop
                 _dotRef = DotNetObjectReference.Create<WebRTCClientTaker>(this);
                 var module = await _jsRuntime.InvokeAsync<IJSObjectReference>(
                     "import", "./js/WebRTCClientTaker.js");
-                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef);
+                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef, _proctors);
             }
         }
 
-        public async ValueTask StartStreaming()
+        public async ValueTask SetDesktopVideoElement(string elementId)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("startStreaming");
+            await _jsObj.InvokeVoidAsync("setDesktopVideoElement", elementId);
+        }
+        
+        public async ValueTask SetCameraVideoElement(string elementId)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("setCameraVideoElement", elementId);
+        }
+        
+        public async ValueTask StartStreamingDesktop()
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("startStreamingDesktop");
         }
 
         public async ValueTask ReceivedCameraAnswerSDP(RTCSessionDescriptionInit sdp)

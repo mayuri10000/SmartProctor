@@ -11,6 +11,7 @@ namespace SmartProctor.Client.WebRTCInterop
         private IJSObjectReference _jsObj;
 
         private DotNetObjectReference<WebRTCClientProctor> _dotRef;
+        private string[] _testTakers;
         
         public event EventHandler<(string, RTCIceCandidate)> OnCameraIceCandidate;
         public event EventHandler<(string, RTCIceCandidate)> OnDesktopIceCandidate;
@@ -19,9 +20,10 @@ namespace SmartProctor.Client.WebRTCInterop
         public event EventHandler<(string, string)> OnDesktopConnectionStateChange;
         public event EventHandler<(string, string)> OnCameraConnectionStateChange;
         
-        private WebRTCClientProctor(IJSRuntime jsRuntime)
+        private WebRTCClientProctor(IJSRuntime jsRuntime, string[] testTakers)
         {
             _jsRuntime = jsRuntime;
+            _testTakers = testTakers;
         }
 
         private async ValueTask Init()
@@ -31,7 +33,7 @@ namespace SmartProctor.Client.WebRTCInterop
                 _dotRef = DotNetObjectReference.Create<WebRTCClientProctor>(this);
                 var module = await _jsRuntime.InvokeAsync<IJSObjectReference>(
                     "import", "./js/WebRTCClientProctor.js");
-                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef);
+                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef, _testTakers);
             }
         }
 
