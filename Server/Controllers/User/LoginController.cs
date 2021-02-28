@@ -35,6 +35,7 @@ namespace SmartProctor.Server.Controllers.User
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, uid),
+                new Claim(ClaimTypes.NameIdentifier, uid),
                 new Claim(ClaimTypes.Role, "User"),
             };
             

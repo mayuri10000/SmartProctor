@@ -7,11 +7,11 @@ namespace SmartProctor.Server.Controllers.Exam
 {
     [ApiController]
     [Route("api/exam/[controller]")]
-    public class ExamDetailsController : ControllerBase
+    public class GetProctorsController : ControllerBase
     {
         private IExamServices _services;
 
-        public ExamDetailsController(IExamServices services)
+        public GetProctorsController(IExamServices services)
         {
             _services = services;
         }
@@ -19,17 +19,14 @@ namespace SmartProctor.Server.Controllers.Exam
         [HttpGet("{eid}")]
         public BaseResponseModel Get(int eid)
         {
-            var e = _services.GetObject(eid);
+            var e = _services.GetProctors(eid);
             if (e != null)
             {
-                return new ExamDetailsResponseModel()
+                return new GetProctorsResponseModel()
                 {
                     Code = 0,
                     Message = "Success",
-                    Description = e.Description,
-                    Duration = e.Duration,
-                    Name = e.Name,
-                    StartTime = e.StartTime
+                    Proctors = e
                 };
             }
 

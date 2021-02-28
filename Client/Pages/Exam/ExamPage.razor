@@ -12,7 +12,7 @@
     <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
         <Popover Placement="@PlacementType.BottomRight" Title="Camera Capture" OnVisibleChange="OnCameraVideoVisibleChange">
             <ContentTemplate>
-                <video id="local-camera" autoplay style="max-width: 320px; max-height: 240px;"></video>
+                <video id="local-camera" autoplay class="proctor-video"></video>
             </ContentTemplate>
             <ChildContent>
                 <Icon Type="video-camera" Theme="outline" Style="font-size: 20px; width: 30px;"/>
@@ -21,7 +21,7 @@
 
         <Popover Placement="@PlacementType.BottomRight" Title="Screen Capture" OnVisibleChange="OnDesktopVideoVisibleChange">
             <ContentTemplate>
-                <video id="local-desktop" autoplay style="max-width: 320px; max-height: 240px;"></video>
+                <video id="local-desktop" autoplay class="proctor-video"></video>
             </ContentTemplate>
             <ChildContent>
                 <Icon Type="desktop" Theme="outline" Style="font-size: 20px; width: 30px;"/>
@@ -51,7 +51,7 @@
             </Menu>
         </Sider>
         <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
-            
+            // TODO: Display exam questions
         </Content>
     </Layout>
 </Content>

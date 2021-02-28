@@ -13,6 +13,8 @@ namespace SmartProctor.Server.Services
     {
         int Attempt(int eid, string uid);
         int EnterProctor(int eid, string uid);
+        IList<string> GetExamTakers(int eid);
+        IList<string> GetProctors(int eid);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -82,39 +84,39 @@ namespace SmartProctor.Server.Services
             return ErrorCodes.Success;
         }
 
-        public BaseResponseModel GetExamTakers(int eid)
+        public IList<string> GetExamTakers(int eid)
         {
             if (GetObject(eid) == null)
             {
-                return ErrorCodes.CreateSimpleResponse(ErrorCodes.ExamNotExist);
+                return null;
             }
 
             var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 1, x => x.UserId,
                 OrderingType.Ascending);
 
-            var ret = new GetExamTakersResponseModel { ExamTakers = new List<string>() };
+            var ret = new List<string>();
             foreach (var x in q)
             {
-                ret.ExamTakers.Add(x.UserId);
+                ret.Add(x.UserId);
             }
 
             return ret;
         }
 
-        public BaseResponseModel GetProctors(int eid)
+        public IList<string> GetProctors(int eid)
         {
             if (GetObject(eid) == null)
             {
-                return ErrorCodes.CreateSimpleResponse(ErrorCodes.ExamNotExist);
+                return null;
             }
 
             var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 2, x => x.UserId,
                 OrderingType.Ascending);
 
-            var ret = new GetProctorsResponseModel() { Proctors = new List<string>() };
+            var ret = new List<string>();
             foreach (var x in q)
             {
-                ret.Proctors.Add(x.UserId);
+                ret.Add(x.UserId);
             }
 
             return ret;

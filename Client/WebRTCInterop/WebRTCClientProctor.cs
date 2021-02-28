@@ -62,42 +62,42 @@ namespace SmartProctor.Client.WebRTCInterop
         }
 
         [JSInvokable]
-        private ValueTask _onDesktopConnectionStateChange(string testTaker, string state)
+        public ValueTask _onDesktopConnectionStateChange(string testTaker, string state)
         {
             OnDesktopConnectionStateChange?.Invoke(this, (testTaker, state));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        private ValueTask _onDesktopIceCandidate(string testTaker, RTCIceCandidate candidate)
+        public ValueTask _onDesktopIceCandidate(string testTaker, RTCIceCandidate candidate)
         {
             OnDesktopIceCandidate?.Invoke(this, (testTaker, candidate));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        private ValueTask _onDesktopSdp(string testTaker, RTCSessionDescriptionInit sdp)
+        public ValueTask _onDesktopSdp(string testTaker, RTCSessionDescriptionInit sdp)
         {
             OnDesktopSdp?.Invoke(this, (testTaker, sdp));
             return ValueTask.CompletedTask;
         }
         
         [JSInvokable]
-        private ValueTask _onCameraConnectionStateChange(string testTaker, string state)
+        public ValueTask _onCameraConnectionStateChange(string testTaker, string state)
         {
             OnCameraConnectionStateChange?.Invoke(this, (testTaker, state));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        private ValueTask _onCameraIceCandidate(string testTaker, RTCIceCandidate candidate)
+        public ValueTask _onCameraIceCandidate(string testTaker, RTCIceCandidate candidate)
         {
             OnCameraIceCandidate?.Invoke(this, (testTaker, candidate));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        private ValueTask _onCameraSdp(string testTaker, RTCSessionDescriptionInit sdp)
+        public ValueTask _onCameraSdp(string testTaker, RTCSessionDescriptionInit sdp)
         {
             OnCameraSdp?.Invoke(this, (testTaker, sdp));
             return ValueTask.CompletedTask;

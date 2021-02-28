@@ -65,19 +65,19 @@ namespace SmartProctor.Client.WebRTCInterop
         public async ValueTask ReceivedCameraIceCandidate(RTCIceCandidate candidate)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedIceCandidate", candidate);
+            await _jsObj.InvokeVoidAsync("receivedCameraIceCandidate", candidate);
         }
         
         public async ValueTask ReceivedProctorAnswerSDP(string proctor, RTCSessionDescriptionInit sdp)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedAnswerSDP", proctor, sdp);
+            await _jsObj.InvokeVoidAsync("receivedProctorAnswerSDP", proctor, sdp);
         }
 
         public async ValueTask ReceivedProctorIceCandidate(string proctor, RTCIceCandidate candidate)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedIceCandidate", proctor, candidate);
+            await _jsObj.InvokeVoidAsync("receivedProctorIceCandidate", proctor, candidate);
         }
 
 

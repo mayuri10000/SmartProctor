@@ -35,8 +35,8 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 await GetExamDetails();
                 await GetProctors();
-                await SetupWebRTCClient();
                 await SetupSignalRClient();
+                await SetupWebRTCClient();
                 StateHasChanged();
             }
         }

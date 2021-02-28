@@ -54,23 +54,27 @@ var SmartProctor;
                 return __generator(this, function (_a) {
                     this.helper = helper;
                     testTakers.forEach(function (testTaker) {
-                        var desktopConnection = new RTCPeerConnection();
-                        var cameraConnection = new RTCPeerConnection();
+                        var desktopConnection = new RTCPeerConnection(null);
+                        var cameraConnection = new RTCPeerConnection(null);
                         _this.testTakerConnections[testTaker] = {
                             desktopConnection: desktopConnection,
                             cameraConnection: cameraConnection,
                             desktopStream: null,
                             cameraStream: null
                         };
-                        desktopConnection.ontrack = function (e) {
+                        // @ts-ignore
+                        desktopConnection.onaddstream = function (e) {
                             // @ts-ignore
-                            document.getElementById(testTaker + "-desktop").srcObject = e.streams[0];
-                            _this.testTakerConnections[testTaker].desktopStream = e.streams[0];
+                            document.getElementById(testTaker + "-desktop").srcObject = e.stream;
+                            _this.testTakerConnections[testTaker].desktopStream = e.stream;
+                            console.log("get desktop stream: " + testTaker);
                         };
                         desktopConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopConnectionStateChange", testTaker, desktopConnection.connectionState)];
+                                    case 0:
+                                        console.log("connection state of " + testTaker + " changed to '" + desktopConnection.connectionState + "'");
+                                        return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopConnectionStateChange", testTaker, desktopConnection.connectionState)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
@@ -80,17 +84,18 @@ var SmartProctor;
                         desktopConnection.onicecandidate = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopIceCandidate", testTaker, desktopConnection.connectionState)];
+                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopIceCandidate", testTaker, e.candidate)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
                                 }
                             });
                         }); };
-                        cameraConnection.ontrack = function (e) {
+                        // @ts-ignore
+                        cameraConnection.onaddstream = function (e) {
                             // @ts-ignore
-                            document.getElementById(testTaker + "-camera").srcObject = e.streams[0];
-                            _this.testTakerConnections[testTaker].cameraStream = e.streams[0];
+                            document.getElementById(testTaker + "-camera").srcObject = e.stream;
+                            _this.testTakerConnections[testTaker].cameraStream = e.stream;
                         };
                         cameraConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
@@ -105,7 +110,7 @@ var SmartProctor;
                         cameraConnection.onicecandidate = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraIceCandidate", testTaker, desktopConnection.connectionState)];
+                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraIceCandidate", testTaker, e.candidate)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
@@ -124,6 +129,7 @@ var SmartProctor;
                         case 0: return [4 /*yield*/, this.testTakerConnections[testTaker].desktopConnection.addIceCandidate(candidate)];
                         case 1:
                             _a.sent();
+                            console.log("received ICE candidate from " + testTaker + ".");
                             return [2 /*return*/];
                     }
                 });
@@ -148,6 +154,7 @@ var SmartProctor;
                             return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopSdp", testTaker, answer)];
                         case 4:
                             _a.sent();
+                            console.log("received offer from " + testTaker + " and sending answer.");
                             return [2 /*return*/];
                     }
                 });

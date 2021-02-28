@@ -45,7 +45,6 @@ var SmartProctor;
         }
         WebRTCClientTaker.prototype.init = function (helper, proctors) {
             return __awaiter(this, void 0, void 0, function () {
-                var _loop_1, this_1, proctor;
                 var _this = this;
                 return __generator(this, function (_a) {
                     this.helper = helper;
@@ -76,12 +75,14 @@ var SmartProctor;
                             return [2 /*return*/];
                         });
                     }); };
-                    _loop_1 = function (proctor) {
-                        var conn = new RTCPeerConnection();
+                    proctors.forEach(function (proctor) {
+                        var conn = new RTCPeerConnection(null);
                         conn.onicecandidate = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, helper.invokeMethodAsync("_onProctorIceCandidate", proctor, e.candidate)];
+                                    case 0:
+                                        console.log("Sending ICE candidate to " + proctor + ".");
+                                        return [4 /*yield*/, helper.invokeMethodAsync("_onProctorIceCandidate", proctor, e.candidate)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
@@ -91,26 +92,24 @@ var SmartProctor;
                         conn.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, helper.invokeMethodAsync("_onProctorConnectionStateChange", proctor, conn.connectionState)];
+                                    case 0:
+                                        console.log("connection state of " + proctors + " changed to '" + conn.connectionState + "'");
+                                        return [4 /*yield*/, helper.invokeMethodAsync("_onProctorConnectionStateChange", proctor, conn.connectionState)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
                                 }
                             });
                         }); };
-                        this_1.proctorConnections[proctor] = conn;
-                    };
-                    this_1 = this;
-                    for (proctor in proctors) {
-                        _loop_1(proctor);
-                    }
+                        _this.proctorConnections[proctor] = conn;
+                    });
                     return [2 /*return*/];
                 });
             });
         };
         WebRTCClientTaker.prototype.startStreamingDesktop = function () {
             return __awaiter(this, void 0, void 0, function () {
-                var _a, _loop_2, this_2, _b, _c, _i, proctor;
+                var _a, _loop_1, this_1, _b, _c, _i, proctor;
                 var _this = this;
                 return __generator(this, function (_d) {
                     switch (_d.label) {
@@ -121,13 +120,13 @@ var SmartProctor;
                         case 1:
                             // @ts-ignore
                             _a.desktopStream = _d.sent();
-                            _loop_2 = function (proctor) {
+                            _loop_1 = function (proctor) {
                                 var conn, offer;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            conn = this_2.proctorConnections[proctor];
-                                            this_2.desktopStream.getTracks().forEach(function (track) {
+                                            conn = this_1.proctorConnections[proctor];
+                                            this_1.desktopStream.getTracks().forEach(function (track) {
                                                 conn.addTrack(track, _this.desktopStream);
                                             });
                                             return [4 /*yield*/, conn.createOffer()];
@@ -137,15 +136,16 @@ var SmartProctor;
                                         case 2:
                                             _a.sent();
                                             // Send the local SDP through SignalR in .NET
-                                            return [4 /*yield*/, this_2.helper.invokeMethodAsync("_onProctorSdp", proctor, offer)];
+                                            return [4 /*yield*/, this_1.helper.invokeMethodAsync("_onProctorSdp", proctor, offer)];
                                         case 3:
                                             // Send the local SDP through SignalR in .NET
                                             _a.sent();
+                                            console.log("Sending offer to " + proctor + ".");
                                             return [2 /*return*/];
                                     }
                                 });
                             };
-                            this_2 = this;
+                            this_1 = this;
                             _b = [];
                             for (_c in this.proctorConnections)
                                 _b.push(_c);
@@ -154,7 +154,7 @@ var SmartProctor;
                         case 2:
                             if (!(_i < _b.length)) return [3 /*break*/, 5];
                             proctor = _b[_i];
-                            return [5 /*yield**/, _loop_2(proctor)];
+                            return [5 /*yield**/, _loop_1(proctor)];
                         case 3:
                             _d.sent();
                             _d.label = 4;
@@ -183,6 +183,7 @@ var SmartProctor;
                         case 0: return [4 /*yield*/, this.proctorConnections[proctor].setRemoteDescription(sdp)];
                         case 1:
                             _a.sent();
+                            console.log("received answer from " + proctor + " and sending answer.");
                             return [2 /*return*/];
                     }
                 });
@@ -195,12 +196,13 @@ var SmartProctor;
                         case 0: return [4 /*yield*/, this.proctorConnections[proctor].addIceCandidate(candidate)];
                         case 1:
                             _a.sent();
+                            console.log("received ICE candidate from " + proctor + ".");
                             return [2 /*return*/];
                     }
                 });
             });
         };
-        WebRTCClientTaker.prototype.receivedCameraAnswerSDP = function (sdp) {
+        WebRTCClientTaker.prototype.receivedCameraOfferSDP = function (sdp) {
             return __awaiter(this, void 0, void 0, function () {
                 var answer;
                 return __generator(this, function (_a) {

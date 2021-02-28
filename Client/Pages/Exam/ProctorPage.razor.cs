@@ -22,21 +22,33 @@ namespace SmartProctor.Client.Pages.Exam
         
         private HubConnection hubConnection;
         
+        private ListGridType gutter = new ListGridType
+        {
+            Gutter = 16,
+            Xs = 1,
+            Sm = 2,
+            Md = 4,
+            Lg = 4,
+            Xl = 6,
+            Xxl = 3,
+            Column = 3
+        };
+        
         protected override async Task OnInitializedAsync()
         {
             if (await Attempt())
             {
                 await GetExamDetails();
                 await GetExamTakers();
-                await SetupWebRTC();
                 await SetupSignalRClient();
+                await SetupWebRTC();
                 StateHasChanged();
             }
         }
 
         private async Task<bool> Attempt()
         {
-            var result = await Http.GetFromJsonAsync<BaseResponseModel>("api/exam/Attempt/" + ExamId);
+            var result = await Http.GetFromJsonAsync<BaseResponseModel>("api/exam/EnterProctor/" + ExamId);
 
             if (result.Code == 1000)
             {
@@ -89,11 +101,11 @@ namespace SmartProctor.Client.Pages.Exam
             };
             _webRtcClient.OnDesktopSdp += (_, e) =>
             {
-                hubConnection.SendAsync("ReceivedDesktopAnswer", e.Item1, e.Item2);
+                hubConnection.SendAsync("DesktopAnswer", e.Item1, e.Item2);
             };
             _webRtcClient.OnDesktopIceCandidate += (_, e) =>
             {
-                hubConnection.SendAsync("ReceivedDesktopIceCandidate", e.Item1, e.Item2);
+                hubConnection.SendAsync("SendDesktopIceCandidate", e.Item1, e.Item2);
             };
             _webRtcClient.OnCameraIceCandidate += (_, e) =>
             {

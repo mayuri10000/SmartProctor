@@ -25,7 +25,7 @@ namespace SmartProctor.Server.Hubs
         public async Task Test()
         {
             await Clients.Caller.SendAsync("TestBack",
-                Context.User?.Identity == null ? "null" : Context.User.Identity.Name);
+                Context.UserIdentifier ?? "null");
         }
 
         public async Task ExamTakerJoin(int examId)

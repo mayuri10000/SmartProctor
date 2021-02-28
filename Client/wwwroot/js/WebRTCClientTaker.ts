@@ -25,18 +25,20 @@
                 this.cameraStream = e.streams[0];
             }
 
-            for (let proctor in proctors) {
-                let conn = new RTCPeerConnection();
+            proctors.forEach((proctor) => {
+                let conn = new RTCPeerConnection(null);
 
                 conn.onicecandidate = async (e) => {
+                    console.log("Sending ICE candidate to " + proctor + ".");
                     await helper.invokeMethodAsync("_onProctorIceCandidate", proctor, e.candidate);
                 };
 
                 conn.onconnectionstatechange = async (e) => {
+                    console.log("connection state of " + proctors + " changed to '" + conn.connectionState + "'");
                     await helper.invokeMethodAsync("_onProctorConnectionStateChange", proctor, conn.connectionState);
                 };
                 this.proctorConnections[proctor] = conn;
-            }
+            });
         }
 
         public async startStreamingDesktop() {
@@ -54,6 +56,7 @@
 
                 // Send the local SDP through SignalR in .NET
                 await this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer);
+                console.log("Sending offer to " + proctor + ".");
             }
         }
         
@@ -71,10 +74,12 @@
 
         public async receivedProctorAnswerSDP(proctor: string, sdp: RTCSessionDescriptionInit) {
             await this.proctorConnections[proctor].setRemoteDescription(sdp);
+            console.log("received answer from " + proctor + " and sending answer.");
         }
 
         public async receivedProctorIceCandidate(proctor: string, candidate: RTCIceCandidate) {
             await this.proctorConnections[proctor].addIceCandidate(candidate);
+            console.log("received ICE candidate from " + proctor + ".");
         }
 
         public async receivedCameraOfferSDP(sdp: RTCSessionDescriptionInit) {
