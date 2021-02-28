@@ -77,7 +77,7 @@
             await this.proctorConnections[proctor].addIceCandidate(candidate);
         }
 
-        public async receivedCameraAnswerSDP(sdp: RTCSessionDescriptionInit) {
+        public async receivedCameraOfferSDP(sdp: RTCSessionDescriptionInit) {
             await this.cameraConnection.setRemoteDescription(sdp);
             let answer = await this.cameraConnection.createAnswer();
             await this.cameraConnection.setLocalDescription(answer);

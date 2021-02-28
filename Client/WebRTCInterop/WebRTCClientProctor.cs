@@ -20,7 +20,7 @@ namespace SmartProctor.Client.WebRTCInterop
         public event EventHandler<(string, string)> OnDesktopConnectionStateChange;
         public event EventHandler<(string, string)> OnCameraConnectionStateChange;
         
-        private WebRTCClientProctor(IJSRuntime jsRuntime, string[] testTakers)
+        public WebRTCClientProctor(IJSRuntime jsRuntime, string[] testTakers)
         {
             _jsRuntime = jsRuntime;
             _testTakers = testTakers;

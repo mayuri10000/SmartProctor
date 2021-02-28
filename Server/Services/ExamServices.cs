@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using SmartProctor.Server.Data;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
 using SmartProctor.Server.Utils;
+using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Services
 {
@@ -78,6 +80,44 @@ namespace SmartProctor.Server.Services
             }
 
             return ErrorCodes.Success;
+        }
+
+        public BaseResponseModel GetExamTakers(int eid)
+        {
+            if (GetObject(eid) == null)
+            {
+                return ErrorCodes.CreateSimpleResponse(ErrorCodes.ExamNotExist);
+            }
+
+            var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 1, x => x.UserId,
+                OrderingType.Ascending);
+
+            var ret = new GetExamTakersResponseModel { ExamTakers = new List<string>() };
+            foreach (var x in q)
+            {
+                ret.ExamTakers.Add(x.UserId);
+            }
+
+            return ret;
+        }
+
+        public BaseResponseModel GetProctors(int eid)
+        {
+            if (GetObject(eid) == null)
+            {
+                return ErrorCodes.CreateSimpleResponse(ErrorCodes.ExamNotExist);
+            }
+
+            var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 2, x => x.UserId,
+                OrderingType.Ascending);
+
+            var ret = new GetProctorsResponseModel() { Proctors = new List<string>() };
+            foreach (var x in q)
+            {
+                ret.Proctors.Add(x.UserId);
+            }
+
+            return ret;
         }
     }
 }

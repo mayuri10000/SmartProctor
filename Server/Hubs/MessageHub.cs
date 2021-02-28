@@ -156,5 +156,37 @@ namespace SmartProctor.Server.Hubs
             var user = Context.User.Identity.Name + "_cam";
             await Clients.User(user).SendAsync("CameraAnswerFromTaker", sdp);
         }
+        
+        public async Task CameraIceCandidateToTaker(RTCIceCandidate candidate)
+        {
+            var user = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 4);
+            await Clients.User(user).SendAsync("CameraIceCandidateToTaker", candidate);
+        }
+        
+        public async Task CameraIceCandidateFromTaker(RTCIceCandidate candidate)
+        {
+            var user = Context.User.Identity.Name + "_cam";
+            await Clients.User(user).SendAsync("CameraIceCandidateFromTaker", candidate);
+        }
+        
+        public async Task CameraOfferToProctor(string proctor, RTCSessionDescriptionInit sdp)
+        {
+            await Clients.User(proctor).SendAsync("CameraOfferToProctor", Context.User.Identity.Name, sdp);
+        }
+        
+        public async Task CameraAnswerFromProctor(string testTaker, RTCSessionDescriptionInit sdp)
+        {
+            await Clients.User(testTaker).SendAsync("CameraAnswerFromTaker", Context.User.Identity.Name, sdp);
+        }
+        
+        public async Task CameraIceCandidateToProctor(string proctor, RTCIceCandidate candidate)
+        {
+            await Clients.User(proctor).SendAsync("CameraIceCandidateToProctor", Context.User.Identity.Name, candidate);
+        }
+        
+        public async Task CameraIceCandidateFromProctor(string testTaker, RTCIceCandidate candidate)
+        {
+            await Clients.User(testTaker).SendAsync("CameraIceCandidateFromProctor", Context.User.Identity.Name, candidate);
+        }
     }
 }

@@ -1,2 +1,40 @@
-﻿@page "/ProctorPage"
-<h3>ProctorPage</h3>
+﻿@page "/Exam/Proctor/{examId}"
+@inject NavigationManager NavManager
+@inject HttpClient Http
+@inject ModalService Modal
+@inject IJSRuntime JsRuntime
+
+<Header Class="header">
+    @if (examDetails != null)
+    {
+        <div class="logo">@examDetails.Name</div>
+    }
+    <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
+    </Menu>
+</Header>
+<Content Style="padding: 0 50px">
+    <Breadcrumb Style=" margin: 16px 0">
+
+    </Breadcrumb>
+    <Layout Class="site-layout-background" Style="padding: 24px 0; height: 100%;">
+
+        <Sider Class="site-layout-background" Width="200" Style="margin-bottom: 50px;">
+            @if (examDetails != null)
+            {
+                <CountDown Title="Time remaining" Format="hh:mm:ss" Value="examDetails.StartTime.AddSeconds(examDetails.Duration)" OnFinish="OnFinish" Style="margin-left: 40px"/>
+            }
+            <Menu Mode="MenuMode.Inline"
+                  DefaultSelectedKeys=@(new[] {"1"})
+                  Style="height: 100%; overflow: auto">
+                <MenuItem Key="1">// TODO:</MenuItem>
+                <MenuItem Key="2">Display</MenuItem>
+                <MenuItem Key="3">Question</MenuItem>
+                <MenuItem Key="4">Numbers</MenuItem>
+                <MenuItem Key="5">Here</MenuItem>
+            </Menu>
+        </Sider>
+        <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
+            
+        </Content>
+    </Layout>
+</Content>

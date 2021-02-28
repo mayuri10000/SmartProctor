@@ -56,10 +56,10 @@ namespace SmartProctor.Client.WebRTCInterop
             await _jsObj.InvokeVoidAsync("startStreamingDesktop");
         }
 
-        public async ValueTask ReceivedCameraAnswerSDP(RTCSessionDescriptionInit sdp)
+        public async ValueTask receivedCameraOfferSDP(RTCSessionDescriptionInit sdp)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedAnswerSDP", sdp);
+            await _jsObj.InvokeVoidAsync("receivedCameraOfferSDP", sdp);
         }
 
         public async ValueTask ReceivedCameraIceCandidate(RTCIceCandidate candidate)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AntDesign;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.SignalR.Client;
 using SmartProctor.Client.WebRTCInterop;
 using SmartProctor.Shared.Responses;
+using SmartProctor.Shared.WebRTC;
 
 namespace SmartProctor.Client.Pages.Exam
 {
@@ -19,15 +22,27 @@ namespace SmartProctor.Client.Pages.Exam
 
         private ExamDetailsResponseModel examDetails;
         private WebRTCClientTaker _webRtcClient;
+        private IList<string> _proctors;
         
         private HubConnection hubConnection;
 
         private bool localDesktopVideoLoaded = false;
-        private bool localCameraVideoLoded = false;
+        private bool localCameraVideoLoaded = false;
 
         protected override async Task OnInitializedAsync()
         {
-            /*
+            if (await Attempt())
+            {
+                await GetExamDetails();
+                await GetProctors();
+                await SetupWebRTCClient();
+                await SetupSignalRClient();
+                StateHasChanged();
+            }
+        }
+
+        private async Task<bool> Attempt()
+        {
             var result = await Http.GetFromJsonAsync<BaseResponseModel>("api/exam/Attempt/" + ExamId);
 
             if (result.Code == 1000)
@@ -37,6 +52,7 @@ namespace SmartProctor.Client.Pages.Exam
                     Title = "You must login first",
                 });
                 NavManager.NavigateTo("/User/Login");
+                return false;
             }
             else if (result.Code != 0)
             {
@@ -46,32 +62,93 @@ namespace SmartProctor.Client.Pages.Exam
                     Content = result.Message
                 });
                 NavManager.NavigateTo("/");
+                return false;
             }
-            else
+
+            return true;
+        }
+
+        private async Task GetExamDetails()
+        {
+            var details = await Http.GetFromJsonAsync<ExamDetailsResponseModel>("api/exam/ExamDetails/" + ExamId);
+
+            if (details.Code == 0)
             {
-                var details = await Http.GetFromJsonAsync<ExamDetailsResponseModel>("api/exam/ExamDetails/" + ExamId);
-
-                if (details.Code == 0)
-                {
-                    examDetails = details;
-                }
-
-                await SetupSignalRClientAsync();
-                StateHasChanged();
+                examDetails = details;
             }
-            */
+        }
+
+        private async Task GetProctors()
+        {
+            var proctors = await Http.GetFromJsonAsync<GetProctorsResponseModel>("api/exam/GetProctors/" + ExamId);
+            if (proctors.Code == 0)
+            {
+                _proctors = proctors.Proctors;
+            }
+        }
+
+        private async Task SetupWebRTCClient()
+        {
+            _webRtcClient = new WebRTCClientTaker(JsRuntime, _proctors.ToArray());
             
-            _webRtcClient = new WebRTCClientTaker(JsRuntime, new [] { "1" });
-            _webRtcClient.OnProctorSdp += (sender, tuple) =>
+            _webRtcClient.OnProctorSdp += (_, e) =>
             {
-                Modal.Success(new ConfirmOptions()
-                {
-                    Title = tuple.Item2.Type,
-                    Content = tuple.Item2.Sdp
-                });
+                hubConnection.SendAsync("DesktopOffer", e.Item1, e.Item2);
             };
-            await _webRtcClient.StartStreamingDesktop();
 
+            _webRtcClient.OnProctorIceCandidate += (_, e) =>
+            {
+                hubConnection.SendAsync("SendDesktopIceCandidate", e.Item1, e.Item2);
+            };
+
+            _webRtcClient.OnCameraSdp += (_, sdp) =>
+            {
+                hubConnection.SendAsync("CameraAnswerFromTaker", sdp);
+            };
+
+            _webRtcClient.OnCameraIceCandidate += (_, candidate) =>
+            {
+                hubConnection.SendAsync("CameraIceCandidateToTaker", candidate);
+            };
+                
+            await _webRtcClient.StartStreamingDesktop();
+        }
+        
+        private async Task SetupSignalRClient()
+        {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(NavManager.ToAbsoluteUri("/hub"))
+                .Build();
+
+            hubConnection.On<string>("ReceiveMessage",
+                (message) =>
+                {
+                    // TODO: Process and display message
+                });
+
+            hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedDesktopAnswer",
+                async (proctor, sdp) =>
+                {
+                    await _webRtcClient.ReceivedProctorAnswerSDP(proctor, sdp);
+                });
+
+            hubConnection.On<string, RTCIceCandidate>("ReceivedDesktopIceCandidate",
+                async (proctor, candidate) =>
+                {
+                    await _webRtcClient.ReceivedProctorIceCandidate(proctor, candidate);
+                });
+            hubConnection.On<RTCIceCandidate>("CameraIceCandidateToTaker",
+                async candidate =>
+                {
+                    await _webRtcClient.ReceivedCameraIceCandidate(candidate);
+                });
+            hubConnection.On<RTCSessionDescriptionInit>("CameraOfferToTaker",
+                async sdp =>
+                {
+                    await _webRtcClient.receivedCameraOfferSDP(sdp);
+                });
+
+            await hubConnection.StartAsync();
         }
 
         private async Task OnDesktopVideoVisibleChange(bool visible)
@@ -79,14 +156,16 @@ namespace SmartProctor.Client.Pages.Exam
             if (visible && !localDesktopVideoLoaded)
             {
                 await _webRtcClient.SetDesktopVideoElement("local-desktop");
+                localDesktopVideoLoaded = true;
             }
         }
 
         private async Task OnCameraVideoVisibleChange(bool visible)
         {
-            if (visible && !localCameraVideoLoded)
+            if (visible && !localCameraVideoLoaded)
             {
                 await _webRtcClient.SetCameraVideoElement("local-camera");
+                localCameraVideoLoaded = true;
             }
         }
 
@@ -111,31 +190,6 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 Title = "Time's up",
             });
-            
-            RenderFragment rf = builder =>
-            {
-            };
-        }
-
-        private async Task SetupSignalRClientAsync()
-        {
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavManager.ToAbsoluteUri("/hub"))
-                .Build();
-
-            hubConnection.On<string>("ReceiveMessage", OnReceiveMessage);
-            
-            await hubConnection.StartAsync();
-        }
-
-        private void OnReceiveMessage(string message)
-        {
-            // TODO: Process and display message
-        }
-
-        private async Task SendMessage(string message)
-        {
-            await hubConnection.SendAsync("SendMessage", message);
         }
     }
 }
