@@ -42,6 +42,7 @@ namespace SmartProctor.Client.Pages.Exam
                 await GetExamTakers();
                 await SetupSignalRClient();
                 await SetupWebRTC();
+                await hubConnection.SendAsync("ProctorJoin", ExamId);
                 StateHasChanged();
             }
         }

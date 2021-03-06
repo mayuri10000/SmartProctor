@@ -1,0 +1,191 @@
+﻿@inject HttpClient Http
+
+@{
+    RenderFragment footer = @<div>
+                                <Button Disabled="@(currentStep == 1)" OnClick="Previous">Previous</Button>
+                                <Button
+                                    Type="primary"
+                                    Style="@(currentStep == 4 ? "display:none" : "")"
+                                    Disabled="@(hardwareDetectedState != 1)"
+                                    OnClick="Next">
+                                    Next
+                                </Button>
+                                <Button Type="primary" Disabled="@(currentStep < 4)">
+                                    Finish
+                                </Button>
+                            </div>;
+}
+
+<Modal Title="Enter the test" Footer="footer" Visible="true" Style="width:800px; ">
+    <div style="@(currentStep == 1 ? "" : "display:none")">
+        <Paragraph>
+            Before entering the test, please get your DeepLens hardware connected. To
+            set up the DeepLens hardware, please connect it to your PC with a USB wire. Note
+            that the USB wire should be connected to the USB port marked with "Registration".
+        </Paragraph>
+        <Paragraph>
+            <Image Src="/img/camera_setup.png" Preview="false"></Image>
+        </Paragraph>
+        <Paragraph>
+            If you are using a wired connection or VPN, disconnect them since they will make the
+            DeepLens hardware undetectable. After connected, click "Detect".
+        </Paragraph>
+
+        <Paragraph>
+            <Button Type="primary" OnClick="DetectHardware">Detect</Button>
+        </Paragraph>
+        <Paragraph>
+            @if (hardwareDetectedState == 1)
+            {
+                <div style="color: green">
+                    <Icon Type="check-circle" Theme="outline"/>&nbsp;
+                    <label>&nbsp;Detected, device S/N: @hardwareSerialNum</label>
+                </div>
+            }
+            else if (hardwareDetectedState == 0)
+            {
+                <div>
+                    <Spin></Spin>
+                    <label>&nbsp;Detecting...</label>
+                </div>
+            }
+            else if (hardwareDetectedState == -2)
+            {
+                <div style="color: red">
+                    <Icon Type="close-circle" Theme="outline"/>
+                    <label>&nbsp;Detection failed</label>
+                </div>
+            }
+        </Paragraph>
+    </div>
+    <div style="@(currentStep == 2 ? "" : "display:none")">
+        <Paragraph>
+            To get your DeepLens device online, please plug in a USB Ethernet adapter or connect to a
+            wireless network.
+        </Paragraph>
+        <Paragraph>
+            Device network status:
+            @if (ethernetConnected)
+            {
+                <div>
+                    Wired network:&nbsp;&nbsp;
+                    <Icon Type="check-circle" Theme="outline" Style="color: green"/>
+                    <label  style="color: green">&nbsp;Connected</label>
+                </div>
+            }
+            else
+            {
+                <div>
+                    Wired network:&nbsp;&nbsp;
+                    <Icon Type="close-circle" Theme="outline" Style="color: red"/>
+                    <label style="color: red">&nbsp;Not connected</label>
+                </div>
+            }
+            @if (wirelessSSID != null)
+            {
+                <div>
+                    Wireless network:&nbsp;&nbsp;
+                    <Icon Type="check-circle" Theme="outline" Style="color: green"/>
+                    <label style="color: green">&nbsp;Connected, SSID: @wirelessSSID</label>
+                </div>
+            }
+            else
+            {
+                <div>
+                    Wireless network:&nbsp;&nbsp;
+                    <Icon Type="close-circle" Theme="outline" Style="color: red"/>
+                    <label style="color: red">&nbsp;Not connected</label>
+                </div>
+            }
+        </Paragraph>
+        <Paragraph>
+            Connect to a new wireless network:
+        </Paragraph>
+    </div>
+    <div style="@(currentStep == 3 ? "" : "display:none")">
+        <Paragraph>
+            Please wait until the camera video from the DeepLens shows on the page. Then put
+            your DeepLens hardware on an angle where your entire desktop, your computer screen is visible.
+        </Paragraph>
+        <Paragraph>
+            <video class="proctor-video" id="camera-video-dialog" autoplay></video>
+        </Paragraph>
+    </div>
+</Modal>
+
+@code {
+    private int currentStep = 1;
+    private int hardwareDetectedState = -1;
+    private string hardwareSerialNum;
+
+    private bool ethernetConnected;
+    private string wirelessSSID;
+
+    private string connectionType;
+
+    private async Task ToStep(int step)
+    {
+        currentStep = step;
+        if (currentStep == 2)
+        {
+            await GetNetworkStatus();
+        }
+        StateHasChanged();
+    }
+
+    private async Task Previous()
+    {
+        await ToStep(--currentStep);
+    }
+
+    private async Task Next()
+    {
+        await ToStep(++currentStep);
+    }
+
+    private async Task DetectHardware()
+    {
+        try
+        {
+            hardwareDetectedState = 0;
+            StateHasChanged();
+            var res = await Http.GetFromJsonAsync<DeepLensSerialNumberResponse>("http://192.168.1.6:8080/sn");
+
+            if (res != null)
+            {
+                hardwareDetectedState = 1;
+                hardwareSerialNum = res.SerialNumber;
+            }
+            else
+            {
+                hardwareDetectedState = -2;
+            }
+        }
+        catch
+        {
+            hardwareDetectedState = -2;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task GetNetworkStatus()
+    {
+        var res = await Http.GetFromJsonAsync<DeepLensNetworkStatusResponse>("http://192.168.1.6:8080/network_status");
+
+        wirelessSSID = res.Wifi;
+        ethernetConnected = res.Ethernet;
+    }
+
+    private class DeepLensSerialNumberResponse
+    {
+        public string SerialNumber { get; set; }
+    }
+
+    private class DeepLensNetworkStatusResponse
+    {
+        public bool Ethernet { get; set; }
+        public string Wifi { get; set; }
+    }
+
+}

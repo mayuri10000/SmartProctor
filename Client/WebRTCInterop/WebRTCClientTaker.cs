@@ -49,6 +49,12 @@ namespace SmartProctor.Client.WebRTCInterop
             await Init();
             await _jsObj.InvokeVoidAsync("setCameraVideoElement", elementId);
         }
+
+        public async ValueTask<string> ObtainDesktopStream()
+        {
+            await Init();
+            return await _jsObj.InvokeAsync<string>("obtainDesktopStream");
+        }
         
         public async ValueTask StartStreamingDesktop()
         {
@@ -56,7 +62,13 @@ namespace SmartProctor.Client.WebRTCInterop
             await _jsObj.InvokeVoidAsync("startStreamingDesktop");
         }
 
-        public async ValueTask receivedCameraOfferSDP(RTCSessionDescriptionInit sdp)
+        public async ValueTask ReconnectToProctor(string proctor)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("reconnectToProctor", proctor);
+        }
+
+        public async ValueTask ReceivedCameraOfferSDP(RTCSessionDescriptionInit sdp)
         {
             await Init();
             await _jsObj.InvokeVoidAsync("receivedCameraOfferSDP", sdp);
@@ -80,7 +92,12 @@ namespace SmartProctor.Client.WebRTCInterop
             await _jsObj.InvokeVoidAsync("receivedProctorIceCandidate", proctor, candidate);
         }
 
-
+        public async ValueTask OnProctorReconnected(string proctor)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("onProctorReconnected", proctor); 
+        }
+        
         [JSInvokable]
         public ValueTask _onCameraIceCandidate(RTCIceCandidate candidate)
         {

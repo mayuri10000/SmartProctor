@@ -107,19 +107,30 @@ var SmartProctor;
                 });
             });
         };
-        WebRTCClientTaker.prototype.startStreamingDesktop = function () {
+        WebRTCClientTaker.prototype.obtainDesktopStream = function () {
             return __awaiter(this, void 0, void 0, function () {
-                var _a, _loop_1, this_1, _b, _c, _i, proctor;
-                var _this = this;
-                return __generator(this, function (_d) {
-                    switch (_d.label) {
+                var _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
                         case 0:
                             // @ts-ignore
                             _a = this;
                             return [4 /*yield*/, navigator.mediaDevices.getDisplayMedia()];
                         case 1:
                             // @ts-ignore
-                            _a.desktopStream = _d.sent();
+                            _a.desktopStream = _b.sent();
+                            return [2 /*return*/, this.desktopStream.id];
+                    }
+                });
+            });
+        };
+        WebRTCClientTaker.prototype.startStreamingDesktop = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var _loop_1, this_1, _a, _b, _i, proctor;
+                var _this = this;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
                             _loop_1 = function (proctor) {
                                 var conn, offer;
                                 return __generator(this, function (_a) {
@@ -146,22 +157,46 @@ var SmartProctor;
                                 });
                             };
                             this_1 = this;
-                            _b = [];
-                            for (_c in this.proctorConnections)
-                                _b.push(_c);
+                            _a = [];
+                            for (_b in this.proctorConnections)
+                                _a.push(_b);
                             _i = 0;
-                            _d.label = 2;
-                        case 2:
-                            if (!(_i < _b.length)) return [3 /*break*/, 5];
-                            proctor = _b[_i];
+                            _c.label = 1;
+                        case 1:
+                            if (!(_i < _a.length)) return [3 /*break*/, 4];
+                            proctor = _a[_i];
                             return [5 /*yield**/, _loop_1(proctor)];
+                        case 2:
+                            _c.sent();
+                            _c.label = 3;
                         case 3:
-                            _d.sent();
-                            _d.label = 4;
-                        case 4:
                             _i++;
-                            return [3 /*break*/, 2];
-                        case 5: return [2 /*return*/];
+                            return [3 /*break*/, 1];
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        WebRTCClientTaker.prototype.reconnectToProctor = function (proctor) {
+            return __awaiter(this, void 0, void 0, function () {
+                var conn, offer;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            conn = this.proctorConnections[proctor];
+                            return [4 /*yield*/, conn.createOffer()];
+                        case 1:
+                            offer = _a.sent();
+                            return [4 /*yield*/, conn.setLocalDescription(offer)];
+                        case 2:
+                            _a.sent();
+                            // Send the local SDP through SignalR in .NET
+                            return [4 /*yield*/, this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer)];
+                        case 3:
+                            // Send the local SDP through SignalR in .NET
+                            _a.sent();
+                            console.log("Sending offer to " + proctor + ".");
+                            return [2 /*return*/];
                     }
                 });
             });
@@ -231,6 +266,35 @@ var SmartProctor;
                         case 0: return [4 /*yield*/, this.cameraConnection.addIceCandidate(candidate)];
                         case 1:
                             _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        WebRTCClientTaker.prototype.onProctorReconnected = function (proctor) {
+            return __awaiter(this, void 0, void 0, function () {
+                var conn, offer;
+                var _this = this;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            console.log("Proctor " + proctor + " reconnected, resending SDP...");
+                            conn = this.proctorConnections[proctor];
+                            this.desktopStream.getTracks().forEach(function (track) {
+                                conn.addTrack(track, _this.desktopStream);
+                            });
+                            return [4 /*yield*/, conn.createOffer()];
+                        case 1:
+                            offer = _a.sent();
+                            return [4 /*yield*/, conn.setLocalDescription(offer)];
+                        case 2:
+                            _a.sent();
+                            // Send the local SDP through SignalR in .NET
+                            return [4 /*yield*/, this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer)];
+                        case 3:
+                            // Send the local SDP through SignalR in .NET
+                            _a.sent();
+                            console.log("Sending offer to " + proctor + ".");
                             return [2 /*return*/];
                     }
                 });

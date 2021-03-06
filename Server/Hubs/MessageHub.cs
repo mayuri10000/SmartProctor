@@ -28,77 +28,18 @@ namespace SmartProctor.Server.Hubs
                 Context.UserIdentifier ?? "null");
         }
 
-        public async Task ExamTakerJoin(int examId)
+        public async Task ProctorJoin(string examId)
         {
-            if (Context.User?.Identity?.Name == null)
+            var examTakers = _examServices.GetExamTakers(int.Parse(examId));
+            if (examTakers != null)
             {
-                await Clients.Caller.SendAsync("Error", ErrorCodes.NotLoggedIn);
-                return;
-            }
-
-            var ret = _examServices.Attempt(examId, Context.User.Identity.Name);
-            if (ret != 0)
-            {
-                await Clients.Caller.SendAsync("Error", ret);
-            }
-            else
-            {
-                await Groups.AddToGroupAsync(Context.ConnectionId, examId + "-takers");
-                await Clients.Caller.SendAsync("ExamAccepted");
-                await Clients.Group(examId + "-proctors").SendAsync("ExamTakerJoined", Context.User.Identity.Name);
-                
-                _userGroupDict.Add(Context.ConnectionId, examId.ToString());
+                foreach (var taker in examTakers)
+                {
+                    await Clients.User(taker).SendAsync("ProctorConnected", Context.UserIdentifier);
+                }
             }
         }
-
-        public async Task ProctorJoin(int examId)
-        {
-            if (Context.User?.Identity?.Name == null)
-            {
-                await Clients.Caller.SendAsync("Error", ErrorCodes.NotLoggedIn);
-                return;
-            }
-
-            var ret = _examServices.EnterProctor(examId, Context.User.Identity.Name);
-            if (ret != 0)
-            {
-                await Clients.Caller.SendAsync("Error", ret);
-            }
-            else
-            {
-                await Groups.AddToGroupAsync(Context.ConnectionId, examId + "-proctors");
-                await Clients.Caller.SendAsync("ProctorAccepted");
-                
-                _userGroupDict.Add(Context.ConnectionId, examId.ToString());
-            }
-        }
-
-        public async Task DeepLensJoin(int examId)
-        {
-            if (Context.User?.Identity?.Name == null)
-            {
-                await Clients.Caller.SendAsync("Error", ErrorCodes.NotLoggedIn);
-                return;
-            }
-
-            var ret = _examServices.Attempt(examId, Context.User.Identity.Name);
-            if (ret != 0)
-            {
-                await Clients.Caller.SendAsync("Error", ret);
-            }
-            else
-            {
-                var un = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 4);
-                
-                await Groups.AddToGroupAsync(Context.ConnectionId, examId + "-deeplens");
-                await Clients.Caller.SendAsync("DeepLensJoined");
-                await Clients.User(un)
-                    .SendAsync("DeepLensJoined");
-                await Clients.Group(examId + "-proctors").SendAsync("DeepLensJoined", un);
-                
-                _userGroupDict.Add(Context.ConnectionId, examId.ToString());
-            }
-        }
+        
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {

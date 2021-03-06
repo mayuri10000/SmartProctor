@@ -110,7 +110,8 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 hubConnection.SendAsync("CameraIceCandidateToTaker", candidate);
             };
-                
+
+            await _webRtcClient.ObtainDesktopStream();
             await _webRtcClient.StartStreamingDesktop();
         }
         
@@ -145,7 +146,12 @@ namespace SmartProctor.Client.Pages.Exam
             hubConnection.On<RTCSessionDescriptionInit>("CameraOfferToTaker",
                 async sdp =>
                 {
-                    await _webRtcClient.receivedCameraOfferSDP(sdp);
+                    await _webRtcClient.ReceivedCameraOfferSDP(sdp);
+                });
+            hubConnection.On<string>("ProctorConnected",
+                async proctor =>
+                {
+                    await _webRtcClient.ReconnectToProctor(proctor);
                 });
 
             await hubConnection.StartAsync();
