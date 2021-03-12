@@ -22,10 +22,10 @@ namespace SmartProctor.Server.Controllers.User
             _services = services;
         }
 
-        [HttpPost]
-        public async Task<BaseResponseModel> Post(DeepLensLoginModel model)
+        [HttpGet("{token}")]
+        public async Task<BaseResponseModel> Get(string token)
         {
-            var uid = _services.ValidateOneTimeToken(model.Token);
+            var uid = _services.ValidateOneTimeToken(token);
             if (uid == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.UserNameOrPasswordWrong);

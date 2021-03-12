@@ -7,6 +7,7 @@ using AntDesign;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.SignalR.Client;
+using SmartProctor.Client.Components;
 using SmartProctor.Client.WebRTCInterop;
 using SmartProctor.Shared.Responses;
 using SmartProctor.Shared.WebRTC;
@@ -28,6 +29,9 @@ namespace SmartProctor.Client.Pages.Exam
 
         private bool localDesktopVideoLoaded = false;
         private bool localCameraVideoLoaded = false;
+
+        private TestPrepareModal _testPrepareModal;
+        private bool inPrepare = true;
 
         protected override async Task OnInitializedAsync()
         {
@@ -110,9 +114,7 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 hubConnection.SendAsync("CameraIceCandidateToTaker", candidate);
             };
-
-            await _webRtcClient.ObtainDesktopStream();
-            await _webRtcClient.StartStreamingDesktop();
+            
         }
         
         private async Task SetupSignalRClient()
@@ -173,6 +175,21 @@ namespace SmartProctor.Client.Pages.Exam
                 await _webRtcClient.SetCameraVideoElement("local-camera");
                 localCameraVideoLoaded = true;
             }
+        }
+
+        private async Task OnShareScreen()
+        {
+            var streamId = await _webRtcClient.ObtainDesktopStream();
+            await _webRtcClient.SetDesktopVideoElement("desktop-video-dialog");
+            if (_testPrepareModal.ShareScreenComplete(streamId))
+            {
+                await _webRtcClient.StartStreamingDesktop();
+            }
+        }
+
+        private void OnPrepareFinish()
+        {
+            inPrepare = false;
         }
 
         private void OnNextQuestion()

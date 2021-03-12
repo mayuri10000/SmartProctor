@@ -47,20 +47,12 @@ namespace SmartProctor.Server.Services
 
         public string GenerateOneTimeToken(string uid)
         {
-            var token = Guid.NewGuid().ToString();
-            _tokens.Add(token, uid);
-            return token;
+            return UserTokenStorage.Instance.GenerateToken(uid);
         }
 
         public string ValidateOneTimeToken(string token)
         {
-            if (_tokens.TryGetValue(token, out string uid))
-            {
-                _tokens.Remove(token);
-                return uid;
-            }
-
-            return null;
+            return UserTokenStorage.Instance.VerifyAndRemoveToken(token);
         }
 
         public int Register(string id, string nickName, string password, string email, string phone)

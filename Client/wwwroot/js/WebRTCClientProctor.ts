@@ -5,6 +5,9 @@
         
         public desktopStream: MediaStream;
         public cameraStream: MediaStream;
+        
+        public desktopVideoElem: Element;
+        public cameraVideoElem: Element;
     }
     /**
      * Typescript implementation of the WebRTC related functions in the proctor side
@@ -20,6 +23,8 @@
                 var cameraConnection = new RTCPeerConnection(null);
                 
                 this.testTakerConnections[testTaker] = {
+                    cameraVideoElem: document.getElementById(testTaker + "-video"),
+                    desktopVideoElem: null,
                     desktopConnection: desktopConnection,
                     cameraConnection: cameraConnection,
                     desktopStream: null,
@@ -28,8 +33,9 @@
 
                 // @ts-ignore
                 desktopConnection.onaddstream = (e) => {
-                    // @ts-ignore
-                    document.getElementById(testTaker + "-desktop").srcObject = e.stream;
+                    if (this.testTakerConnections[testTaker].desktopVideoElem != null)
+                        // @ts-ignore
+                        this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.stream;
                     this.testTakerConnections[testTaker].desktopStream = e.stream;
                     console.log("get desktop stream: " + testTaker);
                 };
@@ -45,8 +51,9 @@
 
                 // @ts-ignore
                 cameraConnection.onaddstream = (e) => {
-                    // @ts-ignore
-                    document.getElementById(testTaker + "-camera").srcObject = e.stream;
+                    if (this.testTakerConnections[testTaker].cameraVideoElem != null)
+                        // @ts-ignore
+                        this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.stream;
                     this.testTakerConnections[testTaker].cameraStream = e.stream;
                 };
 
@@ -84,6 +91,24 @@
             let answer = await conn.createAnswer();
             await conn.setLocalDescription(answer);
             await this.helper.invokeMethodAsync("_onCameraSdp", testTaker, answer);
+        }
+        
+        public async setDesktopVideoElem(testTaker: string, elementId: string) {
+            if (this.testTakerConnections[testTaker].desktopVideoElem != null)
+                // @ts-ignore
+                this.testTakerConnections[testTaker].desktopVideoElem.srcObject = null;
+            this.testTakerConnections[testTaker].desktopVideoElem = document.getElementById(elementId);
+            // @ts-ignore
+            this.testTakerConnections[testTaker].desktopVideoElem.srcObject = this.testTakerConnections[testTaker].desktopStream;
+        }
+
+        public async setCameraVideoElem(testTaker: string, elementId: string) {
+            if (this.testTakerConnections[testTaker].cameraVideoElem != null)
+                // @ts-ignore
+                this.testTakerConnections[testTaker].cameraVideoElem.srcObject = null;
+            this.testTakerConnections[testTaker].cameraVideoElem = document.getElementById(elementId);
+            // @ts-ignore
+            this.testTakerConnections[testTaker].cameraVideoElem.srcObject = this.testTakerConnections[testTaker].cameraStream;
         }
     }
 }

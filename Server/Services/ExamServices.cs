@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using SmartProctor.Server.Data;
 using SmartProctor.Server.Data.Entities;
@@ -15,6 +16,8 @@ namespace SmartProctor.Server.Services
         int EnterProctor(int eid, string uid);
         IList<string> GetExamTakers(int eid);
         IList<string> GetProctors(int eid);
+
+        IList<ExamDetails> GetExamsForUser(string uid, int role);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -120,6 +123,32 @@ namespace SmartProctor.Server.Services
             }
 
             return ret;
+        }
+
+        public IList<ExamDetails> GetExamsForUser(string uid, int role)
+        {
+            try
+            {
+                var q = _examUserRepo.GetObjectList(x => x.UserId == uid && x.UserRole == role,
+                    x => x.ExamId, OrderingType.Ascending);
+
+                return (from x in q
+                    select GetObject(x.ExamId)
+                    into ex
+                    where ex != null
+                    select new ExamDetails()
+                    {
+                        Id = ex.Id,
+                        Name = ex.Name,
+                        Description = ex.Description,
+                        Duration = ex.Duration,
+                        StartTime = ex.StartTime
+                    }).ToList();
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

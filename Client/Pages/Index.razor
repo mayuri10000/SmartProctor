@@ -1,34 +1,238 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
-@layout LoginLayout
+@using SmartProctor.Shared.Responses
+@using System.Text
 @inject ModalService Modal
 @inject NavigationManager NavManager
+@inject HttpClient Http
 
 
-<TestPrepareModal></TestPrepareModal>
+<Header Class="header">
+    <div class="logo">SmartProctor Exams</div>
+
+    <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
+    </Menu>
+</Header>
+<Content Style="padding: 0 50px">
+    <Layout Class="site-layout-background" Style="padding: 24px 0; height: 100%;">
+        <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
+            <div class="card-container">
+                <Tabs>
+                    <TabPane Key="1">
+                        <Tab>Exams to take</Tab>
+                        <ChildContent>
+                            @if (examsToTake != null)
+                            {
+                                <AntList Grid="gutter" DataSource="@examsToTake">
+                                    <ListItem Class="test-li">
+                                        <Card Title="@context.Name" Size="small" Class="test-card">
+                                            <Extra>
+                                                @if (DateTime.Now < context.StartTime.AddMinutes(-15))
+                                                {
+                                                    <Button Type="primary" Disabled>Not started</Button>
+                                                }
+                                                else if (DateTime.Now > context.StartTime.AddMinutes(15))
+                                                {
+                                                    <Button Type="primary" Disabled>Expired</Button>
+                                                }
+                                                else
+                                                {
+                                                    <Button Type="primary">Enter</Button>
+                                                }
+                                            </Extra>
+                                            <ChildContent>
+                                                <div class="test-time">
+                                                    @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
+                                                </div>
+                                                <div class="test-description">
+                                                    @context.Description
+                                                </div>
+
+                                            </ChildContent>
+                                        </Card>
+                                    </ListItem>
+                                </AntList>
+                            }
+                        </ChildContent>
+                    </TabPane>
+                    <TabPane Key="2">
+                        <Tab>Exams to proctor</Tab>
+                        <ChildContent>
+                            @if (examsToProctor != null)
+                            {
+                                <AntList Grid="gutter" DataSource="@examsToProctor">
+                                    <ListItem >
+                                        <Card Title="@context.Name">
+                                            <Extra>
+                                                @if (DateTime.Now < context.StartTime.AddMinutes(-15))
+                                                {
+                                                    <Button Type="primary" Disabled>Not started</Button>
+                                                }
+                                                else if (DateTime.Now > context.StartTime.AddSeconds(context.Duration))
+                                                {
+                                                    <Button Type="primary" Disabled>Ended</Button>
+                                                }
+                                                else
+                                                {
+                                                    <Button Type="primary">Enter</Button>
+                                                }
+                                            </Extra>
+                                            <ChildContent>
+                                                <div class="test-time">
+                                                    @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
+                                                </div>
+                                                <div class="test-description">
+                                                    @context.Description
+                                                </div>
+                                            </ChildContent>
+                                        </Card>
+                                    </ListItem>
+                                </AntList>
+                            }
+                        </ChildContent>
+                    </TabPane>
+                    <TabPane Key="3">
+                        <Tab>My exams</Tab>
+                        <ChildContent>
+                            @if (myExams != null)
+                            {
+                                <AntList Grid="gutter" DataSource="@myExams">
+                                    <ListItem >
+                                        <Card Title="@context.Name">
+                                            <Extra>
+                                                <Button Type="primary">Edit</Button>
+                                            </Extra>
+                                            <ChildContent>
+                                                <div class="test-time">
+                                                    @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
+                                                </div>
+                                                <div class="test-description">
+                                                    @context.Description
+                                                </div>
+
+                                            </ChildContent>
+                                        </Card>
+                                    </ListItem>
+                                    <ListItem>
+                                        <Card Title="Create New">
+                                            <Extra>
+                                                <Button Type="success">Create</Button>
+                                            </Extra>
+                                            <ChildContent>
+                                                <Skeleton></Skeleton>
+                                            </ChildContent>
+                                        </Card>
+                                    </ListItem>
+                                </AntList>
+                            }
+                        </ChildContent>
+                    </TabPane>
+                </Tabs>
+            </div>
+        </Content>
+    </Layout>
+</Content>
+
+
+<style>
+    [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-content,
+    .card-container .ant-tabs-card .ant-tabs-content {
+        height: 120px;
+        margin-top: -16px;
+    }
+
+        [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-content .ant-tabs-tabpane,
+        .card-container .ant-tabs-card .ant-tabs-content .ant-tabs-tabpane {
+            background: #fff;
+            padding: 16px;
+        }
+
+    [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-bar,
+    .card-container .ant-tabs-card .ant-tabs-bar {
+        border-color: #fff;
+    }
+
+        [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab,
+        .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab {
+            border-color: transparent;
+            background: transparent;
+        }
+
+        [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab-active,
+        .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab-active {
+            border-color: #fff;
+            background: #fff;
+        }
+</style>
 
 @code
 {
-    private HubConnection _hubConnection;
+    private ListGridType gutter = new ListGridType
+    {
+        Gutter = 16,
+        Xs = 1,
+        Sm = 2,
+        Md = 4,
+        Lg = 4,
+        Xl = 6,
+        Xxl = 3,
+        Column = 3
+    };
+
+    private ExamDetails[] examsToTake;
+    private ExamDetails[] examsToProctor;
+    private ExamDetails[] myExams = new ExamDetails[0];
 
     protected override async Task OnInitializedAsync()
     {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavManager.ToAbsoluteUri("/hub"))
-            .Build();
+        try
+        {
+            var takeRes = await Http.GetFromJsonAsync<GetUserExamsResponseModel>("api/exam/GetExams/1");
+            var proctorRes = await Http.GetFromJsonAsync<GetUserExamsResponseModel>("api/exam/GetExams/2");
 
-        _hubConnection.On<string>("TestBack", TestBack);
-            
-        await _hubConnection.StartAsync();
+            if (takeRes != null && takeRes.Code == 0)
+            {
+                examsToTake = takeRes.ExamDetailsList.ToArray();
+            }
 
-        await _hubConnection.SendAsync("Test");
+            if (proctorRes != null && proctorRes.Code == 0)
+            {
+                examsToProctor = proctorRes.ExamDetailsList.ToArray();
+            }
+        }
+        catch (Exception e)
+        {
+            await Modal.ErrorAsync(new ConfirmOptions()
+            {
+                Title = e.Message,
+                Content = e.StackTrace
+            });
+        }
     }
 
-    private void TestBack(string str)
+    private string ConvertExamDuration(int secs)
     {
-        Modal.Success(new ConfirmOptions()
+        var hours = secs / 3600;
+        var minutes = (secs - hours * 3600) / 60;
+        var seconds = secs - minutes * 60 - hours * 3600;
+
+        var sb = new StringBuilder();
+        if (hours > 0)
         {
-            Title = str
-        });
+            sb.Append(hours);
+            sb.Append("h");
+        }
+        if (minutes > 0)
+        {
+            sb.Append(minutes);
+            sb.Append("m");
+        }
+        if (seconds > 0)
+        {
+            sb.Append(seconds);
+            sb.Append("s");
+        }
+
+        return sb.ToString();
     }
 }

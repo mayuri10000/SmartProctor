@@ -61,6 +61,18 @@ namespace SmartProctor.Client.WebRTCInterop
             await _jsObj.InvokeVoidAsync("onReceivedCameraSdp", testTaker, sdp);
         }
 
+        public async ValueTask SetDesktopVideoElem(string testTaker, string elementId)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("setDesktopVideoElem", testTaker, elementId);
+        }
+
+        public async ValueTask SetCameraVideoElem(string testTaker, string elementId)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("setCameraVideoElem", testTaker, elementId);
+        }
+
         [JSInvokable]
         public ValueTask _onDesktopConnectionStateChange(string testTaker, string state)
         {

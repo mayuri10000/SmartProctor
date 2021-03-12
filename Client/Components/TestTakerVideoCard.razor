@@ -12,10 +12,13 @@
                                   </Template>;
 }
 
-<Card Size="small" Title="@TestTakerName" Actions="new[] {toggleCamera, toggleDesktop, iconWarnings}">
+<Card Size="small" Title="@TestTakerName" Actions="new[] {toggleCamera, toggleDesktop, iconWarnings}"
+      Style="margin-bottom: 20px; margin-right: 20px">
+    <Extra>
+        <Icon Type="expand" Theme="outline" OnClick="Enlarge"/>
+    </Extra>
     <Body>
-        <video id="@(TestTakerName + "-camera")" class="proctor-video" autoplay style="@(showingDesktop ? "display:none;" : "")"></video>
-        <video id="@(TestTakerName + "-desktop")" class="proctor-video" autoplay style="@(showingDesktop ? "" : "display:none;")"></video>
+    <video id="@(TestTakerName + "-video")" class="proctor-video" autoplay></video>
     </Body>
 </Card>
 
@@ -24,18 +27,37 @@
     [Parameter]
     public string TestTakerName { get; set; }
 
+    [Parameter] 
+    public EventCallback OnToggleCamera { get; set; }
+
+    [Parameter] 
+    public EventCallback OnToggleDesktop { get; set; }
+    
+    [Parameter]
+    public EventCallback OnEnlarge { get; set; }
+    
+
     private bool showingDesktop;
     private bool hasWarnings;
+    
+    
 
-    private void ToggleDesktop()
+    private async Task ToggleDesktop()
     {
+        await OnToggleDesktop.InvokeAsync();
         showingDesktop = true;
         StateHasChanged();
     }
 
-    private void ToggleCamera()
+    private async Task ToggleCamera()
     {
+        await OnToggleCamera.InvokeAsync();
         showingDesktop = false;
         StateHasChanged();
+    }
+
+    private async Task Enlarge()
+    {
+        await OnEnlarge.InvokeAsync();
     }
 }

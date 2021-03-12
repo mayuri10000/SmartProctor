@@ -119,7 +119,7 @@ var SmartProctor;
                         case 1:
                             // @ts-ignore
                             _a.desktopStream = _b.sent();
-                            return [2 /*return*/, this.desktopStream.id];
+                            return [2 /*return*/, this.desktopStream.getTracks()[0].label];
                     }
                 });
             });
@@ -202,14 +202,20 @@ var SmartProctor;
             });
         };
         WebRTCClientTaker.prototype.setDesktopVideoElement = function (elementId) {
-            var localVideo = document.getElementById(elementId);
+            if (this.desktopVideoElem != null)
+                // @ts-ignore
+                this.desktopVideoElem.srcObject = null;
+            this.desktopVideoElem = document.getElementById(elementId);
             // @ts-ignore
-            localVideo.srcObject = this.desktopStream;
+            this.desktopVideoElem.srcObject = this.desktopStream;
         };
         WebRTCClientTaker.prototype.setCameraVideoElement = function (elementId) {
-            var localVideo = document.getElementById(elementId);
+            if (this.cameraVideoElem != null)
+                // @ts-ignore
+                this.cameraVideoElem.srcObject = null;
+            this.cameraVideoElem = document.getElementById(elementId);
             // @ts-ignore
-            localVideo.srcObject = this.cameraStream;
+            this.cameraVideoElem.srcObject = this.cameraStream;
         };
         WebRTCClientTaker.prototype.receivedProctorAnswerSDP = function (proctor, sdp) {
             return __awaiter(this, void 0, void 0, function () {

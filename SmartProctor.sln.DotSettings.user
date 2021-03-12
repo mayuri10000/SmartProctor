@@ -6,4 +6,5 @@
   &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\UnityParrot.dll" /&gt;&#xD;
   &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\VERSION.dll" /&gt;&#xD;
   &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\ThincaPayment.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\microsoft.aspnetcore.signalr.client.core\5.0.2\lib\netstandard2.1\Microsoft.AspNetCore.SignalR.Client.Core.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

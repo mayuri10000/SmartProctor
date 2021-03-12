@@ -57,6 +57,8 @@ var SmartProctor;
                         var desktopConnection = new RTCPeerConnection(null);
                         var cameraConnection = new RTCPeerConnection(null);
                         _this.testTakerConnections[testTaker] = {
+                            cameraVideoElem: document.getElementById(testTaker + "-video"),
+                            desktopVideoElem: null,
                             desktopConnection: desktopConnection,
                             cameraConnection: cameraConnection,
                             desktopStream: null,
@@ -64,8 +66,9 @@ var SmartProctor;
                         };
                         // @ts-ignore
                         desktopConnection.onaddstream = function (e) {
-                            // @ts-ignore
-                            document.getElementById(testTaker + "-desktop").srcObject = e.stream;
+                            if (_this.testTakerConnections[testTaker].desktopVideoElem != null)
+                                // @ts-ignore
+                                _this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.stream;
                             _this.testTakerConnections[testTaker].desktopStream = e.stream;
                             console.log("get desktop stream: " + testTaker);
                         };
@@ -93,8 +96,9 @@ var SmartProctor;
                         }); };
                         // @ts-ignore
                         cameraConnection.onaddstream = function (e) {
-                            // @ts-ignore
-                            document.getElementById(testTaker + "-camera").srcObject = e.stream;
+                            if (_this.testTakerConnections[testTaker].cameraVideoElem != null)
+                                // @ts-ignore
+                                _this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.stream;
                             _this.testTakerConnections[testTaker].cameraStream = e.stream;
                         };
                         cameraConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
@@ -193,6 +197,32 @@ var SmartProctor;
                             _a.sent();
                             return [2 /*return*/];
                     }
+                });
+            });
+        };
+        WebRTCClientProctor.prototype.setDesktopVideoElem = function (testTaker, elementId) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (this.testTakerConnections[testTaker].desktopVideoElem != null)
+                        // @ts-ignore
+                        this.testTakerConnections[testTaker].desktopVideoElem.srcObject = null;
+                    this.testTakerConnections[testTaker].desktopVideoElem = document.getElementById(elementId);
+                    // @ts-ignore
+                    this.testTakerConnections[testTaker].desktopVideoElem.srcObject = this.testTakerConnections[testTaker].desktopStream;
+                    return [2 /*return*/];
+                });
+            });
+        };
+        WebRTCClientProctor.prototype.setCameraVideoElem = function (testTaker, elementId) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    if (this.testTakerConnections[testTaker].cameraVideoElem != null)
+                        // @ts-ignore
+                        this.testTakerConnections[testTaker].cameraVideoElem.srcObject = null;
+                    this.testTakerConnections[testTaker].cameraVideoElem = document.getElementById(elementId);
+                    // @ts-ignore
+                    this.testTakerConnections[testTaker].cameraVideoElem.srcObject = this.testTakerConnections[testTaker].cameraStream;
+                    return [2 /*return*/];
                 });
             });
         };

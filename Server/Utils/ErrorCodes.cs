@@ -5,6 +5,7 @@ namespace SmartProctor.Server.Utils
 {
     public static class ErrorCodes
     {
+        public const int UnknownError = -1;
         public const int Success = 0;
         public const int NotLoggedIn = 1000;
         public const int UserNameOrPasswordWrong = 1001;
@@ -21,6 +22,8 @@ namespace SmartProctor.Server.Utils
 
         public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
         {
+            {  -1, "Unknown Error"},
+            
             { 0000, "Success" },
             
             { 1000, "Please log in first" },

@@ -22,10 +22,26 @@
             {
                 <AntList Grid="gutter" DataSource="@_testTakers">
                     <ListItem >
-                        <TestTakerVideoCard TestTakerName="@context"></TestTakerVideoCard>
+                        <TestTakerVideoCard TestTakerName="@context" 
+                                            OnToggleCamera="() => OnToggleCamera(context)"
+                                            OnToggleDesktop="() => OnToggleDesktop(context)"
+                                            OnEnlarge="() => OnEnlarge(context)"></TestTakerVideoCard>
                     </ListItem>
                 </AntList>
             }
         </Content>
     </Layout>
 </Content>
+
+<Modal Visible="@enlarged" OnCancel="CancelEnlarged" OnOk="CancelEnlarged" Title="@enlargedTestTakerName" Style="width: 700px;">
+    @if (loading)
+    {
+        <div>Loading proctor page, please wait...</div>
+    }
+    else
+    {
+        <video id="video-enlarged" class="proctor-video-large" autoplay></video>
+        <br/>
+        <Button OnClick="ToggleEnlarged">Toggle&nbsp;@(enlargedDesktop ? "camera" : "desktop")</Button>
+    }
+</Modal>

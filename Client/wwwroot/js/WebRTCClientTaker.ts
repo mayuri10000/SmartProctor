@@ -46,7 +46,7 @@
         public async obtainDesktopStream() : Promise<string> {
             // @ts-ignore
             this.desktopStream = await navigator.mediaDevices.getDisplayMedia();
-            return this.desktopStream.id;
+            return this.desktopStream.getTracks()[0].label;
         }
 
         public async startStreamingDesktop() {
@@ -77,16 +77,18 @@
         }
         
         public setDesktopVideoElement(elementId: string) {
-            // @ts-ignore
-            this.desktopVideoElem.srcObject = null;
+            if (this.desktopVideoElem != null)
+                // @ts-ignore
+                this.desktopVideoElem.srcObject = null;
             this.desktopVideoElem = document.getElementById(elementId);
             // @ts-ignore
             this.desktopVideoElem.srcObject = this.desktopStream;
         }
         
         public setCameraVideoElement(elementId: string) {
-            // @ts-ignore
-            this.cameraVideoElem.srcObject = null;
+            if (this.cameraVideoElem != null)
+                // @ts-ignore
+                this.cameraVideoElem.srcObject = null;
             this.cameraVideoElem = document.getElementById(elementId);
             // @ts-ignore
             this.cameraVideoElem.srcObject = this.cameraStream;

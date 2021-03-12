@@ -21,6 +21,12 @@ namespace SmartProctor.Client.Pages.Exam
         private IList<string> _testTakers;
         
         private HubConnection hubConnection;
+
+        private bool loading = true;
+        
+        private string enlargedTestTakerName;
+        private bool enlarged = true;
+        private bool enlargedDesktop;
         
         private ListGridType gutter = new ListGridType
         {
@@ -45,6 +51,9 @@ namespace SmartProctor.Client.Pages.Exam
                 await hubConnection.SendAsync("ProctorJoin", ExamId);
                 StateHasChanged();
             }
+
+            loading = false;
+            enlarged = false;
         }
 
         private async Task<bool> Attempt()
@@ -151,5 +160,57 @@ namespace SmartProctor.Client.Pages.Exam
             await hubConnection.StartAsync();
         }
 
+        private async Task OnToggleDesktop(string testTaker)
+        {
+            await _webRtcClient.SetDesktopVideoElem(testTaker, testTaker + "-video");
+        }
+        
+        private async Task OnToggleCamera(string testTaker)
+        {
+            await _webRtcClient.SetCameraVideoElem(testTaker, testTaker + "-video");
+        }
+
+        private async Task OnEnlarge(string testTaker)
+        {
+            enlargedTestTakerName = testTaker;
+            enlarged = true;
+            StateHasChanged();
+            if (enlargedDesktop)
+            {
+                await _webRtcClient.SetDesktopVideoElem(testTaker, "video-enlarged");
+            }
+            else
+            {
+                await _webRtcClient.SetCameraVideoElem(testTaker, "video-enlarged");
+            }
+        }
+
+        private async Task ToggleEnlarged()
+        {
+            if (!enlargedDesktop)
+            {
+                await _webRtcClient.SetDesktopVideoElem(enlargedTestTakerName, "video-enlarged");
+                enlargedDesktop = true;
+            }
+            else
+            {
+                await _webRtcClient.SetCameraVideoElem(enlargedTestTakerName, "video-enlarged");
+                enlargedDesktop = false;
+            }
+        }
+
+        private async Task CancelEnlarged()
+        {
+            if (enlargedDesktop)
+            {
+                await _webRtcClient.SetDesktopVideoElem(enlargedTestTakerName, enlargedTestTakerName + "-video");
+            }
+            else
+            {
+                await _webRtcClient.SetCameraVideoElem(enlargedTestTakerName, enlargedTestTakerName + "-video");
+            }
+
+            enlarged = false;
+        }
     }
 }
