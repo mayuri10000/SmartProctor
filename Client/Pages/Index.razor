@@ -31,13 +31,13 @@
                                                 {
                                                     <Button Type="primary" Disabled>Not started</Button>
                                                 }
-                                                else if (DateTime.Now > context.StartTime.AddMinutes(15))
+                                                else if (DateTime.Now > context.StartTime.AddSeconds(context.Duration))
                                                 {
                                                     <Button Type="primary" Disabled>Expired</Button>
                                                 }
                                                 else
                                                 {
-                                                    <Button Type="primary">Enter</Button>
+                                                    <Button Type="primary" OnClick="() => EnterExam(context.Id)">Enter</Button>
                                                 }
                                             </Extra>
                                             <ChildContent>
@@ -61,8 +61,8 @@
                             @if (examsToProctor != null)
                             {
                                 <AntList Grid="gutter" DataSource="@examsToProctor">
-                                    <ListItem >
-                                        <Card Title="@context.Name">
+                                    <ListItem Class="test-li">
+                                        <Card Title="@context.Name" Class="test-card" Size="small">
                                             <Extra>
                                                 @if (DateTime.Now < context.StartTime.AddMinutes(-15))
                                                 {
@@ -74,7 +74,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <Button Type="primary">Enter</Button>
+                                                    <Button Type="primary" OnClick="() => EnterProctor(context.Id)">Enter</Button>
                                                 }
                                             </Extra>
                                             <ChildContent>
@@ -96,32 +96,35 @@
                         <ChildContent>
                             @if (myExams != null)
                             {
-                                <AntList Grid="gutter" DataSource="@myExams">
-                                    <ListItem >
-                                        <Card Title="@context.Name">
-                                            <Extra>
-                                                <Button Type="primary">Edit</Button>
-                                            </Extra>
-                                            <ChildContent>
-                                                <div class="test-time">
-                                                    @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
-                                                </div>
-                                                <div class="test-description">
-                                                    @context.Description
-                                                </div>
-
-                                            </ChildContent>
-                                        </Card>
-                                    </ListItem>
-                                    <ListItem>
-                                        <Card Title="Create New">
-                                            <Extra>
-                                                <Button Type="success">Create</Button>
-                                            </Extra>
-                                            <ChildContent>
-                                                <Skeleton></Skeleton>
-                                            </ChildContent>
-                                        </Card>
+                                <AntList Grid="gutter" DataSource="myExams" TItem="ExamDetails">
+                                    <ListItem Class="test-li">
+                                        @if (context == null)
+                                        {
+                                            <Card Title="Create New Exam" Class="test-card" Size="small">
+                                                <Extra>
+                                                    <Button Type="primary" OnClick="EnterCreateExam">Create</Button>
+                                                </Extra>
+                                                <ChildContent>
+                                                    <Skeleton ParagraphRows="3" Title="false"></Skeleton>
+                                                </ChildContent>
+                                            </Card>
+                                        }
+                                        else
+                                        {
+                                            <Card Title="@context.Name" Class="test-card" Size="small">
+                                                <Extra>
+                                                    <Button>Edit</Button>
+                                                </Extra>
+                                                <ChildContent>
+                                                    <div class="test-time">
+                                                        @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
+                                                    </div>
+                                                    <div class="test-description">
+                                                        @context.Description
+                                                    </div>
+                                                </ChildContent>
+                                            </Card>
+                                        }
                                     </ListItem>
                                 </AntList>
                             }
@@ -181,7 +184,7 @@
 
     private ExamDetails[] examsToTake;
     private ExamDetails[] examsToProctor;
-    private ExamDetails[] myExams = new ExamDetails[0];
+    private ExamDetails[] myExams = new ExamDetails[1];
 
     protected override async Task OnInitializedAsync()
     {
@@ -199,6 +202,15 @@
             {
                 examsToProctor = proctorRes.ExamDetailsList.ToArray();
             }
+
+            if (takeRes?.Code == 1000)
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Please login first",
+                });
+                NavManager.NavigateTo("/User/Login");
+            }
         }
         catch (Exception e)
         {
@@ -208,6 +220,21 @@
                 Content = e.StackTrace
             });
         }
+    }
+
+    private void EnterExam(int eid)
+    {
+        NavManager.NavigateTo("/Exam/Exam/" + eid);
+    }
+
+    private void EnterProctor(int eid)
+    {
+        NavManager.NavigateTo("/Exam/Proctor/" + eid);
+    }
+
+    private void EnterCreateExam()
+    {
+        NavManager.NavigateTo("/Exam/Create");
     }
 
     private string ConvertExamDuration(int secs)

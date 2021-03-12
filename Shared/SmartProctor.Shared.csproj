@@ -11,4 +11,9 @@
     <SupportedPlatform Remove="Linux" />
     <SupportedPlatform Remove="Windows" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="PagedList.cs" />
+    <Compile Remove="WeatherForecast.cs" />
+  </ItemGroup>
 </Project>
