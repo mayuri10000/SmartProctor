@@ -10,7 +10,7 @@
                                     OnClick="Next">
                                     Next
                                 </Button>
-                                <Button Type="primary" Disabled="@(currentStep < 4)" 
+                                <Button Type="primary" Disabled="@(currentStep < 4)"
                                         OnClick="async () => await OnFinish.InvokeAsync()">
                                     Finish
                                 </Button>
@@ -44,38 +44,21 @@
         </Paragraph>
         <Paragraph>
             Device network status:
-            @if (ethernetConnected)
-            {
-                <div>
-                    Wired network:&nbsp;&nbsp;
-                    <Icon Type="check-circle" Theme="outline" Style="color: green"/>
-                    <label style="color: green">&nbsp;Connected</label>
-                </div>
-            }
-            else
-            {
-                <div>
-                    Wired network:&nbsp;&nbsp;
-                    <Icon Type="close-circle" Theme="outline" Style="color: red"/>
-                    <label style="color: red">&nbsp;Not connected</label>
-                </div>
-            }
-            @if (wirelessSSID != null)
-            {
-                <div>
-                    Wireless network:&nbsp;&nbsp;
-                    <Icon Type="check-circle" Theme="outline" Style="color: green"/>
-                    <label style="color: green">&nbsp;Connected, SSID: @wirelessSSID</label>
-                </div>
-            }
-            else
-            {
-                <div>
-                    Wireless network:&nbsp;&nbsp;
-                    <Icon Type="close-circle" Theme="outline" Style="color: red"/>
-                    <label style="color: red">&nbsp;Not connected</label>
-                </div>
-            }
+            <div>
+                Wired network:&nbsp;&nbsp;
+                <Icon Type="check-circle" Theme="outline" Style="color: @(ethernetConnected ? "green" : "red")"/>
+                <label style="color: @(ethernetConnected ? "green" : "red")">
+                    &nbsp;@(ethernetConnected ? "Connected" : "Not connected")
+                </label>
+            </div>
+            <div>
+                Wireless network:&nbsp;&nbsp;
+                <Icon Type="check-circle" Theme="outline" Style="color: @(wirelessSSID != null ? "green" : "red")"/>
+                <label style="color: @(wirelessSSID != null ? "green" : "red")">
+                    &nbsp;
+                    &nbsp;@(wirelessSSID != null ? "Connected, SSID: " + wirelessSSID : "Not connected")
+                </label>
+            </div>
         </Paragraph>
         <Paragraph>
             <Button OnClick="GetNetworkStatus">Refresh network status</Button>
@@ -132,16 +115,15 @@
         <Paragraph>
             <Button Type="primary" OnClick="() => OnShareScreen.InvokeAsync()">Share screen</Button>
         </Paragraph>
-            <Paragraph>
-                <video class="proctor-video-large" id="desktop-video-dialog" autoplay></video>
-            </Paragraph>
-        </div>
+        <Paragraph>
+            <video class="proctor-video-large" id="desktop-video-dialog" autoplay></video>
+        </Paragraph>
+    </div>
     @if (tipType != 0)
     {
-        <div style="color: @(tipType == 1 ? "green" : "red")">
-            <Icon Type="@(tipType == 1 ? "check-circle" : "close-circle")" Theme="outline"/>&nbsp;
-            <label>&nbsp;@tipText</label>
-        </div>
+        <Alert Type="@(tipType == 1 ? AlertType.Success : AlertType.Error)"
+               Message="@tipText" ShowIcon>
+        </Alert>
     }
 </Modal>
 
@@ -166,13 +148,13 @@
 
     [Parameter]
     public EventCallback OnShareScreen { get; set; }
-    
+
     [Parameter]
     public EventCallback OnFinish { get; set; }
-    
+
     [Parameter]
     public string ExamId { get; set; }
-    
+
     [Parameter]
     public bool Visible { get; set; }
 
@@ -229,7 +211,7 @@
             tipText = "Detection failed";
         }
 
-        
+
         isDetecting = false;
         StateHasChanged();
     }
@@ -285,7 +267,7 @@
             tipType = -1;
             tipText = "Please share your entire screen, instead of a window or browser tab";
         }
-        
+
         return false;
     }
 
@@ -377,4 +359,5 @@
     {
         public bool Success { get; set; }
     }
+
 }

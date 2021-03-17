@@ -12,5 +12,6 @@ namespace SmartProctor.Server.Data.Entities
         public string Description { get; set; }
         public DateTime StartTime { get; set; }
         public int Duration { get; set; }
+        public string Creator { get; set; }
     }
 }

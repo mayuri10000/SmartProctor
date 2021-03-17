@@ -120,6 +120,12 @@ namespace SmartProctor.Server.Data.Entities
                 entity.Property(e => e.StartTime)
                     .HasMaxLength(6)
                     .HasColumnName("start_time");
+                
+                entity.Property(e => e.Creator)
+                    .HasColumnType("varchar(20)")
+                    .HasColumnName("receipt")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
             });
 
             modelBuilder.Entity<ExamUser>(entity =>

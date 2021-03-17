@@ -1,9 +1,11 @@
 ﻿@page "/User/Login"
 @using SmartProctor.Shared.Requests
 @using SmartProctor.Shared.Responses
+@using SmartProctor.Client.Services
+@using SmartProctor.Client.Utils
 @layout LoginLayout
 @inject NavigationManager NavManager
-@inject HttpClient Http
+@inject IUserServices UserServices
 @inject ModalService Modal
 
 <Form Model="@model"
@@ -31,24 +33,25 @@
 
     private void OnRegister()
     {
+        // redirect to register
         NavManager.NavigateTo("/User/Register");
     }
 
     private async Task OnFinish(EditContext editContext)
     {
-        var result = await Http.PostAsJsonAsync("api/user/Login", model);
-        var response = await result.Content.ReadFromJsonAsync<BaseResponseModel>();
+        var result = await UserServices.LoginAsync(model);
 
-        if (response.Code != 0)
+        if (result != ErrorCodes.Success)
         {
             Modal.Error(new ConfirmOptions()
             {
                 Title = "Login failed",
-                Content = response.Message
+                Content = ErrorCodes.MessageMap[result]
             });
         }
         else
         {
+            // Login success
             NavManager.NavigateTo("/");
         }
     }

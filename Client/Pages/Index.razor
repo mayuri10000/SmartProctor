@@ -14,6 +14,9 @@
     </Menu>
 </Header>
 <Content Style="padding: 0 50px">
+    <Breadcrumb Style=" margin: 16px 0">
+
+    </Breadcrumb>
     <Layout Class="site-layout-background" Style="padding: 24px 0; height: 100%;">
         <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
             <div class="card-container">
@@ -25,31 +28,44 @@
                             {
                                 <AntList Grid="gutter" DataSource="@examsToTake">
                                     <ListItem Class="test-li">
-                                        <Card Title="@context.Name" Size="small" Class="test-card">
-                                            <Extra>
-                                                @if (DateTime.Now < context.StartTime.AddMinutes(-15))
-                                                {
-                                                    <Button Type="primary" Disabled>Not started</Button>
-                                                }
-                                                else if (DateTime.Now > context.StartTime.AddSeconds(context.Duration))
-                                                {
-                                                    <Button Type="primary" Disabled>Expired</Button>
-                                                }
-                                                else
-                                                {
-                                                    <Button Type="primary" OnClick="() => EnterExam(context.Id)">Enter</Button>
-                                                }
-                                            </Extra>
-                                            <ChildContent>
-                                                <div class="test-time">
-                                                    @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
-                                                </div>
-                                                <div class="test-description">
-                                                    @context.Description
-                                                </div>
-
-                                            </ChildContent>
-                                        </Card>
+                                        @if (context != null)
+                                        {
+                                            <Card Title="@context.Name" Size="small" Class="test-card">
+                                                <Extra>
+                                                    @if (DateTime.Now < context.StartTime.AddMinutes(-15))
+                                                    {
+                                                        <Button Type="primary" Disabled>Not started</Button>
+                                                    }
+                                                    else if (DateTime.Now > context.StartTime.AddSeconds(context.Duration))
+                                                    {
+                                                        <Button Type="primary" Disabled>Expired</Button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <Button Type="primary" OnClick="() => EnterExam(context.Id)">Enter</Button>
+                                                    }
+                                                </Extra>
+                                                <ChildContent>
+                                                    <div class="test-time">
+                                                        @(context.StartTime.ToString("MM/dd/yyyy HH:mm") + " " + ConvertExamDuration(context.Duration))
+                                                    </div>
+                                                    <div class="test-description">
+                                                        @context.Description
+                                                    </div>
+                                                </ChildContent>
+                                            </Card>
+                                        }
+                                        else
+                                        {
+                                            <Card Title="Join Exam" Class="test-card" Size="small">
+                                                <Extra>
+                                                    <Button Type="primary" OnClick="EnterCreateExam">Join</Button>
+                                                </Extra>
+                                                <ChildContent>
+                                                    <Skeleton ParagraphRows="3" Title="false"></Skeleton>
+                                                </ChildContent>
+                                            </Card>
+                                        }
                                     </ListItem>
                                 </AntList>
                             }
@@ -182,9 +198,9 @@
         Column = 3
     };
 
-    private ExamDetails[] examsToTake;
-    private ExamDetails[] examsToProctor;
-    private ExamDetails[] myExams = new ExamDetails[1];
+    private IList<ExamDetails> examsToTake;
+    private IList<ExamDetails> examsToProctor;
+    private IList<ExamDetails> myExams = new ExamDetails[1];
 
     protected override async Task OnInitializedAsync()
     {
@@ -195,12 +211,13 @@
 
             if (takeRes != null && takeRes.Code == 0)
             {
-                examsToTake = takeRes.ExamDetailsList.ToArray();
+                examsToTake = takeRes.ExamDetailsList;
+                examsToTake.Add(null);
             }
 
             if (proctorRes != null && proctorRes.Code == 0)
             {
-                examsToProctor = proctorRes.ExamDetailsList.ToArray();
+                examsToProctor = proctorRes.ExamDetailsList;
             }
 
             if (takeRes?.Code == 1000)

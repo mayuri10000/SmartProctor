@@ -19,6 +19,8 @@ namespace SmartProctor.Server.Utils
         public const int ExamNotPermitToProctor = 2002;
         public const int ExamNotBegin = 2003;
         public const int ExamExpired = 2004;
+        public const int QuestionNotExist = 2005;
+        public const int ExamNotPermitToEdit = 2006;
 
         public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
         {
@@ -37,7 +39,8 @@ namespace SmartProctor.Server.Utils
             { 2001, "You have no permission to take this exam"},
             { 2002, "You have no permission to proctor this exam"},
             { 2003, "This exam have not begin yet."},
-            { 2004, "This exam has expired"}
+            { 2004, "This exam has expired"},
+            { 2005, "The question number does not exist in the exam"}
         };
 
         public static BaseResponseModel CreateSimpleResponse(int errorCode)
