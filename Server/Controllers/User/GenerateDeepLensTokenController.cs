@@ -30,7 +30,6 @@ namespace SmartProctor.Server.Controllers.User
             return new DeepLensTokenResponseModel()
             {
                 Code = 0,
-                Message = "Success",
                 Token = u
             };
         }

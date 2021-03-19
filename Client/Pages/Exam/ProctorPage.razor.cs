@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using AntDesign;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using SmartProctor.Client.Utils;
 using SmartProctor.Client.WebRTCInterop;
 using SmartProctor.Shared.Responses;
 using SmartProctor.Shared.WebRTC;
@@ -15,6 +17,8 @@ namespace SmartProctor.Client.Pages.Exam
     {
         [Parameter]
         public string ExamId { get; set; }
+
+        private int examId;
         
         private ExamDetailsResponseModel examDetails;
         private WebRTCClientProctor _webRtcClient;
@@ -42,12 +46,13 @@ namespace SmartProctor.Client.Pages.Exam
         
         protected override async Task OnInitializedAsync()
         {
+            examId = Int32.Parse(ExamId);
             if (await Attempt())
             {
                 await GetExamDetails();
                 await GetExamTakers();
                 await SetupSignalRClient();
-                await SetupWebRTC();
+                SetupWebRTC();
                 await hubConnection.SendAsync("ProctorJoin", ExamId);
                 StateHasChanged();
             }
@@ -58,9 +63,9 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async Task<bool> Attempt()
         {
-            var result = await Http.GetFromJsonAsync<BaseResponseModel>("api/exam/EnterProctor/" + ExamId);
+            var result = await ExamServices.AttemptProctor(examId);
 
-            if (result.Code == 1000)
+            if (result == ErrorCodes.NotLoggedIn)
             {
                 Modal.Error(new ConfirmOptions()
                 {
@@ -69,12 +74,12 @@ namespace SmartProctor.Client.Pages.Exam
                 NavManager.NavigateTo("/User/Login");
                 return false;
             }
-            else if (result.Code != 0)
+            else if (result != ErrorCodes.Success)
             {
                 Modal.Error(new ConfirmOptions()
                 {
                     Title = "Enter proctor failed",
-                    Content = result.Message
+                    Content = ErrorCodes.MessageMap[result]
                 });
                 NavManager.NavigateTo("/");
                 return false;
@@ -95,14 +100,14 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async Task GetExamTakers()
         {
-            var takers = await Http.GetFromJsonAsync<GetExamTakersResponseModel>("api/exam/GetExamTakers/" + ExamId);
-            if (takers.Code == 0)
+            var (err, takers) = await ExamServices.GetTestTakers(examId);
+            if (err == ErrorCodes.Success)
             {
-                _testTakers = takers.ExamTakers;
+                _testTakers = takers;
             }
         }
 
-        private async Task SetupWebRTC()
+        private void SetupWebRTC()
         {
             _webRtcClient = new WebRTCClientProctor(JsRuntime, _testTakers.ToArray());
             _webRtcClient.OnCameraSdp += (_, e) =>

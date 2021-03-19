@@ -31,7 +31,6 @@ namespace SmartProctor.Server.Controllers.User
             return new UserDetailsResponseModel()
             {
                 Code = 0,
-                Message = "Success",
                 Id = u.Id,
                 NickName = u.NickName,
                 Email = u.Email,

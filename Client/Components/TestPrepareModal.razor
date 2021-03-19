@@ -46,16 +46,15 @@
             Device network status:
             <div>
                 Wired network:&nbsp;&nbsp;
-                <Icon Type="check-circle" Theme="outline" Style="color: @(ethernetConnected ? "green" : "red")"/>
-                <label style="color: @(ethernetConnected ? "green" : "red")">
+                <Icon Type="check-circle" Theme="outline" Style="@(ethernetConnected ? "color:green" : "color:red")"/>
+                <label style="@(ethernetConnected ? "color:green" : "color:red")">
                     &nbsp;@(ethernetConnected ? "Connected" : "Not connected")
                 </label>
             </div>
             <div>
                 Wireless network:&nbsp;&nbsp;
-                <Icon Type="check-circle" Theme="outline" Style="color: @(wirelessSSID != null ? "green" : "red")"/>
-                <label style="color: @(wirelessSSID != null ? "green" : "red")">
-                    &nbsp;
+                <Icon Type="check-circle" Theme="outline" Style="@(wirelessSSID != null ? "color:green" : "color:red")"/>
+                <label style="@(wirelessSSID != null ? "color:green" : "color:red")">
                     &nbsp;@(wirelessSSID != null ? "Connected, SSID: " + wirelessSSID : "Not connected")
                 </label>
             </div>

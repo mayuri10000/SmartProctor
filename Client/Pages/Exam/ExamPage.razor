@@ -1,8 +1,10 @@
 ﻿@page "/Exam/Exam/{examId}"
+@using SmartProctor.Client.Services
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject ModalService Modal
 @inject IJSRuntime JsRuntime
+@inject IExamServices ExamServices
 
 <Header Class="header">
     @if (examDetails != null)

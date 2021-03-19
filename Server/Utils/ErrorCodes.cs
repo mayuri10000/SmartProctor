@@ -22,33 +22,11 @@ namespace SmartProctor.Server.Utils
         public const int QuestionNotExist = 2005;
         public const int ExamNotPermitToEdit = 2006;
 
-        public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
-        {
-            {  -1, "Unknown Error"},
-            
-            { 0000, "Success" },
-            
-            { 1000, "Please log in first" },
-            { 1001, "User name or password incorrect" },
-            { 1002, "User name already exists" },
-            { 1003, "Email already exists" },
-            { 1004, "Phone already exists" },
-            { 1005, "Old Password Wrong"},
-            
-            { 2000, "This exam does not exist"},
-            { 2001, "You have no permission to take this exam"},
-            { 2002, "You have no permission to proctor this exam"},
-            { 2003, "This exam have not begin yet."},
-            { 2004, "This exam has expired"},
-            { 2005, "The question number does not exist in the exam"}
-        };
-
         public static BaseResponseModel CreateSimpleResponse(int errorCode)
         {
             return new BaseResponseModel()
             {
                 Code = errorCode,
-                Message = MessageMap[errorCode]
             };
         }
     }

@@ -1,4 +1,5 @@
 ﻿@page "/Exam/Create"
+@using SmartProctor.Shared.Requests
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject ModalService Modal
@@ -31,7 +32,10 @@
             </Menu>
         </Sider>
         <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
-            
+            @if (currentQuestionNum == "basic")
+            {
+                
+            }
         </Content>
     </Layout>
 </Content>
@@ -42,4 +46,5 @@
     private string currentQuestionNum = "basic";
 
     private RenderFragment choicesForm = null;
+    private CreateExamRequestModel basicInfo;
 }

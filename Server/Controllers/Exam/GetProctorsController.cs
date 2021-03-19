@@ -25,7 +25,6 @@ namespace SmartProctor.Server.Controllers.Exam
                 return new GetProctorsResponseModel()
                 {
                     Code = 0,
-                    Message = "Success",
                     Proctors = e
                 };
             }

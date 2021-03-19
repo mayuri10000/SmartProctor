@@ -25,7 +25,6 @@ namespace SmartProctor.Server.Controllers.Exam
                 return new ExamDetailsResponseModel()
                 {
                     Code = 0,
-                    Message = "Success",
                     Description = e.Description,
                     Duration = e.Duration,
                     Name = e.Name,

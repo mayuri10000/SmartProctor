@@ -13,7 +13,7 @@ namespace SmartProctor.Client.Services
         Task<int> LogoutAsync();
         Task<int> RegisterAsync(RegisterRequestModel model);
 
-        Task<UserDetailsResponseModel> GetUserDetails();
+        Task<(int, UserDetailsResponseModel)> GetUserDetails();
     }
     
     public class UserServices : IUserServices
@@ -29,10 +29,9 @@ namespace SmartProctor.Client.Services
         {
             try
             {
-                var res = await _http.PostAsJsonAsync<LoginRequestModel>("/api/user/Login", model);
-                var resJson = await res.Content.ReadFromJsonAsync<BaseResponseModel>();
+                var res = await _http.PostAsAndGetFromJsonAsync<LoginRequestModel, BaseResponseModel>("/api/user/Login", model);
                 
-                return resJson?.Code ?? ErrorCodes.UnknownError;
+                return res?.Code ?? ErrorCodes.UnknownError;
             }
             catch(HttpRequestException)
             {
@@ -58,10 +57,9 @@ namespace SmartProctor.Client.Services
         {
             try
             {
-                var res = await _http.PostAsJsonAsync<RegisterRequestModel>("/api/user/Register", model);
-                var resJson = await res.Content.ReadFromJsonAsync<BaseResponseModel>();
+                var res = await _http.PostAsAndGetFromJsonAsync<RegisterRequestModel,BaseResponseModel>("/api/user/Register", model);
 
-                return resJson?.Code ?? ErrorCodes.UnknownError;
+                return res?.Code ?? ErrorCodes.UnknownError;
             }
             catch (HttpRequestException)
             {
@@ -69,17 +67,23 @@ namespace SmartProctor.Client.Services
             }
         }
 
-        public async Task<UserDetailsResponseModel> GetUserDetails()
+        public async Task<(int, UserDetailsResponseModel)> GetUserDetails()
         {
+            UserDetailsResponseModel userDetails = null;
             try
             {
                 var res = await _http.GetFromJsonAsync<UserDetailsResponseModel>("/api/user/UserDetails");
 
-                return (res == null || res.Code != 0) ? null : res;
+                if (res != null && res.Code != 0)
+                {
+                    userDetails = res;
+                }
+
+                return (res?.Code ?? ErrorCodes.UnknownError, userDetails);
             }
             catch (HttpRequestException)
             {
-                return null;
+                return (ErrorCodes.UnknownError, null);
             }
         }
     }
