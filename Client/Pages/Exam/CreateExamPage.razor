@@ -1,5 +1,7 @@
 ﻿@page "/Exam/Create"
 @using SmartProctor.Shared.Requests
+@using Microsoft.AspNetCore.Connections
+@using SmartProctor.Shared.Questions
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject ModalService Modal
@@ -26,7 +28,9 @@
                 <MenuItem Key="basic">Basic Info.</MenuItem>
                 @for (var i = 1; i < questionCount; i++)
                 {
-                    <MenuItem Key="@i.ToString()">@("Question" + i)</MenuItem>
+                    <MenuItem Key="@i.ToString()">
+                        @("Question" + i)
+                    </MenuItem>
                 }
                 <MenuItem Key="add">Add Question</MenuItem>
             </Menu>
@@ -34,7 +38,27 @@
         <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
             @if (currentQuestionNum == "basic")
             {
-                
+                <Form Model="basicInfo">
+                    <FormItem Label="Exam Title">
+                        <Input TValue="string" @bind-Value="@context.ExamTitle"/>
+                    </FormItem>
+                    <FormItem Label="Exam Description">
+                        <TextArea @bind-Value="@context.Description"></TextArea>
+                    </FormItem>
+                    <FormItem Label="Begin Date/Time">
+                    </FormItem>
+                    <FormItem Label="Duration">
+                    </FormItem>
+                    <FormItem>
+                        <Button Type="@ButtonType.Primary">Confirm</Button>
+                    </FormItem>
+                </Form>
+            }
+            else
+            {
+                <Form Model="currentQuestion">
+                    
+                </Form>
             }
         </Content>
     </Layout>
@@ -47,4 +71,6 @@
 
     private RenderFragment choicesForm = null;
     private CreateExamRequestModel basicInfo;
+
+    private BaseQuestion currentQuestion;
 }

@@ -1,5 +1,56 @@
-﻿<h3>HtmlEditor</h3>
+﻿@using Blazored.TextEditor
 
-@code {
+<BlazoredTextEditor @ref="@_quillHtml" Placeholder="@PlaceHolder">
+    <ToolbarContent>
+        <select class="ql-header">
+            <option selected=""></option>
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="3"></option>
+            <option value="4"></option>
+            <option value="5"></option>
+        </select>
+        <span class="ql-formats">
+            <Button Class="ql-bold"></Button>
+            <Button Class="ql-italic"></Button>
+            <Button Class="ql-underline"></Button>
+            <Button Class="ql-strike"></Button>
+        </span>
+        <span class="ql-formats">
+            <select class="ql-color"></select>
+            <select class="ql-background"></select>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+        </span>
+        <span class="ql-formats">
+            <Button Class="ql-link"></Button>
+            <Button Class="ql-image"></Button>
+        </span>
+        <span class="ql-formats">
+            <Button Class="ql-formula"></Button>
+            <Button Class="ql-code-block"></Button>
+        </span>
+    </ToolbarContent>
+    <EditorContent>
+    </EditorContent>
+</BlazoredTextEditor>
+
+@code
+{
+    private BlazoredTextEditor _quillHtml;
     
+    [Parameter]
+    public string PlaceHolder { get; set; }
+
+    public async Task<string> GetHtmlString()
+    {
+        return await _quillHtml.GetHTML();
+    }
+
+    public async Task LoadHtmlString(string html)
+    {
+        await _quillHtml.LoadHTMLContent(html);
+    }
 }

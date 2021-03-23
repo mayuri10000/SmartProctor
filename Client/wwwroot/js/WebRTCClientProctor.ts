@@ -31,12 +31,21 @@
                     cameraStream: null
                 };
 
-                // @ts-ignore
-                desktopConnection.onaddstream = (e) => {
+                desktopConnection.ontrack = (e) => {
+                    let track = e.track;
+                    
+                    track.onmute = async (_) => {
+                        await this.helper.invokeMethodAsync("_onDesktopMuted", testTaker);
+                    };
+
+                    track.onunmute = async (_) => {
+                        await this.helper.invokeMethodAsync("_onDesktopUnmuted", testTaker);
+                    };
+                    
                     if (this.testTakerConnections[testTaker].desktopVideoElem != null)
                         // @ts-ignore
-                        this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.stream;
-                    this.testTakerConnections[testTaker].desktopStream = e.stream;
+                        this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.streams[0];
+                    this.testTakerConnections[testTaker].desktopStream = e.streams[0];
                     console.log("get desktop stream: " + testTaker);
                 };
                 
@@ -50,11 +59,21 @@
                 }
 
                 // @ts-ignore
-                cameraConnection.onaddstream = (e) => {
+                cameraConnection.ontrack= (e) => {
+                    let track = e.track;
+
+                    track.onmute = async (_) => {
+                        await this.helper.invokeMethodAsync("_onCameraMuted", testTaker);
+                    };
+
+                    track.onunmute = async (_) => {
+                        await this.helper.invokeMethodAsync("_onCameraUnmuted", testTaker);
+                    };
+                    
                     if (this.testTakerConnections[testTaker].cameraVideoElem != null)
                         // @ts-ignore
-                        this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.stream;
-                    this.testTakerConnections[testTaker].cameraStream = e.stream;
+                        this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.streams[0];
+                    this.testTakerConnections[testTaker].cameraStream = e.streams[0];
                 };
 
                 cameraConnection.onconnectionstatechange = async (e) => {

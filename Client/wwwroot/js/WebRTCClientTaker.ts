@@ -46,6 +46,9 @@
         public async obtainDesktopStream() : Promise<string> {
             // @ts-ignore
             this.desktopStream = await navigator.mediaDevices.getDisplayMedia();
+            this.desktopStream.getTracks()[0].onmute = async (_) => {
+                await this.helper.invokeMethodAsync("_onDesktopMuted");
+            };
             return this.desktopStream.getTracks()[0].label;
         }
 

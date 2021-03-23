@@ -24,7 +24,7 @@
                     <TabPane Key="1">
                         <Tab>Exams to take</Tab>
                         <ChildContent>
-                            @if (examsToTake != null)
+                            @if (examsToTake?[0] != null)
                             {
                                 <AntList Grid="gutter" DataSource="@examsToTake">
                                     <ListItem Class="test-li">
@@ -69,12 +69,23 @@
                                     </ListItem>
                                 </AntList>
                             }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        You have not joined any exam
+                                    </DescriptionTemplate>
+                                    <ChildContent>
+                                        <Button Type="@ButtonType.Primary">Join exam</Button>
+                                    </ChildContent>
+                                </Empty>
+                            }
                         </ChildContent>
                     </TabPane>
                     <TabPane Key="2">
                         <Tab>Exams to proctor</Tab>
                         <ChildContent>
-                            @if (examsToProctor != null)
+                            @if (examsToProctor != null && examsToProctor.Count != 0)
                             {
                                 <AntList Grid="gutter" DataSource="@examsToProctor">
                                     <ListItem Class="test-li">
@@ -105,12 +116,16 @@
                                     </ListItem>
                                 </AntList>
                             }
+                            else
+                            {
+                                <Empty/>
+                            }
                         </ChildContent>
                     </TabPane>
                     <TabPane Key="3">
                         <Tab>My exams</Tab>
                         <ChildContent>
-                            @if (myExams != null)
+                            @if (myExams[0] != null)
                             {
                                 <AntList Grid="gutter" DataSource="myExams" TItem="ExamDetails">
                                     <ListItem Class="test-li">
@@ -143,6 +158,17 @@
                                         }
                                     </ListItem>
                                 </AntList>
+                            }
+                            else
+                            {
+                                <Empty>
+                                    <DescriptionTemplate>
+                                        You have not crated any exams
+                                    </DescriptionTemplate>
+                                    <ChildContent>
+                                        <Button OnClick="EnterCreateExam" Type="@ButtonType.Primary">Create Exam</Button>
+                                    </ChildContent>
+                                </Empty>
                             }
                         </ChildContent>
                     </TabPane>

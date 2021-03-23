@@ -1,0 +1,262 @@
+@page "/TestPage"
+@using SmartProctor.Shared.Questions
+@using System.Collections.Concurrent
+@inject ModalService _modal
+
+<Header Class="header">
+    <div class="logo">SmartProctor Exams</div>
+    <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
+    </Menu>
+</Header>
+<Content Style="padding: 0 50px">
+    <Breadcrumb Style=" margin: 16px 0">
+        <BreadcrumbItem>Test name</BreadcrumbItem>
+        <BreadcrumbItem>Question x</BreadcrumbItem>
+    </Breadcrumb>
+    <Layout Class="site-layout-background" Style="padding: 24px 0; height: 100%;">
+        <Content Style="padding:0 24px; min-height: 280px; overflow: auto; margin-bottom: 30px">
+            <div class="card-container" style="height: 100%">
+                <Row style="height: 90%">
+                    <Col Span="12">
+                        <HtmlEditor @ref="@_questionEditor" PlaceHolder="Question text here"/>
+                    </Col>
+                    <Col Span="12" Style="padding-left: 20px;">
+                        <Paragraph Style="float:right;">
+                            <Space>
+                                <SpaceItem>
+                                    <Button Type="@ButtonType.Default">
+                                        <Icon Type="left" Theme="outline"/>
+                                        Previous
+                                    </Button>
+                                    <Button Type="@ButtonType.Default">
+                                        Next
+                                        <Icon Type="right" Theme="outline"/>
+                                    </Button>
+                                </SpaceItem>
+                                <SpaceItem>
+                                    <Button Type="@ButtonType.Primary" Danger>
+                                        <Icon Type="close" Theme="outline"/>
+                                        Delete
+                                    </Button>
+                                    <Button Type="@ButtonType.Primary">
+                                        <Icon Type="check" Theme="outline"/>
+                                        Finish
+                                    </Button>
+                                </SpaceItem>
+                            </Space>
+                        </Paragraph>
+                        <Divider/>
+                        <Form Model="_question" LabelColSpan="8" WrapperColSpan="16">
+                            <FormItem Label="Question type">
+                                <RadioGroup TValue="QuestionType" @bind-Value="context.QuestionType" OnChange="OnQuestionTypeChange">
+                                    <Radio Value="QuestionType.Choices" RadioButton>Choices</Radio>
+                                    @*<Radio Value="QuestionType.Fill" RadioButton>Fill</Radio>*@
+                                    <Radio Value="QuestionType.ShortAnswer" RadioButton>Short answer</Radio>
+                                </RadioGroup>
+                            </FormItem>
+                            @if (context is ChoiceQuestion q)
+                            {
+                                <FormItem Label="Multi-choice">
+                                    <Checkbox @bind-Value="q.MultiChoice"></Checkbox>
+                                </FormItem>
+                                <FormItem Label="Choices">
+                                    <AntList DataSource="@q.Choices" Bordered="true" 
+                                             Style="margin-right: 100px; margin-left: 10px; max-height: 50%; overflow: scroll">
+                                        <ChildContent Context="item">
+                                            <ListItem>
+                                                <span>@((MarkupString) item)</span>
+                                                <div>
+                                                    <Button Type="@ButtonType.Link"
+                                                            Style="padding-left: 2px; padding-right: 2px" OnClick="() => OnEditChoice(item)">
+                                                        <Icon Type="edit" Theme="outline" Style="font-size: 20px;"/>
+                                                    </Button>
+                                                    <Button Type="@ButtonType.Link" Danger
+                                                            Style="padding-left: 2px; padding-right: 2px" OnClick="() => OnRemoveChoice(item)">
+                                                        <Icon Type="close" Theme="outline" Style="font-size: 20px;"/>
+                                                    </Button>
+                                                </div>
+                                            </ListItem>
+                                        </ChildContent>
+
+                                        <Footer>
+                                            <Button Type="primary" OnClick="OnAddChoice">Add</Button>
+                                        </Footer>
+                                    </AntList>
+                                </FormItem>
+                            }
+                            @*else if (context is FillQuestion fq)
+                            {
+                                <FormItem Label="Blanks">
+                                    <AntList DataSource="fq.BlankType" Style="width: 60%; margin-left: 10px">
+                                        <ChildContent Context="item">
+                                            <ListItem>
+                                                
+                                            </ListItem>
+                                        </ChildContent>
+                                    </AntList>
+                                </FormItem>
+                            }*@
+                            else if (context is ShortAnswerQuestion sq)
+                            {
+                                <FormItem Label="Maximum word count">
+                                    <AntDesign.InputNumber TValue="int" @bind-Value="@sq.MaxWordCount"></AntDesign.InputNumber>
+                                </FormItem>
+
+                                <FormItem Label="Rich Text">
+                                    <Checkbox @bind-Value="@sq.RichText"></Checkbox>
+                                </FormItem>
+                            }
+                        </Form>
+                    </Col>
+                </Row>
+            </div>
+        </Content>
+    </Layout>
+</Content>
+
+<Modal Visible="_editChoice" OnOk="OnChoiceConfirmed" OnCancel="OnChoiceCancel" Title="Edit choice">
+    <ChildContent>
+        <HtmlEditor @ref="@_choiceEditor"/>
+    </ChildContent>
+</Modal>
+
+<style>
+    [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-content,
+    .card-container .ant-tabs-card .ant-tabs-content {
+        height: 120px;
+        margin-top: -16px;
+    }
+
+        [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-content .ant-tabs-tabpane,
+        .card-container .ant-tabs-card .ant-tabs-content .ant-tabs-tabpane {
+            background: #fff;
+            padding: 16px;
+        }
+
+    [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-bar,
+    .card-container .ant-tabs-card .ant-tabs-bar {
+        border-color: #fff;
+    }
+
+        [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab,
+        .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab {
+            border-color: transparent;
+            background: transparent;
+        }
+
+        [data-theme='compact'] .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab-active,
+        .card-container .ant-tabs-card .ant-tabs-bar .ant-tabs-tab-active {
+            border-color: #fff;
+            background: #fff;
+        }
+</style>
+
+@code
+{
+    private bool _editChoice = false;
+
+    private string _currentEditChoice = null;
+    private HtmlEditor _questionEditor;
+    private HtmlEditor _choiceEditor;
+
+    private bool _choiceModalLoaded = false;
+
+    private BaseQuestion _question = new ChoiceQuestion()
+    {
+        QuestionType = QuestionType.Choices,
+        Choices = new List<string>()
+        {
+            "<p>Test Choice 1</p>",
+            "<p>Test Choice 2</p>"
+        }
+    };
+
+    private async Task OnAddChoice()
+    {
+        _currentEditChoice = null;
+        _editChoice = true;
+        if (!_choiceModalLoaded)
+        {
+    // Ant design's modal loading is quite LAZY, it won't load until
+    // the code tells it to do so, there's a delay from its visibility
+    // being set true to when its content is loaded
+            await Task.Delay(300);
+            _choiceModalLoaded = true;
+        }
+        await _choiceEditor.LoadHtmlString("");
+    }
+
+    private async Task OnEditChoice(string choice)
+    {
+        _currentEditChoice = choice;
+        _editChoice = true;
+        if (!_choiceModalLoaded)
+        {
+            await Task.Delay(300);
+            _choiceModalLoaded = true;
+        }
+        await _choiceEditor.LoadHtmlString(_currentEditChoice);
+    }
+
+    private void OnRemoveChoice(string choice)
+    {
+        if (_question is ChoiceQuestion q)
+        {
+            q.Choices.Remove(choice);
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnQuestionTypeChange(QuestionType questionType)
+    {
+        var questionText = _question.Question;
+        switch (questionType)
+        {
+            case QuestionType.Choices:
+                _question = new ChoiceQuestion();
+                ((ChoiceQuestion) _question).Choices = new List<string>();
+                break;
+            case QuestionType.ShortAnswer:
+                _question = new ShortAnswerQuestion();
+                break;
+        }
+        _question.Question = questionText;
+        _question.QuestionType = questionType;
+        StateHasChanged();
+    }
+
+    private async Task OnChoiceConfirmed()
+    {
+        var content = await _choiceEditor.GetHtmlString();
+        if (_question is ChoiceQuestion q)
+        {
+            if (q.Choices.Contains(content) && _currentEditChoice != content)
+            {
+                await _modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Duplicate options",
+                    Content = "Please make sure that each choice for the question are different."
+                });
+            }
+            else if (_currentEditChoice != null && _currentEditChoice != content)
+            {
+                var index = q.Choices.IndexOf(_currentEditChoice);
+                q.Choices[index] = content;
+            }
+            else if (_currentEditChoice == null)
+            {
+                q.Choices.Add(content);
+            }
+        }
+
+        _editChoice = false;
+        StateHasChanged();
+    }
+
+    private void OnChoiceCancel()
+    {
+        _editChoice = false;
+        _currentEditChoice = null;
+    }
+}

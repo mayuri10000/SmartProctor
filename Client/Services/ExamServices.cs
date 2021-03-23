@@ -179,13 +179,8 @@ namespace SmartProctor.Client.Services
                     var blankPositions = json.GetProperty("blankPositions");
                     var blankTypes = json.GetProperty("blankTypes");
 
-                    ((FillQuestion) ret).BlankPosition = new List<int>();
                     ((FillQuestion) ret).BlankType = new List<int>();
 
-                    for (var i = 0; i < blankPositions.GetArrayLength(); i++)
-                    {
-                        ((FillQuestion) ret).BlankPosition.Add(blankPositions[i].GetInt32());
-                    }
                 
                     for (var i = 0; i < blankTypes.GetArrayLength(); i++)
                     {

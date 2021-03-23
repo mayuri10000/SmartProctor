@@ -78,3 +78,7 @@ a, .btn-link {
 .test-time {
     color: #4e555b;
 }
+
+.ant-list-item img {
+    max-width: 100%;
+}

@@ -40,7 +40,7 @@
 
         if (result != ErrorCodes.Success)
         {
-            Modal.Error(new ConfirmOptions()
+            await Modal.ErrorAsync(new ConfirmOptions()
             {
                 Title = "Login failed",
                 Content = ErrorCodes.MessageMap[result]

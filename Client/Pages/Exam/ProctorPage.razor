@@ -6,9 +6,9 @@
 @inject IExamServices ExamServices
 
 <Header Class="header">
-    @if (examDetails != null)
+    @if (_examDetails != null)
     {
-        <div class="logo">@examDetails.Name</div>
+        <div class="logo">@_examDetails.Name</div>
     }
     <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" Style="text-align:right">
     </Menu>
@@ -34,15 +34,8 @@
     </Layout>
 </Content>
 
-<Modal Visible="@enlarged" OnCancel="CancelEnlarged" OnOk="CancelEnlarged" Title="@enlargedTestTakerName" Style="width: 700px;">
-    @if (loading)
-    {
-        <div>Loading proctor page, please wait...</div>
-    }
-    else
-    {
-        <video id="video-enlarged" class="proctor-video-large" autoplay></video>
-        <br/>
-        <Button OnClick="ToggleEnlarged">Toggle&nbsp;@(enlargedDesktop ? "camera" : "desktop")</Button>
-    }
+<Modal Visible="@_enlarged" OnCancel="CancelEnlarged" OnOk="CancelEnlarged" Title="@_enlargedTestTakerName" Style="width: 700px;">
+    <video id="video-enlarged" class="proctor-video-large" autoplay></video>
+    <br/>
+    <Button OnClick="ToggleEnlarged">Toggle&nbsp;@(_enlargedDesktop ? "camera" : "desktop")</Button>
 </Modal>
