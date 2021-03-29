@@ -1,0 +1,114 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@page "/Exam/ListProctor"
+@using SmartProctor.Shared.Responses
+@inject ModalService Modal
+@inject NavigationManager NavManager
+@inject IExamServices ExamServices
+
+<div>
+    <PageContainer Title="Exams to proctor">
+        <Breadcrumb>
+            <Breadcrumb>
+                <BreadcrumbItem>Exams</BreadcrumbItem>
+                <BreadcrumbItem>Exams to proctor</BreadcrumbItem>
+            </Breadcrumb>
+        </Breadcrumb>
+        <ChildContent>
+            <div class="standardList">
+                <Card>
+                    <Row Gutter="24">
+                        <Col Sm="12" Xs="24">
+                            <div class="headerInfo">
+                                <span>Upcoming exam</span>
+                                <p>@(_nextExam?.Name ?? "No upcoming test")</p>
+                                <em/>
+                            </div>
+                        </Col>
+                        <Col Sm="12" Xs="24">
+                            @if (_nextExam != null)
+                            {
+                                <div class="headerInfo">
+                                    @if (_haveOngoingExam)
+                                    {
+                                        <Button Type="primary" Size="large" OnClick="EnterExam">
+                                            Continue
+                                        </Button>
+                                    }
+                                    else if (_haveReadyExam)
+                                    {
+                                        <Button Type="primary" Size="large" OnClick="EnterExam">
+                                            Begin
+                                        </Button>
+                                    }
+                                    else
+                                    {
+                                        <CountDown Title="Time remaining" 
+                                                   Value="@_nextExam.StartTime.AddMinutes(-15)" 
+                                                   OnFinish="() => _haveReadyExam = true"/>
+                                    }
+                                </div>
+                            }
+                        </Col>
+                    </Row>
+                </Card>
+
+                <Card Class="listCard"
+                      Title="Exams"
+                      Style="margin-top: 24px;"
+                      BodyStyle="padding: 0 32px 40px 32px">
+                    <Extra>
+                        <div class="extraContent">
+                            <RadioGroup @bind-Value="_selectedExamState">
+                                <Radio RadioButton Value="@("all")" CheckedChanged="_ => OnSearchExam()">All</Radio>
+                                <Radio RadioButton Value="@("pending")" CheckedChanged="_ => OnSearchExam()">Pending</Radio>
+                                <Radio RadioButton Value="@("ended")" CheckedChanged="_ => OnSearchExam()">Ended</Radio>
+                            </RadioGroup>
+                            <Search Class="extraContentSearch" Placeholder="Please Enter" @bind-Value="_searchKeyword" 
+                                    OnPressEnter="s => OnSearchExam()"/>
+                        </div>
+                    </Extra>
+                    <ChildContent>
+                        <AntList TItem="ExamDetails"
+                                 DataSource="_filteredExamList"
+                                 ItemLayout="ListItemLayout.Horizontal">
+                            <ListItem>
+                                <ListItemMeta Description="@context.Description"
+                                              Title="@context.Name">
+                                </ListItemMeta>
+                                <div class="listContent">
+                                    <div class="listContentItem">
+                                        <span>Starting time</span>
+                                        <p>@context.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
+                                    </div>
+                                    <div class="listContentItem">
+                                        <span>Duration</span>
+                                        <p>@ConvertExamDuration(context.Duration)</p>
+                                    </div>
+                                    <div class="listContentItem">
+                                        <span>Open book</span>
+                                        <p>@(context.OpenBook ? "Yes" : "No")</p>
+                                    </div>
+                                    <div class="listContentItem">
+                                        @if (context.StartTime > DateTime.Now)
+                                        {
+                                            <Tag Color="green">Pending</Tag>
+                                        }
+                                        else if (context.StartTime.AddSeconds(context.Duration) < DateTime.Now)
+                                        {
+                                            <Tag Color="gray">Ended</Tag>
+                                        }
+                                        else
+                                        {
+                                            <Tag Color="blue">Ongoing</Tag>
+                                        }
+                                        
+                                    </div>
+                                </div>
+                            </ListItem>
+                        </AntList>
+                    </ChildContent>
+                </Card>
+            </div>
+        </ChildContent>
+    </PageContainer>
+</div>

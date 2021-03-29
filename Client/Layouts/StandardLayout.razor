@@ -1,0 +1,69 @@
+@inherits LayoutComponentBase
+
+<BasicLayout 
+    Logo="@_logo"
+    MenuData="_menuData"
+    Title="SmartProctor">
+    <RightContentRender>
+        <RightContent />
+    </RightContentRender>
+    <ChildContent>
+        @Body
+    </ChildContent>
+    <FooterRender>
+    </FooterRender>
+</BasicLayout>
+<SettingDrawer />
+
+@code
+{
+    private readonly RenderFragment _logo = builder =>
+    {
+        // Empty, reserved for logos
+    };
+
+    private readonly MenuDataItem[] _menuData = {
+        new MenuDataItem
+        {
+            Name = "Exams",
+            Key = "exams",
+            Icon = "form",
+            Children = new[]
+            {
+                new MenuDataItem
+                {
+                    Name = "Exams to take",
+                    Path = "/Exam/ListTake",
+                    Key = "exams.take",
+                },
+                new MenuDataItem
+                {
+                    Path = "/Exam/ListProctor",
+                    Name = "Exams to proctor",
+                    Key = "exams.proctor"
+                }, 
+                new MenuDataItem
+                {
+                    Path = "/Exam/ListMine",
+                    Name = "My exams",
+                    Key = "exams.mine"
+                }, 
+            }
+        }, 
+        new MenuDataItem
+        {
+            Name = "Account",
+            Key = "account",
+            Icon = "user",
+            Children = new[]
+            {
+                new MenuDataItem
+                {
+                    Name = "Account settings",
+                    Key = "account.settings",
+                    Path = "/User/Settings"
+                }
+            }
+        }, 
+    }; 
+}

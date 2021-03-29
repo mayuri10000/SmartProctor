@@ -10,6 +10,10 @@ namespace SmartProctor.Shared.Responses
         public string Description { get; set; }
         public DateTime StartTime { get; set; }
         public int Duration { get; set; }
+        
+        public bool OpenBook { get; set; }
+        
+        public string BanReason { get; set; }
     }
     
     public class GetUserExamsResponseModel : BaseResponseModel

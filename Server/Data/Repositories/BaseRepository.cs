@@ -12,7 +12,6 @@ namespace SmartProctor.Server.Data.Repositories
     {
         SmartProctorDbContext DbContext { get; set; }
         bool IsInsert(T obj);
-        IQueryable<T> GeAll<TK>(Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
         T GetObjectByKeys(params object[] keys);
 
         IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
@@ -56,14 +55,6 @@ namespace SmartProctor.Server.Data.Repositories
             var entry = DbContext.Entry(obj);
             return entry.State == EntityState.Added || entry.State == EntityState.Detached; 
             //return obj.EntityKey == null || obj.EntityKey.EntityKeyValues == null;
-        }
-
-        public virtual IQueryable<T> GeAll<TK>(Expression<Func<T, TK>> orderBy, OrderingType orderingType,
-            string[] includes = null)
-        {
-            return DbContext.Set<T>()
-                .Includes(includes)
-                .OrderBy(orderBy, orderingType).AsQueryable();
         }
 
         public virtual IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,

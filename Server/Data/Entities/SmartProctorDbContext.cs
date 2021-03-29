@@ -102,6 +102,13 @@ namespace SmartProctor.Server.Data.Entities
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
+                entity.Property(e => e.Creator)
+                    .IsRequired()
+                    .HasColumnType("varchar(20)")
+                    .HasColumnName("creator")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
                 entity.Property(e => e.Description)
                     .HasColumnType("text")
                     .HasColumnName("description")
@@ -110,6 +117,8 @@ namespace SmartProctor.Server.Data.Entities
 
                 entity.Property(e => e.Duration).HasColumnName("duration");
 
+                entity.Property(e => e.MaximumTakersNum).HasColumnName("maximum_takers_num");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasColumnType("varchar(30)")
@@ -117,15 +126,11 @@ namespace SmartProctor.Server.Data.Entities
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
+                entity.Property(e => e.OpenBook).HasColumnName("open_book");
+
                 entity.Property(e => e.StartTime)
                     .HasMaxLength(6)
                     .HasColumnName("start_time");
-                
-                entity.Property(e => e.Creator)
-                    .HasColumnType("varchar(20)")
-                    .HasColumnName("creator")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
             });
 
             modelBuilder.Entity<ExamUser>(entity =>
@@ -143,6 +148,12 @@ namespace SmartProctor.Server.Data.Entities
                     .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.Property(e => e.ExamId).HasColumnName("exam_id");
+
+                entity.Property(e => e.BanReason)
+                    .HasColumnType("varchar(100)")
+                    .HasColumnName("ban_reason")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.Property(e => e.UserRole).HasColumnName("user_role");
             });

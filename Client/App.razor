@@ -1,9 +1,10 @@
-﻿<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+﻿@using SmartProctor.Client.Layouts
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(StandardLayout)" />
     </Found>
     <NotFound>
-        <LayoutView Layout="@typeof(MainLayout)">
+        <LayoutView Layout="@typeof(StandardLayout)">
             <p>Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>

@@ -19,8 +19,9 @@ namespace SmartProctor.Server.Services
         /// </summary>
         /// <param name="eid">Exam Id</param>
         /// <param name="uid">User Id</param>
+        /// <param name="banReason">If the user was banned, outputs the reason</param>
         /// <returns>Error code, <code>ErrorCodes.Success</code> if no error</returns>
-        int Attempt(int eid, string uid);
+        int Attempt(int eid, string uid, out string banReason);
         
         /// <summary>
         /// Verify the exam is eligible for current user to proctor
@@ -44,6 +45,7 @@ namespace SmartProctor.Server.Services
         /// <returns>List of user ids of the test proctors, <code>null</code> if error occurs</returns>
         IList<string> GetProctors(int eid);
 
+        int JoinExam(string uid, int eid, out string banReason);
         /// <summary>
         /// 
         /// </summary>
@@ -75,8 +77,9 @@ namespace SmartProctor.Server.Services
             _answerRepo = answerRepo;
         }
 
-        public int Attempt(int eid, string uid)
+        public int Attempt(int eid, string uid, out string banReason)
         {
+            banReason = null;
             if (GetObject(eid) == null)
             {
                 return ErrorCodes.ExamNotExist;
@@ -86,6 +89,12 @@ namespace SmartProctor.Server.Services
             if (q == null)
             {
                 return ErrorCodes.ExamNotPermitToTake;
+            }
+
+            if (q.BanReason != null)
+            {
+                banReason = q.BanReason;
+                return ErrorCodes.ExamTakerBanned;
             }
 
             var e = GetObject(eid);
@@ -152,6 +161,40 @@ namespace SmartProctor.Server.Services
             return ret;
         }
 
+        public int JoinExam(string uid, int eid, out string banReason)
+        {
+            banReason = null;
+            var exam = GetObject(eid);
+
+            if (exam == null)
+            {
+                return ErrorCodes.ExamNotExist;
+            }
+
+            var eu = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid);
+
+            if (eu != null)
+            {
+                if (eu.UserRole != 1) 
+                    return ErrorCodes.ExamAlreadyProctored;
+                
+                banReason = eu.BanReason;
+                return eu.BanReason == null ? ErrorCodes.ExamAlreadyJoined : ErrorCodes.ExamTakerBanned;
+            }
+
+            eu = new ExamUser()
+            {
+                ExamId = eid,
+                UserId = uid,
+                UserRole = 1,
+                BanReason = null
+            };
+            
+            _examUserRepo.Add(eu);
+                
+            return ErrorCodes.Success;
+        }
+
         public IList<string> GetProctors(int eid)
         {
             if (GetObject(eid) == null)
@@ -179,16 +222,18 @@ namespace SmartProctor.Server.Services
                     x => x.ExamId, OrderingType.Ascending);
 
                 return (from x in q
-                    select GetObject(x.ExamId)
+                    select (GetObject(x.ExamId), x)
                     into ex
-                    where ex != null
+                    where ex.Item1 != null
                     select new ExamDetails()
                     {
-                        Id = ex.Id,
-                        Name = ex.Name,
-                        Description = ex.Description,
-                        Duration = ex.Duration,
-                        StartTime = ex.StartTime
+                        Id = ex.Item1.Id,
+                        Name = ex.Item1.Name,
+                        Description = ex.Item1.Description,
+                        Duration = ex.Item1.Duration,
+                        StartTime = ex.Item1.StartTime,
+                        OpenBook = ex.Item1.OpenBook,
+                        BanReason = ex.Item2?.BanReason
                     }).ToList();
             }
             catch

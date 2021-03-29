@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+﻿using Microsoft.AspNetCore.Mvc;
 using SmartProctor.Server.Services;
 using SmartProctor.Server.Utils;
 using SmartProctor.Shared.Responses;
@@ -10,11 +7,11 @@ namespace SmartProctor.Server.Controllers.Exam
 {
     [ApiController]
     [Route("api/exam/[controller]")]
-    public class AttemptController : ControllerBase
+    public class JoinExamController : ControllerBase
     {
         private IExamServices _services;
 
-        public AttemptController(IExamServices services)
+        public JoinExamController(IExamServices services)
         {
             _services = services;
         }
@@ -29,7 +26,7 @@ namespace SmartProctor.Server.Controllers.Exam
             
             var uid = User.Identity.Name;
 
-            var res = _services.Attempt(eid, uid, out var banReason);
+            var res = _services.JoinExam(uid, eid, out var banReason);
 
             return new AttemptExamResponseModel()
             {

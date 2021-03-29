@@ -1,0 +1,30 @@
+﻿@namespace SmartProctor.Client.Pages.User
+@layout LoginLayout
+@page "/User/Login"
+
+<div class="main__b__0">
+     <div class="login">
+         <Form Model="@_model" OnFinish="HandleSubmit">
+             <FormItem>
+                 
+                 <Input Placeholder="Username: admin or user" Size="large" @bind-Value="@context.UserName">
+                     <Prefix><Icon Type="user"/></Prefix>
+                 </Input>
+             </FormItem>
+             <FormItem>
+                 <InputPassword Placeholder="Password: ant.design" Size="large" @bind-Value="@context.Password" Type="password">
+                     <Prefix><Icon Type="lock" /></Prefix>
+                 </InputPassword>
+             </FormItem>
+             <div>
+                 <Checkbox Checked="@context.Remember">
+                     Remember me
+                 </Checkbox>
+             </div>
+             <Button Type="primary" HtmlType="submit" Class="submit" Size="large" Block>Log in</Button>
+             <div class="other">
+                 <a class="register" href="/User/Register">Register Account</a>
+             </div>
+         </Form>
+     </div>
+ </div>

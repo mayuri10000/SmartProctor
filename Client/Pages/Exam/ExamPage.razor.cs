@@ -51,7 +51,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async Task<bool> Attempt()
         {
-            var result = await ExamServices.Attempt(_examId);
+            var (result, banReason) = await ExamServices.Attempt(_examId);
 
             if (result == ErrorCodes.NotLoggedIn)
             {

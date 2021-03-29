@@ -21,6 +21,9 @@ namespace SmartProctor.Server.Utils
         public const int ExamExpired = 2004;
         public const int QuestionNotExist = 2005;
         public const int ExamNotPermitToEdit = 2006;
+        public const int ExamAlreadyJoined = 2007;
+        public const int ExamAlreadyProctored = 2008;
+        public const int ExamTakerBanned = 2009;
 
         public static BaseResponseModel CreateSimpleResponse(int errorCode)
         {

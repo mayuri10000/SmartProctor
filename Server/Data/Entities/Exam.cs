@@ -13,5 +13,7 @@ namespace SmartProctor.Server.Data.Entities
         public DateTime StartTime { get; set; }
         public int Duration { get; set; }
         public string Creator { get; set; }
+        public bool OpenBook { get; set; }
+        public int MaximumTakersNum { get; set; }
     }
 }

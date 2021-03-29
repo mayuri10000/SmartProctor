@@ -1,0 +1,32 @@
+<Dropdown Style="display: inherit; width: inherit;"
+          OverlayClassName="container">
+    <Overlay>
+        <Menu Class="menu">
+            <ChildContent>
+                <MenuItem Key="center">
+                    <Icon Type="user" Theme="outline"></Icon>
+                    Account settings
+                </MenuItem>
+                <MenuItem Key="logout">
+                    <Icon Type="logout" Theme="outline"></Icon>
+                    Logout
+                </MenuItem>
+            </ChildContent>
+        </Menu>
+    </Overlay>
+    <ChildContent>
+        <span class="action account">
+            <Avatar Size="small" Class="avatar" Src="@UserAvatar"
+                    Alt="avatar"></Avatar>
+            <span class="name anticon">@UserName</span>
+        </span>
+    </ChildContent>
+</Dropdown>
+
+@code {
+    [Parameter]
+    public string UserAvatar { get; set; }
+    
+    [Parameter]
+    public string UserName { get; set; }
+}

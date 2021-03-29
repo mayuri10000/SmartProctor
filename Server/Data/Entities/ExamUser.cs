@@ -10,5 +10,6 @@ namespace SmartProctor.Server.Data.Entities
         public string UserId { get; set; }
         public int ExamId { get; set; }
         public int? UserRole { get; set; }
+        public string BanReason { get; set; }
     }
 }

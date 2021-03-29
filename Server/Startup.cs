@@ -39,7 +39,7 @@ namespace SmartProctor.Server
             // For dependency injection
             // DbContext
             services.AddDbContext<SmartProctorDbContext>(
-                db => db.UseMySql("server=localhost;user id=root;password=Mayuri;database=smartproctor", 
+                db => db.UseMySql("server=localhost;user id=root;password=Mayuri;database=smartproctor;TreatTinyAsBoolean=True", 
                     ServerVersion.FromString("8.0.23-mysql")));
 
             // Repositories

@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AntDesign" Version="0.6.0" />
+    <PackageReference Include="AntDesign.Pro.Layout" Version="0.1.0-nightly-210311054507" />
     <PackageReference Include="Blazored.TextEditor" Version="1.0.3" />
     <PackageReference Include="BrowserInterop" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.2" />
@@ -27,5 +27,29 @@
     <TypeScriptCompile Include="wwwroot\js\WebRTCClientProctor.ts" />
     <TypeScriptCompile Include="wwwroot\js\WebRTCClientTaker.ts" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="obj" />
+    <Folder Include="Pages\Exam\ListMine" />
+  </ItemGroup>
+
+  <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SolutionDir)node_modules') ">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+    <Exec WorkingDirectory="$(SolutionDir)" Command="npm install" />
+  </Target>
+
+  <Target Name="DebugRunGulp" BeforeTargets="DebugEnsureNodeEnv" Condition=" '$(Configuration)' == 'Debug' And Exists('$(SolutionDir)node_modules') ">
+    <Exec WorkingDirectory="$(SolutionDir)" Command="npm run gulp:pro" />
+  </Target>
+
+  <Target Name="PublishRunGulp" AfterTargets="ComputeFilesToPublish">
+    <Exec WorkingDirectory="$(SolutionDir)" Command="npm install" />
+    <Exec WorkingDirectory="$(SolutionDir)" Command="npm run gulp:pro" />
+  </Target>
 
 </Project>

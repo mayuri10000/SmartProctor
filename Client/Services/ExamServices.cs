@@ -17,8 +17,10 @@ namespace SmartProctor.Client.Services
 {
     public interface IExamServices
     {
-        Task<int> Attempt(int examId);
+        Task<(int, string)> JoinExam(int examId);
+        Task<(int, string)> Attempt(int examId);
         Task<int> AttemptProctor(int examId);
+        Task<(int, IList<ExamDetails>)> GetExams(int role);
         Task<(int, ExamDetailsResponseModel)> GetExamDetails(int examId);
         Task<(int, string[])> GetTestTakers(int examId);
         Task<(int, string[])> GetProctors(int examId);
@@ -34,17 +36,31 @@ namespace SmartProctor.Client.Services
             this._http = http;
         }
 
-        public async Task<int> Attempt(int examId)
+        public async Task<(int, string)> JoinExam(int examId)
         {
             try
             {
-                var res = await _http.GetFromJsonAsync<BaseResponseModel>("/api/exam/Attempt/" + examId);
+                var res = await _http.GetFromJsonAsync<AttemptExamResponseModel>("/api/exam/JoinExam/" + examId);
 
-                return res?.Code ?? ErrorCodes.UnknownError;
+                return (res?.Code ?? ErrorCodes.UnknownError, res?.BanReason);
             }
             catch (HttpRequestException)
             {
-                return ErrorCodes.UnknownError;
+                return (ErrorCodes.UnknownError, null);
+            }
+        }
+        
+        public async Task<(int, string)> Attempt(int examId)
+        {
+            try
+            {
+                var res = await _http.GetFromJsonAsync<AttemptExamResponseModel>("/api/exam/Attempt/" + examId);
+
+                return (res?.Code ?? ErrorCodes.UnknownError, res?.BanReason);
+            }
+            catch (HttpRequestException)
+            {
+                return (ErrorCodes.UnknownError, null);
             }
         }
 
@@ -59,6 +75,25 @@ namespace SmartProctor.Client.Services
             catch (HttpRequestException)
             {
                 return ErrorCodes.UnknownError;
+            }
+        }
+
+        public async Task<(int, IList<ExamDetails>)> GetExams(int role)
+        {
+            try
+            {
+                var res = await _http.GetFromJsonAsync<GetUserExamsResponseModel>("api/exam/GetExams/" + role);
+                
+                if (res != null && res.Code == ErrorCodes.Success)
+                {
+                    return (res.Code, res.ExamDetailsList);
+                }
+                
+                return (res?.Code ?? ErrorCodes.UnknownError, null);
+            }
+            catch (HttpRequestException)
+            {
+                return (ErrorCodes.UnknownError, null);
             }
         }
 

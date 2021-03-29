@@ -1,0 +1,39 @@
+﻿@namespace SmartProctor.Client.Pages.User
+@layout LoginLayout
+@page "/User/Register"
+
+<div class="main__b__1">
+    <div class="register">
+        <h3>Registration</h3>
+        <Form Model="@_model" OnFinish="OnFinish">
+            <FormItem>
+                <Input Placeholder="User name" @bind-Value="@context.Id" Size="@InputSize.Large"/>
+            </FormItem>
+
+            <FormItem>
+                <Input Placeholder="User name" @bind-Value="@context.Nickname" Size="@InputSize.Large"/>
+            </FormItem>
+
+            <FormItem>
+                <InputPassword Placeholder="At Least 6-Digit Password, Case Sensitive" @bind-Value="@context.Password" Size="@InputSize.Large"/>
+            </FormItem>
+
+            <FormItem>
+                <InputPassword Placeholder="Confirm Password" @bind-Value="@context.PasswordConfirm" Size="@InputSize.Large"/>
+            </FormItem>
+
+            <FormItem>
+                <Input @bind-Value="@context.Email" Placeholder="Email Address" Size="@InputSize.Large"/>
+            </FormItem>
+            
+            <FormItem>
+                <Input @bind-Value="@context.Phone" Placeholder="Phone number" Size="@InputSize.Large"/>
+            </FormItem>
+
+            <FormItem>
+                <Button Type="primary" Size="large" HtmlType="submit" class="submit">Register</Button>
+                <a class="login" href="/User/Login">Log in with an existing account</a>
+            </FormItem>
+        </Form>
+    </div>
+</div>
