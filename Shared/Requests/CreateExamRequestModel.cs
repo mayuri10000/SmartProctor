@@ -16,5 +16,11 @@ namespace SmartProctor.Shared.Requests
         
         [Required]
         public DateTime Duration { get; set; }
+        
+        [Required]
+        public bool OpenBook { get; set; }
+        
+        [Required]
+        public int MaxTakers { get; set; }
     }
 }

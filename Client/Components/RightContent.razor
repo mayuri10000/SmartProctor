@@ -1,9 +1,9 @@
 @using SmartProctor.Shared.Responses
 @inherits AntDomComponentBase
 
-<Space Class="@ClassMapper.Class">
+<Space Class="@ClassMapper.Class" Style="margin-right: 60px;">
     <SpaceItem>
-        <UserDropdown UserName="User name"
-                        UserAvatar=""/>
+        <UserDropdown UserName="@_userName"
+                      UserAvatar="@_avatar"/>
     </SpaceItem>
 </Space>

@@ -1,0 +1,84 @@
+﻿@namespace SmartProctor.Client.Pages.User
+@page "/User/Details"
+
+<GridContent>
+    <div class="main__b__2">
+        <div class="right__b__0">
+            <div class="title">Account Settings</div>
+            <div class="baseView">
+                <div class="left" style="min-width: 310px;">
+                    <Form 
+                        Layout="vertical"
+                        OnFinish="HandleFinish"
+                        Model="@_model">
+                        <FormItem Label="User ID">
+                            <b>@_userDetails.Id</b>
+                            <br/>
+                            <Tag Color="red">User ID cannot be modified</Tag>
+                        </FormItem>
+                        <FormItem Label="Password">
+                            <Button OnClick="OnModifyPassword">Change</Button>
+                        </FormItem>
+                        <FormItem Label="Nickname">
+                            <Input @bind-Value="@context.NickName" />
+                        </FormItem>
+                        <FormItem Label="Email">
+                            <Input @bind-Value="@context.Email" />
+                        </FormItem>
+                        <FormItem Label="Phone">
+                            <Input @bind-Value="@context.Phone" />
+                        </FormItem>
+                        <FormItem>
+                            <Button HtmlType="submit" Type="primary">
+                                Update Information
+                            </Button>
+                        </FormItem>
+                    </Form>
+                </div>
+                <div class="right__b__1">
+                    <div class="avatar_title">
+                        Avatar
+                    </div>
+                    <div class="avatar">
+                        <Avatar Src="@_userDetails.Avatar" Size="128" Icon="user" />
+                    </div>
+                    <Upload ShowUploadList="false" Action="/api/Test" Name="file" OnChange="OnAvatarUploadStatusChange">
+                        <div class="button_view">
+                            <Button Icon="upload">
+                                Change avatar
+                            </Button>
+                        </div>
+                    </Upload>
+                </div>
+            </div>
+        </div>
+    </div>
+</GridContent>
+
+@{
+    RenderFragment _modalFooter = @<div>
+                                      <Button Type="defalut" OnClick="OnModifyPasswordCancel">Cancel</Button>
+                                   </div>;
+}
+
+<Modal Title="Modify password" Visible="@_modifyPasswordModalVisible" Footer="_modalFooter">
+    <ChildContent>
+        <Form Model="_modifyPasswordModel" OnFinish="OnModifyPasswordFinish" LabelColSpan="8" WrapperColSpan="16">
+            <FormItem Label="Old password">
+                <InputPassword @bind-Value="@context.OldPassword"/>
+            </FormItem>
+            <FormItem Label="New password">
+                <InputPassword @bind-Value="@context.NewPassword"/>
+            </FormItem>
+            <FormItem Label="Confirm password">
+                <InputPassword @bind-Value="@context.PasswordConfirm"/>
+            </FormItem>
+            <FormItem WrapperColOffset="8" WrapperColSpan="16">
+                <Button HtmlType="submit" Type="primary">Confirm</Button>
+            </FormItem>
+        </Form>
+    </ChildContent>
+</Modal>
+
+
+

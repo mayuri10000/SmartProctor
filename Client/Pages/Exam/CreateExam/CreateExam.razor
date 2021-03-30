@@ -1,0 +1,49 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@page "/Exam/Create2"
+
+<PageContainer Title="Create new exam">
+    <Breadcrumb>
+        <Breadcrumb>
+            <BreadcrumbItem>Exam</BreadcrumbItem>
+            <BreadcrumbItem>Mine</BreadcrumbItem>
+            <BreadcrumbItem>Create new</BreadcrumbItem>
+        </Breadcrumb>
+    </Breadcrumb>
+    <Content>
+        <span>Complete the following basic info to create a new exam, than you can add questions to the exam by entering the Edit page.</span>
+    </Content>
+    <ChildContent>
+        <Card>
+            <Form 
+                Model="@_model"
+                Style="margin-top: 8px;"
+                OnFinish="HandleSubmit">
+                <FormItem Label="Exam Title" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <Input @bind-Value="@context.ExamTitle" />
+                </FormItem>
+                <FormItem Label="Description" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                      <TextArea MinRows="4" @bind-Value="@context.Description"></TextArea>
+                </FormItem>
+                <FormItem Label="Start time" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <DatePicker Style="width:50%;" ShowTime="@true" @bind-Value="@context.StartTime" />
+                </FormItem>
+                <FormItem Label="Duration" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <TimePicker Style="width:50%;" @bind-Value="@context.Duration" Format="HH:mm"/>
+                </FormItem>
+                
+                <FormItem Label="Open book" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <Checkbox @bind-Value="@context.OpenBook"></Checkbox>
+                </FormItem>
+                <FormItem Label="Maximum test takers" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <InputNumber @bind-Value="@context.MaxTakers" Min="0" DefaultValue="30" />
+                </FormItem>
+                
+                <FormItem Label=" " Style="margin-top:32px" WrapperCol="_submitFormLayout.WrapperCol">
+                    <Button Type="primary" HtmlType="submit">
+                        Submit
+                    </Button>
+                </FormItem>
+            </Form>
+        </Card>
+    </ChildContent>
+</PageContainer>

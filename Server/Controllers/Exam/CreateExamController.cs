@@ -35,7 +35,9 @@ namespace SmartProctor.Server.Controllers.Exam
                     Description = model.Description,
                     Duration = duration,
                     Name = model.ExamTitle,
-                    StartTime = model.StartTime
+                    StartTime = model.StartTime,
+                    MaximumTakersNum = model.MaxTakers,
+                    OpenBook = model.OpenBook
                 };
                 
                 _services.SaveObject(a);

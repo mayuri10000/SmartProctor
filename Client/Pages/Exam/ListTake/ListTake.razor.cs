@@ -33,7 +33,9 @@ namespace SmartProctor.Client.Pages.Exam
 
         private void OnSearchExam()
         {
-            var q = _searchKeyword != null ? _examList.Where(x => x.Name.Contains(_searchKeyword)) : _examList;
+            var q = _searchKeyword != null ? 
+                _examList.Where(x => x.Name.Contains(_searchKeyword, StringComparison.OrdinalIgnoreCase)) : _examList;
+            
             if (_selectedExamState == "pending")
             {
                 q = q.Where(x => x.StartTime > DateTime.Now);

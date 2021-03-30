@@ -78,7 +78,8 @@ namespace SmartProctor.Server.Services
                 NickName = nickName,
                 Password = MD5Helper.HashPassword(id, password),
                 Email = email,
-                Phone = phone
+                Phone = phone,
+                Avatar = ""
             };
             SaveObject(u);
             return ErrorCodes.Success;

@@ -25,6 +25,7 @@ namespace SmartProctor.Client.Services
         Task<(int, string[])> GetTestTakers(int examId);
         Task<(int, string[])> GetProctors(int examId);
         Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum);
+        Task<int> CreateExam(CreateExamRequestModel model);
     }
 
     public class ExamServices : IExamServices
@@ -44,7 +45,7 @@ namespace SmartProctor.Client.Services
 
                 return (res?.Code ?? ErrorCodes.UnknownError, res?.BanReason);
             }
-            catch (HttpRequestException)
+            catch
             {
                 return (ErrorCodes.UnknownError, null);
             }
@@ -58,7 +59,7 @@ namespace SmartProctor.Client.Services
 
                 return (res?.Code ?? ErrorCodes.UnknownError, res?.BanReason);
             }
-            catch (HttpRequestException)
+            catch 
             {
                 return (ErrorCodes.UnknownError, null);
             }
@@ -72,7 +73,7 @@ namespace SmartProctor.Client.Services
 
                 return res?.Code ?? ErrorCodes.UnknownError;
             }
-            catch (HttpRequestException)
+            catch
             {
                 return ErrorCodes.UnknownError;
             }
@@ -91,7 +92,7 @@ namespace SmartProctor.Client.Services
                 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
             }
-            catch (HttpRequestException)
+            catch
             {
                 return (ErrorCodes.UnknownError, null);
             }
@@ -110,7 +111,7 @@ namespace SmartProctor.Client.Services
 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
             }
-            catch (HttpRequestException)
+            catch
             {
                 return (ErrorCodes.UnknownError, null);
             }
@@ -129,7 +130,7 @@ namespace SmartProctor.Client.Services
 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
             }
-            catch (HttpRequestException)
+            catch
             {
                 return (ErrorCodes.UnknownError, null);
             }
@@ -148,7 +149,7 @@ namespace SmartProctor.Client.Services
 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
             }
-            catch (HttpRequestException)
+            catch
             {
                 return (ErrorCodes.UnknownError, null);
             }
@@ -172,9 +173,24 @@ namespace SmartProctor.Client.Services
 
                 return (res.Code, DeserializeQuestionFromJson(res.QuestionJson));
             }
-            catch (HttpRequestException)
+            catch
             {
                 return (ErrorCodes.UnknownError, null);
+            }
+        }
+
+        public async Task<int> CreateExam(CreateExamRequestModel model)
+        {
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<CreateExamRequestModel, BaseResponseModel>(
+                    "/api/exam/CreateExam", model);
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch
+            {
+                return ErrorCodes.UnknownError;
             }
         }
 

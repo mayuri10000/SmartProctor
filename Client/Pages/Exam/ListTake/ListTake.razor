@@ -118,6 +118,10 @@
                                 </div>
                             </ListItem>
                         </AntList>
+                        @if (_filteredExamList == null || _filteredExamList.Count == 0)
+                        {
+                            <Empty/>
+                        }
                     </ChildContent>
                 </Card>
             </div>

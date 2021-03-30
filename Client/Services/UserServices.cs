@@ -12,8 +12,9 @@ namespace SmartProctor.Client.Services
         Task<int> LoginAsync(LoginRequestModel model);
         Task<int> LogoutAsync();
         Task<int> RegisterAsync(RegisterRequestModel model);
-
         Task<(int, UserDetailsResponseModel)> GetUserDetails();
+        Task<int> UpdateUserDetails(UserDetailsRequestModel model);
+        Task<int> ModifyPassword(ModifyPasswordRequestModel model);
     }
     
     public class UserServices : IUserServices
@@ -74,7 +75,7 @@ namespace SmartProctor.Client.Services
             {
                 var res = await _http.GetFromJsonAsync<UserDetailsResponseModel>("/api/user/UserDetails");
 
-                if (res != null && res.Code != 0)
+                if (res != null && res.Code == ErrorCodes.Success)
                 {
                     userDetails = res;
                 }
@@ -84,6 +85,38 @@ namespace SmartProctor.Client.Services
             catch (HttpRequestException)
             {
                 return (ErrorCodes.UnknownError, null);
+            }
+        }
+
+        public async Task<int> UpdateUserDetails(UserDetailsRequestModel model)
+        {
+            try
+            {
+                var res =
+                    await _http.PostAsAndGetFromJsonAsync<UserDetailsRequestModel, BaseResponseModel>(
+                        "/api/user/UserDetails", model);
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch (HttpRequestException)
+            {
+                return ErrorCodes.UnknownError;
+            }
+        }
+
+        public async Task<int> ModifyPassword(ModifyPasswordRequestModel model)
+        {
+            try
+            {
+                var res =
+                    await _http.PostAsAndGetFromJsonAsync<ModifyPasswordRequestModel, BaseResponseModel>(
+                        "/api/user/ModifyPassword", model);
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch (HttpRequestException)
+            {
+                return ErrorCodes.UnknownError;
             }
         }
     }

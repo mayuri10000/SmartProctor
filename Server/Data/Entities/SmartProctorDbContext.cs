@@ -219,6 +219,12 @@ namespace SmartProctor.Server.Data.Entities
                     .HasColumnName("phone")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
+                
+                entity.Property(e => e.Avatar)
+                    .HasColumnType("char(60)")
+                    .HasColumnName("avatar")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
             });
 
             OnModelCreatingPartial(modelBuilder);

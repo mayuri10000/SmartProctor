@@ -3,13 +3,14 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=E273BB1F_002D85D7_002D411A_002DA85F_002D2060F445A68D_002Fd_003APages_002Fd_003AUser_002Ff_003ARegister_002Erazor/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=E273BB1F_002D85D7_002D411A_002DA85F_002D2060F445A68D_002Fd_003APages_002Ff_003AIndex_002Erazor/@EntryIndexedValue">ForceIncluded</s:String>
 	
-	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
-  &lt;Assembly Path="\home\liu\.nuget\packages\pomelo.entityframeworkcore.mysql\5.0.0-alpha.2\lib\netstandard2.1\Pomelo.EntityFrameworkCore.MySql.dll" /&gt;
-  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\browserinterop\1.1.2\lib\netstandard2.1\BrowserInterop.dll" /&gt;
-  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\mu3_Data\Managed\Assembly-CSharp.dll" /&gt;
-  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\UnityParrot.dll" /&gt;
-  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\VERSION.dll" /&gt;
-  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\ThincaPayment.dll" /&gt;
-  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\microsoft.aspnetcore.signalr.client.core\5.0.2\lib\netstandard2.1\Microsoft.AspNetCore.SignalR.Client.Core.dll" /&gt;
-  &lt;Assembly Path="/home/liu/.nuget/packages/antdesign.pro.layout/0.1.0-nightly-210311054507/lib/net5.0/AntDesign.Pro.Layout.dll" /&gt;
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="\home\liu\.nuget\packages\pomelo.entityframeworkcore.mysql\5.0.0-alpha.2\lib\netstandard2.1\Pomelo.EntityFrameworkCore.MySql.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\browserinterop\1.1.2\lib\netstandard2.1\BrowserInterop.dll" /&gt;&#xD;
+  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\mu3_Data\Managed\Assembly-CSharp.dll" /&gt;&#xD;
+  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\UnityParrot.dll" /&gt;&#xD;
+  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\VERSION.dll" /&gt;&#xD;
+  &lt;Assembly Path="E:\Arcade\Ongeki Plus\package\ThincaPayment.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\microsoft.aspnetcore.signalr.client.core\5.0.2\lib\netstandard2.1\Microsoft.AspNetCore.SignalR.Client.Core.dll" /&gt;&#xD;
+  &lt;Assembly Path="\home\liu\.nuget\packages\antdesign.pro.layout\0.1.0-nightly-210311054507\lib\net5.0\AntDesign.Pro.Layout.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\oneof\2.1.155\lib\netstandard1.3\OneOf.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>
