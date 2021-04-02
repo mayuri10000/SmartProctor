@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<BasicLayout 
+    Logo="@_logo"
+    Title="SmartProctor"
+    MenuRender="false">
+    <RightContentRender>
+        <RightContentExam />
+    </RightContentRender>
+    <ChildContent>
+        @Body
+    </ChildContent>
+    <FooterRender>
+    </FooterRender>
+</BasicLayout>
+<SettingDrawer />
+
+@code
+{
+    private readonly RenderFragment _logo = builder =>
+    {
+    // Empty, reserved for logos
+    };
+}

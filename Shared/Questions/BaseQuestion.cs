@@ -7,7 +7,5 @@ namespace SmartProctor.Shared.Questions
         [Required]
         public string Question { get; set; }
         
-        [Required]
-        public QuestionType QuestionType { get; set; }
     }
 }

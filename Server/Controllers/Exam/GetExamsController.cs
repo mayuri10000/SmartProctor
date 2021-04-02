@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using SmartProctor.Server.Services;
 using SmartProctor.Server.Utils;
 using SmartProctor.Shared.Responses;
@@ -25,7 +26,18 @@ namespace SmartProctor.Server.Controllers.Exam
             }
             
             var uid = User.Identity.Name;
-            var res = _services.GetExamsForUser(uid, role);
+
+
+            IList<ExamDetails> res;
+            
+            if (role == 3)
+            {
+                res = _services.GetCreatedExams(uid);
+            }
+            else
+            {
+                res = _services.GetExamsForUser(uid, role);
+            }
 
             if (res != null)
             {

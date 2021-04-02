@@ -61,6 +61,9 @@ namespace SmartProctor.Server.Services
         int SubmitAnswer(string uid, int eid, int num, string json);
 
         int GetAnswer(string currentUid, string uid, int eid, int num, out string json);
+
+        int GetQuestionCount(int examId);
+        IList<ExamDetails> GetCreatedExams(string uid);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -364,6 +367,37 @@ namespace SmartProctor.Server.Services
         public int GetAnswer(string currentUid, string uid, int eid, int num, out string json)
         {
             throw new NotImplementedException();
+        }
+
+        public int GetQuestionCount(int examId)
+        {
+            return _questionRepo.ObjectCount(x => x.ExamId == examId);
+        }
+
+        public IList<ExamDetails> GetCreatedExams(string uid)
+        {
+            try
+            {
+                var q = GetObjectList(x => x.Creator == uid, x => x.Id, OrderingType.Ascending);
+
+                return (from x in q
+                    select x
+                    into x
+                    where x != null
+                    select new ExamDetails()
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Duration = x.Duration,
+                        StartTime = x.StartTime,
+                        OpenBook = x.OpenBook,
+                    }).ToList();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private int CheckEarlyOrLate(int eid, bool viewQuestions)

@@ -30,6 +30,16 @@ namespace SmartProctor.Client.Components
 
         private async Task Logout()
         {
+            var confirm = await Modal.ConfirmAsync(new ConfirmOptions()
+            {
+                Title = "Are you sure to log out?",
+            });
+
+            if (!confirm)
+            {
+                return;
+            }
+            
             var res = await UserServices.LogoutAsync();
 
             if (res != ErrorCodes.Success)

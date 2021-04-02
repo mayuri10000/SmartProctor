@@ -1,8 +1,68 @@
 ﻿@namespace SmartProctor.Client.Pages.Exam
 
-@page "/EditExam"
-<h3>EditExam</h3>
+@page "/Exam/Edit/{ExamId}"
 
-@code {
-    
-}
+<PageContainer Title="Edit exam">
+    <Breadcrumb>
+        <Breadcrumb>
+            <BreadcrumbItem>Exam</BreadcrumbItem>
+            <BreadcrumbItem>Mine</BreadcrumbItem>
+            <BreadcrumbItem>Edit exam</BreadcrumbItem>
+        </Breadcrumb>
+    </Breadcrumb>
+    <Content>
+        <span>Exam Name: </span>
+    </Content>
+    <ChildContent>
+        <Card Title="Basic information">
+            <Form
+                Model="@_updateExamDetailsModel"
+                Style="margin-top: 8px;"
+                OnFinish="HandleUpdateBasicInfo">
+                <FormItem Label="Exam ID" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <Input @bind-Value="@context.Id" Disabled/>
+                </FormItem>
+                <FormItem Label="Exam Title" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <Input @bind-Value="@context.Name"/>
+                </FormItem>
+                <FormItem Label="Description" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <TextArea MinRows="4" @bind-Value="@context.Description"></TextArea>
+                </FormItem>
+                <FormItem Label="Start time" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <DatePicker Style="width:50%;" ShowTime="@true" @bind-Value="@context.StartTime"/>
+                </FormItem>
+                <FormItem Label="Duration" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <TimePicker Style="width:50%;" @bind-Value="@context.Duration" Format="HH:mm"/>
+                </FormItem>
+
+                <FormItem Label="Open book" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <Checkbox @bind-Value="@context.OpenBook"></Checkbox>
+                </FormItem>
+                <FormItem Label="Maximum test takers" LabelCol="_formItemLayout.LabelCol" WrapperCol="_formItemLayout.WrapperCol">
+                    <InputNumber @bind-Value="@context.MaximumTakersNum" Min="0" DefaultValue="30"/>
+                </FormItem>
+
+                <FormItem Label=" " Style="margin-top:32px" WrapperCol="_submitFormLayout.WrapperCol">
+                    <Button Type="primary" HtmlType="submit">
+                        Update
+                    </Button>
+                </FormItem>
+            </Form>
+        </Card>
+        
+        @for (var i = 0; i < _questionCount; i++)
+        {
+            // Bug of Blazor, @ref cannot directly use the index variable, see
+            // https://stackoverflow.com/questions/58205090/using-ref-inside-for-loop-to-get-element-reference
+            var index = i;
+            <QuestionEditor @ref="@_questionEditors[index]" ExamId="@_examId" QuestionNum="@(i + 1)"/>
+        }
+        
+        <Card>
+            <Button Size="large" Type="primary">
+                <Icon Type="add" Theme="outline"/>
+                Add Question
+            </Button>
+        </Card>
+    </ChildContent>
+</PageContainer>

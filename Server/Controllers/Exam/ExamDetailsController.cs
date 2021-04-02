@@ -28,7 +28,10 @@ namespace SmartProctor.Server.Controllers.Exam
                     Description = e.Description,
                     Duration = e.Duration,
                     Name = e.Name,
-                    StartTime = e.StartTime
+                    StartTime = e.StartTime,
+                    OpenBook = e.OpenBook,
+                    MaxTakers = e.MaximumTakersNum,
+                    QuestionCount = _services.GetQuestionCount(eid)
                 };
             }
 

@@ -1,0 +1,71 @@
+﻿@using SmartProctor.Shared.Questions
+@namespace SmartProctor.Client.Pages.Exam
+
+<Card Title="@("Question " + QuestionNum)">
+    <HtmlEditor @ref="@_questionTextEditor" PlaceHolder="Question text here"/>
+    <Divider></Divider>
+    <Form Model="_question" LabelColSpan="8" WrapperColSpan="16">
+        <RadioGroup @bind-Value="_questionType">
+            <Radio RadioButton Value="@("choice")" >Choices</Radio>
+            @*<Radio Value="QuestionType.Fill" RadioButton>Fill</Radio>*@
+            <Radio RadioButton Value="@("short_answer")">Short answer</Radio>
+        </RadioGroup>
+        @if (context is ChoiceQuestion q)
+        {
+            <FormItem Label="Multi-choice">
+                <Checkbox @bind-Value="q.MultiChoice"></Checkbox>
+            </FormItem>
+            <FormItem Label="Choices">
+                <AntList DataSource="@q.Choices" Bordered="true"
+                         Style="margin-right: 100px; margin-left: 10px; max-height: 50%; overflow: scroll">
+                    <ChildContent Context="item">
+                        <ListItem>
+                            <span>@((MarkupString) item)</span>
+                            <div>
+                                <Button Type="@ButtonType.Link"
+                                        Style="padding-left: 2px; padding-right: 2px" OnClick="() => OnEditChoice(item)">
+                                    <Icon Type="edit" Theme="outline" Style="font-size: 20px;"/>
+                                </Button>
+                                <Button Type="@ButtonType.Link" Danger
+                                        Style="padding-left: 2px; padding-right: 2px" OnClick="() => OnRemoveChoice(item)">
+                                    <Icon Type="close" Theme="outline" Style="font-size: 20px;"/>
+                                </Button>
+                            </div>
+                        </ListItem>
+                    </ChildContent>
+
+                    <Footer>
+                        <Button Type="primary" OnClick="OnAddChoice">Add</Button>
+                    </Footer>
+                </AntList>
+            </FormItem>
+        }
+        @*else if (context is FillQuestion fq)
+        {
+            <FormItem Label="Blanks">
+                <AntList DataSource="fq.BlankType" Style="width: 60%; margin-left: 10px">
+                    <ChildContent Context="item">
+                        <ListItem>
+                                                    
+                        </ListItem>
+                    </ChildContent>
+                </AntList>
+            </FormItem>
+        }*@
+        else if (context is ShortAnswerQuestion sq)
+        {
+            <FormItem Label="Maximum word count">
+                <AntDesign.InputNumber TValue="int" @bind-Value="@sq.MaxWordCount"></AntDesign.InputNumber>
+            </FormItem>
+
+            <FormItem Label="Rich Text">
+                <Checkbox @bind-Value="@sq.RichText"></Checkbox>
+            </FormItem>
+        }
+    </Form>
+</Card>
+<Modal Visible="_editChoice" OnOk="OnChoiceConfirmed" OnCancel="OnChoiceCancel" Title="Edit choice">
+    <ChildContent>
+        <HtmlEditor @ref="@_choiceEditor"/>
+    </ChildContent>
+</Modal>

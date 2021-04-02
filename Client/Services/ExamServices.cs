@@ -26,6 +26,7 @@ namespace SmartProctor.Client.Services
         Task<(int, string[])> GetProctors(int examId);
         Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum);
         Task<int> CreateExam(CreateExamRequestModel model);
+        Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
     }
 
     public class ExamServices : IExamServices
@@ -185,6 +186,21 @@ namespace SmartProctor.Client.Services
             {
                 var res = await _http.PostAsAndGetFromJsonAsync<CreateExamRequestModel, BaseResponseModel>(
                     "/api/exam/CreateExam", model);
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch
+            {
+                return ErrorCodes.UnknownError;
+            }
+        }
+
+        public async Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model)
+        {
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<UpdateExamDetailsRequestModel, BaseResponseModel>(
+                    "/api/exam/UpdateExamDetails", model);
 
                 return res?.Code ?? ErrorCodes.UnknownError;
             }

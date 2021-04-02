@@ -115,18 +115,20 @@ namespace SmartProctor.Client.Pages.User
             }
         }
 
-        private void OnAvatarUploadStatusChange(UploadInfo u)
+        private async Task OnAvatarUploadStatusChange(UploadInfo u)
         {
             if (u.File.State == UploadState.Success)
             {
-                Modal.Success(new ConfirmOptions()
+                await Modal.SuccessAsync(new ConfirmOptions()
                 {
                     Content = "Avatar upload success"
                 });
+                
+                await OnInitializedAsync();
             }
             else if (u.File.State == UploadState.Fail)
             {
-                Modal.Error(new ConfirmOptions()
+                await Modal.ErrorAsync(new ConfirmOptions()
                 {
                     Content = "Avatar upload failed"
                 });
