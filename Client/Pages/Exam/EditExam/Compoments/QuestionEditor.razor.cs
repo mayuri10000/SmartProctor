@@ -33,6 +33,8 @@ namespace SmartProctor.Client.Pages.Exam
 
         private bool _choiceModalLoaded = false;
 
+        private string _lastQuestionType = "";
+
         private BaseQuestion _question = new ChoiceQuestion()
         {
             Choices = new List<string>()
@@ -40,8 +42,6 @@ namespace SmartProctor.Client.Pages.Exam
                 "Choice 1"
             }
         };
-
-        private string _questionType = "choice";
 
         protected override async Task OnInitializedAsync()
         {
@@ -117,25 +117,30 @@ namespace SmartProctor.Client.Pages.Exam
 
         private void OnQuestionTypeChange()
         {
+            // Added to prevent a bug, the bind event sometimes will be called again and again
+            if (_question.QuestionType == _lastQuestionType)
+                return;
+
             var questionText = _question.Question;
-            if (_questionType == "choice")
+            var questionType = _question.QuestionType;
+            
+            if (questionType == "choice")
             {
                 _question = new ChoiceQuestion();
                 ((ChoiceQuestion) _question).Choices = new List<string>();
             }
-            else if (_questionType == "short_answer")
+            else if (questionType == "short_answer")
             {
                 _question = new ShortAnswerQuestion();
             }
 
             _question.Question = questionText;
+            _question.QuestionType = questionType;
+            _lastQuestionType = questionType;
+            
             StateHasChanged();
         }
 
-        private void Test()
-        {
-            Console.WriteLine("Changed: " + _questionType);
-        }
 
         private async Task OnChoiceConfirmed()
         {

@@ -5,15 +5,17 @@
     <HtmlEditor @ref="@_questionTextEditor" PlaceHolder="Question text here"/>
     <Divider></Divider>
     <Form Model="_question" LabelColSpan="8" WrapperColSpan="16">
-        <RadioGroup @bind-Value="_questionType">
-            <Radio RadioButton Value="@("choice")" >Choices</Radio>
-            @*<Radio Value="QuestionType.Fill" RadioButton>Fill</Radio>*@
-            <Radio RadioButton Value="@("short_answer")">Short answer</Radio>
-        </RadioGroup>
+        <FormItem Label="Question type">
+            <RadioGroup @bind-Value="@context.QuestionType">
+                <Radio RadioButton Value="@("choice")" CheckedChanged="_ => OnQuestionTypeChange()">Choices</Radio>
+                @*<Radio Value="QuestionType.Fill" RadioButton>Fill</Radio>*@
+                <Radio RadioButton Value="@("short_answer")" CheckedChanged="_ => OnQuestionTypeChange()">Short answer</Radio>
+            </RadioGroup>
+        </FormItem>
         @if (context is ChoiceQuestion q)
         {
             <FormItem Label="Multi-choice">
-                <Checkbox @bind-Value="q.MultiChoice"></Checkbox>
+                <Checkbox @bind-Value="@q.MultiChoice"></Checkbox>
             </FormItem>
             <FormItem Label="Choices">
                 <AntList DataSource="@q.Choices" Bordered="true"
