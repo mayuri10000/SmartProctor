@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -26,6 +28,7 @@ namespace SmartProctor.Client.Services
         Task<(int, string[])> GetProctors(int examId);
         Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum);
         Task<int> CreateExam(CreateExamRequestModel model);
+        Task<int> UpdateQuestion(int examId, int questionNum, BaseQuestion baseQuestion);
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
     }
 
@@ -195,6 +198,28 @@ namespace SmartProctor.Client.Services
             }
         }
 
+        public async Task<int> UpdateQuestion(int examId, int questionNum, BaseQuestion question)
+        {
+            try
+            {
+                var model = new UpdateQuestionRequestModel()
+                {
+                    ExamId = examId,
+                    QuestionJson = SerializeQuestionToJson(question),
+                    QuestionNumber = questionNum
+                };
+
+                var res = await _http.PostAsAndGetFromJsonAsync<UpdateQuestionRequestModel, BaseResponseModel>(
+                    "/api/exam/UpdateQuestion", model);
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch
+            {
+                return ErrorCodes.UnknownError;
+            }
+        }
+
         public async Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model)
         {
             try
@@ -212,13 +237,40 @@ namespace SmartProctor.Client.Services
 
         private string SerializeQuestionToJson(BaseQuestion question)
         {
-            throw new NotImplementedException();
+            var ms = new MemoryStream();
+            var json = new Utf8JsonWriter(ms);
+
+            json.WriteStartObject();
+            json.WriteString("question", question.Question);
+            json.WriteString("type", question.QuestionType);
+
+            if (question is ChoiceQuestion choiceQuestion)
+            {
+                json.WriteBoolean("multiChoice", choiceQuestion.MultiChoice);
+                json.WriteStartArray("choices");
+                foreach (var choice in choiceQuestion.Choices)
+                {
+                    json.WriteStringValue(choice);
+                }
+                json.WriteEndArray();
+            }
+            else if (question is ShortAnswerQuestion shortAnswerQuestion)
+            {
+                json.WriteNumber("maxWordCount", shortAnswerQuestion.MaxWordCount);
+                json.WriteBoolean("richText", shortAnswerQuestion.RichText);
+            }
+            
+            json.WriteEndObject();
+            json.Flush();
+            
+            return Encoding.UTF8.GetString(ms.ToArray());
         }
 
         private BaseQuestion DeserializeQuestionFromJson(string questionJson)
         {
             var json = JsonDocument.Parse(questionJson).RootElement;
 
+            var question = json.GetProperty("question").GetString();
             var type = json.GetProperty("type").GetString();
 
             BaseQuestion ret = null;
@@ -260,10 +312,18 @@ namespace SmartProctor.Client.Services
                 {
                     ret = new ShortAnswerQuestion();
                     var maxWordCount = json.GetProperty("maxWordCount").GetInt32();
+                    var richText = json.GetProperty("richText").GetBoolean();
 
                     ((ShortAnswerQuestion) ret).MaxWordCount = maxWordCount;
+                    ((ShortAnswerQuestion) ret).RichText = richText;
                     break;
                 }
+            }
+
+            if (ret != null)
+            {
+                ret.Question = question;
+                ret.QuestionType = type;
             }
 
             return ret;

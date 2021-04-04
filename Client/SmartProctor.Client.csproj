@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <Folder Include="obj" />
-    <Folder Include="Pages\Exam\ListMine" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SolutionDir)node_modules') ">

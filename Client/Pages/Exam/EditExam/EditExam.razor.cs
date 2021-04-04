@@ -123,5 +123,21 @@ namespace SmartProctor.Client.Pages.Exam
             await Message.Success("Exam information updated");
             // TODO: Reload basic information
         }
+
+        private void OnAddQuestion()
+        {
+            _questionCount++;
+            Array.Resize(ref _questionEditors, _questionCount);
+            StateHasChanged();
+        }
+
+        private async Task OnSavePaper()
+        {
+            await HandleUpdateBasicInfo();
+            foreach (var e in _questionEditors)
+            {
+                await e.SaveQuestion();
+            }
+        }
     }
 }

@@ -16,6 +16,9 @@ namespace SmartProctor.Client.Pages.Exam
         public ModalService Modal { get; set; }
         
         [Inject]
+        public MessageService Msg { get; set; }
+        
+        [Inject]
         public IExamServices ExamServices { get; set; }
 
         [Parameter] 
@@ -37,6 +40,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         private BaseQuestion _question = new ChoiceQuestion()
         {
+            QuestionType = "choice",
             Choices = new List<string>()
             {
                 "Choice 1"
@@ -59,13 +63,21 @@ namespace SmartProctor.Client.Pages.Exam
             }
 
             _question = question;
+            await _questionTextEditor.LoadHtmlString(_question.Question);
             StateHasChanged();
         }
 
         public async Task SaveQuestion()
         {
-            var res = 1001; // await ExamServices.UpdateQuestion(ExamId, QuestionNum);
-            
+            _question.Question = await _questionTextEditor.GetHtmlString();
+
+            var task = Msg.Loading(new MessageConfig()
+            {
+                Content = $"Saving question {QuestionNum}, please wait",
+                Duration = 0
+            });
+            var res = await ExamServices.UpdateQuestion(ExamId, QuestionNum, _question);
+
             if (res != ErrorCodes.Success)
             {
                 await Modal.ErrorAsync(new ConfirmOptions()
@@ -74,6 +86,11 @@ namespace SmartProctor.Client.Pages.Exam
                     Content = ErrorCodes.MessageMap[res]
                 });
             }
+            else
+            {
+                await Msg.Success($"Question {QuestionNum} saved");
+            }
+            task.Start();
         }
 
         private async Task OnAddChoice()
