@@ -15,7 +15,7 @@
         <ChildContent>
             <div class="standardList">
                 <Card Title="Test Page">
-                    <QuestionEditor ExamId="1" QuestionNum="1"></QuestionEditor>
+                    <TextArea OnBlur="OnBlur"></TextArea>
                 </Card>
             </div>
         </ChildContent>
@@ -24,4 +24,8 @@
 
 @code
 {
+    private async Task OnBlur()
+    {
+        await msg.Info("OnBlur");
+    }
 }

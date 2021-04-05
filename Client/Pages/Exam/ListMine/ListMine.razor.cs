@@ -18,10 +18,6 @@ namespace SmartProctor.Client.Pages.Exam
         private IList<ExamDetails> _examList;
         private IList<ExamDetails> _filteredExamList;
 
-        private ExamDetails _nextExam;
-
-        private bool _haveReadyExam;
-        private bool _haveOngoingExam;
 
         protected override async Task OnInitializedAsync()
         {
@@ -44,9 +40,9 @@ namespace SmartProctor.Client.Pages.Exam
             _filteredExamList = q.ToList();
         }
 
-        private void EnterExam()
+        private void EnterExam(int examId)
         {
-            NavManager.NavigateTo("/Exam/Details/" + _nextExam.Id);
+            NavManager.NavigateTo("/Exam/Details/" + examId);
         }
 
         private async Task LoadExamList()
@@ -56,25 +52,6 @@ namespace SmartProctor.Client.Pages.Exam
             if (code == ErrorCodes.Success)
             {
                 _examList = res;
-
-                foreach (var e in _examList)
-                {
-                    if (e.StartTime < DateTime.Now && e.StartTime.AddSeconds(e.Duration) > DateTime.Now)
-                    {
-                        _nextExam = e;
-                        _haveOngoingExam = true;
-                        break;
-                    }
-
-                    if (e.StartTime > DateTime.Now)
-                    {
-                        if (_nextExam == null || (_nextExam.StartTime - DateTime.Now) >
-                            (e.StartTime - DateTime.Now))
-                        {
-                            _nextExam = e;
-                        }
-                    }
-                }
 
                 return;
             }

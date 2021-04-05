@@ -1,0 +1,46 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@using SmartProctor.Shared.Questions
+<Card Title="@("Question " + QuestionNum)">
+    <ChildContent>
+        <Paragraph>
+            @((MarkupString) _question.Question)
+        </Paragraph>
+        <Divider/>
+        @if (_question is ChoiceQuestion choiceQuestion)
+        {
+            if (choiceQuestion.MultiChoice)
+            {
+                <div>
+                    @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
+                    {
+                        var index = i;
+                        <CheckBox>@choiceQuestion.Choices[index]</CheckBox>
+                    }
+                </div>
+            }
+            else
+            {
+                <RadioGroup>
+                    @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
+                    {
+                        var index = i;
+                        <Radio>@choiceQuestion.Choices[index]</Radio>
+                    }
+                </RadioGroup>
+            }
+            
+        }
+        else if (_question is ShortAnswerQuestion shortAnswerQuestion)
+        {
+            if (shortAnswerQuestion.RichText)
+            {
+                <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here"></HtmlEditor>
+            }
+            else
+            {
+                <TextArea Placeholder="Answer here"></TextArea>
+            }
+            <Button Type="primary">Save</Button>
+        }
+        </ChildContent>
+</Card>

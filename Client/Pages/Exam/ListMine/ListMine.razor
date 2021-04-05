@@ -1,5 +1,6 @@
 @namespace SmartProctor.Client.Pages.Exam
 @page "/Exam/ListMine"
+@using SmartProctor.Shared.Responses
 @inject ModalService Modal
 @inject NavigationManager NavManager
 @inject IExamServices ExamServices
@@ -51,7 +52,7 @@
                                         <p>@(context.OpenBook ? "Yes" : "No")</p>
                                     </div>
                                     <div class="listContentItem">
-                                        <Button Type="link">Details</Button>
+                                        <Button Type="link" OnClick="() => EnterExam(context.Id)">Details</Button>
                                     </div>
                                 </div>
                             </ListItem>
