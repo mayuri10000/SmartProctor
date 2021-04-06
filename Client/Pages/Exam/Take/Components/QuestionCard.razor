@@ -20,11 +20,11 @@
             }
             else
             {
-                <RadioGroup>
+                <RadioGroup @bind-Value="@_choices[0]">
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <Radio>@choiceQuestion.Choices[index]</Radio>
+                        <Radio Value="i">@choiceQuestion.Choices[index]</Radio>
                     }
                 </RadioGroup>
             }

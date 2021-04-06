@@ -27,6 +27,9 @@ namespace SmartProctor.Client.Pages.Exam
         };
 
         private HtmlEditor _answerRichTextEditor;
+        private int[] _choices;
+
+        private string _answer;
 
         protected override async Task OnInitializedAsync()
         {

@@ -1,4 +1,32 @@
 ﻿@namespace SmartProctor.Client.Pages.Exam
 @page "/Exam/Take/{ExamId}"
-@layout ExamLayout
+@layout EmptyLayout
+
+<BasicLayout 
+    Logo="@_logo"
+    Title="SmartProctor"
+    MenuRender="false">
+    <RightContentRender>
+        <RightContentExam ExamId="@_examId"/>
+    </RightContentRender>
+    <ChildContent>
+        <PageContainer Title="@_examDetails.Name">
+            <Content>
+                <Descriptions Class="headerList" Size="small" Column="2">
+                    <DescriptionsItem Title="Desciption">@_examDetails.Description</DescriptionsItem>
+                    <DescriptionsItem Title="Duration">@_examDetails.Duration</DescriptionsItem>
+                    <DescriptionsItem Title="Open book">@(_examDetails.OpenBook ? "Yes" : "No")</DescriptionsItem>
+                </Descriptions> 
+            </Content>
+            <ChildContent>
+                @for (var i = 0; i < _questionNum; i++)
+                {
+                    <QuestionCard ExamId="_examId" QuestionNum="@i"/>
+                }
+            </ChildContent>
+        </PageContainer>
+    </ChildContent>
+    <FooterRender>
+    </FooterRender>
+</BasicLayout>
 

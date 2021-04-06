@@ -1,8 +1,12 @@
-﻿<Space>
+﻿@namespace SmartProctor.Client.Pages.Exam
+
+<Space>
     <SpaceItem>
-        <Popover Placement="PlacementType.BottomRight">
+        <Popover Placement="PlacementType.BottomRight" OnVisibleChange="OnCameraVideoVisibleChange">
             <ContentTemplate>
-                <video id="local-camera" autoplay class="proctor-video"></video>
+                <Spin Spinning="_cameraVideoLoading">
+                    <video id="local-camera" autoplay class="proctor-video"></video>
+                </Spin>
             </ContentTemplate>
             <ChildContent>
                 <span class="action account">
@@ -12,7 +16,7 @@
         </Popover>
     </SpaceItem>
     <SpaceItem>
-        <Popover Placement="PlacementType.BottomRight">
+        <Popover Placement="PlacementType.BottomRight" OnVisibleChange="OnDesktopVideoVisibleChange">
             <ContentTemplate>
                 <video id="local-desktop" autoplay class="proctor-video"></video>
             </ContentTemplate>
@@ -24,3 +28,6 @@
         </Popover>
     </SpaceItem>
 </Space>
+<TestPrepareModal @ref="@_testPrepareModal" ExamId="@ExamId"
+                   OnShareScreen="OnShareScreen" OnFinish="OnPrepareFinish"
+                   Visible="@_inPrepare"/>
