@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using OneOf.Types;
 using SmartProctor.Client.Utils;
+using SmartProctor.Shared.Answers;
 using SmartProctor.Shared.Questions;
 using SmartProctor.Shared.Requests;
 using SmartProctor.Shared.Responses;
@@ -29,6 +30,7 @@ namespace SmartProctor.Client.Services
         Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum);
         Task<int> CreateExam(CreateExamRequestModel model);
         Task<int> UpdateQuestion(int examId, int questionNum, BaseQuestion baseQuestion);
+        Task<int> SubmitAnswer(int examId, int questionNum, BaseAnswer answer);
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
     }
 
@@ -220,6 +222,27 @@ namespace SmartProctor.Client.Services
             }
         }
 
+        public async Task<int> SubmitAnswer(int examId, int questionNum, BaseAnswer answer)
+        {
+            try
+            {
+                var model = new SubmitAnswerRequestModel()
+                {
+                    ExamId = examId,
+                    QuestionNum = questionNum,
+                    AnswerJson = SerializeAnswerToJson(answer)
+                };
+
+                var res = await _http.PostAsAndGetFromJsonAsync<SubmitAnswerRequestModel, BaseResponseModel>(
+                    "/api/exam/SubmitAnswer", model);
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch
+            {
+                return ErrorCodes.UnknownError;
+            }
+        }
+
         public async Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model)
         {
             try
@@ -261,6 +284,34 @@ namespace SmartProctor.Client.Services
             }
             
             json.WriteEndObject();
+            json.Flush();
+            
+            return Encoding.UTF8.GetString(ms.ToArray());
+        }
+
+        private string SerializeAnswerToJson(BaseAnswer answer)
+        {
+            var ms = new MemoryStream();
+            var json = new Utf8JsonWriter(ms);
+            
+            json.WriteStartObject();
+            if (answer is ChoiceAnswer choiceAnswer)
+            {
+                json.WriteString("type", "choice");
+                json.WriteStartArray("choices");
+                foreach (var choice in choiceAnswer.Choices)
+                {
+                    json.WriteNumberValue(choice);
+                }
+                json.WriteEndArray();
+            }
+            else if (answer is ShortAnswer shortAnswer)
+            {
+                json.WriteString("type", "short_answer");
+                json.WriteString("answer", shortAnswer.Answer);
+            }
+            
+            json.WriteEndArray();
             json.Flush();
             
             return Encoding.UTF8.GetString(ms.ToArray());
@@ -324,6 +375,44 @@ namespace SmartProctor.Client.Services
             {
                 ret.Question = question;
                 ret.QuestionType = type;
+            }
+
+            return ret;
+        }
+
+        private BaseAnswer DeserializeAnswerFromJson(string answerJson)
+        {
+            var json = JsonDocument.Parse(answerJson).RootElement;
+            var type = json.GetProperty("type").GetString();
+
+            BaseAnswer ret = null;
+            switch (type)
+            {
+                case "choice":
+                {
+                    var choices = json.GetProperty("choices");
+                    
+                    ret = new ChoiceAnswer();
+                    ((ChoiceAnswer) ret).Choices = new List<int>();
+                    for (var i = 0; i < choices.GetArrayLength(); i++)
+                    {
+                        ((ChoiceAnswer) ret).Choices.Add(choices[i].GetInt32());
+                    }
+                    break;
+                }
+                case "short_answer":
+                {
+                    var answer = json.GetProperty("answer");
+                    
+                    ret = new ShortAnswer();
+                    ((ShortAnswer) ret).Answer = answer.GetString();
+                    break;
+                }
+            }
+
+            if (ret != null)
+            {
+                ret.Type = type;
             }
 
             return ret;

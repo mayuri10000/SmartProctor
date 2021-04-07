@@ -14,17 +14,19 @@
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <CheckBox>@choiceQuestion.Choices[index]</CheckBox>
+                        <CheckBox @bind-Value="@_choiceChecked[index]">@((MarkupString) choiceQuestion.Choices[index])</CheckBox>
+                        <br/>
                     }
                 </div>
             }
             else
             {
-                <RadioGroup @bind-Value="@_choices[0]">
+                <RadioGroup @bind-Value="@_choiceSingle">
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <Radio Value="i">@choiceQuestion.Choices[index]</Radio>
+                        <Radio Value="index">@((MarkupString) choiceQuestion.Choices[index])</Radio>
+                        <br/>
                     }
                 </RadioGroup>
             }
@@ -34,13 +36,13 @@
         {
             if (shortAnswerQuestion.RichText)
             {
-                <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here"></HtmlEditor>
+                <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here"/>
             }
             else
             {
-                <TextArea Placeholder="Answer here"></TextArea>
+                <TextArea Placeholder="Answer here" @bind-Value="_answerString"/>
             }
-            <Button Type="primary">Save</Button>
+            <Button Type="primary" OnClick="OnSubmitAnswer">Save</Button>
         }
         </ChildContent>
 </Card>
