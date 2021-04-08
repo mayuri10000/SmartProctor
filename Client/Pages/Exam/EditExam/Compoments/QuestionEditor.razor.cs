@@ -26,6 +26,9 @@ namespace SmartProctor.Client.Pages.Exam
 
         [Parameter] 
         public int QuestionNum { get; set; }
+        
+        [Parameter] 
+        public EventCallback OnRemoveQuestion { get; set; }
 
 
         private bool _editChoice = false;
@@ -37,6 +40,7 @@ namespace SmartProctor.Client.Pages.Exam
         private bool _choiceModalLoaded = false;
 
         private string _lastQuestionType = "";
+        private bool _newQuestion = false;
 
         private BaseQuestion _question = new ChoiceQuestion()
         {
@@ -51,7 +55,7 @@ namespace SmartProctor.Client.Pages.Exam
         {
             var (res, question) = await ExamServices.GetQuestion(ExamId, QuestionNum);
 
-            if (res != ErrorCodes.Success)
+            if (res != ErrorCodes.Success && res != ErrorCodes.QuestionNotExist)
             {
                 await Modal.ErrorAsync(new ConfirmOptions()
                 {
@@ -60,6 +64,10 @@ namespace SmartProctor.Client.Pages.Exam
                 });
                 
                 return;
+            }
+            else if (res == ErrorCodes.QuestionNotExist)
+            {
+                _newQuestion = true;
             }
 
             _question = question;

@@ -19,25 +19,35 @@ namespace SmartProctor.Client.Utils
         public const int ExamNotPermitToProctor = 2002;
         public const int ExamNotBegin = 2003;
         public const int ExamExpired = 2004;
+        public const int QuestionNotExist = 2005;
+        public const int ExamNotPermitToEdit = 2006;
+        public const int ExamAlreadyJoined = 2007;
+        public const int ExamAlreadyProctored = 2008;
+        public const int ExamTakerBanned = 2009;
 
         public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
         {
-            {  -1, "Unknown Error"},
+            { UnknownError,            "Unknown Error"},
             
-            { 0000, "Success" },
+            { Success,                 "Success" },
             
-            { 1000, "Please log in first" },
-            { 1001, "User name or password incorrect" },
-            { 1002, "User name already exists" },
-            { 1003, "Email already exists" },
-            { 1004, "Phone already exists" },
-            { 1005, "Old Password Wrong"},
+            { NotLoggedIn,             "Please log in first" },
+            { UserNameOrPasswordWrong, "User name or password incorrect" },
+            { UserIdExists,            "User name already exists" },
+            { EmailExists,             "Email already exists" },
+            { PhoneExists,             "Phone already exists" },
+            { OldPasswordMismatch,     "Old Password Wrong"},
             
-            { 2000, "This exam does not exist"},
-            { 2001, "You have no permission to take this exam"},
-            { 2002, "You have no permission to proctor this exam"},
-            { 2003, "This exam have not begin yet."},
-            { 2004, "This exam has expired"}
+            { ExamNotExist,            "This exam does not exist"},
+            { ExamNotPermitToTake,     "You have no permission to take this exam"},
+            { ExamNotPermitToProctor,  "You have no permission to proctor this exam"},
+            { ExamNotBegin,            "This exam have not begin yet."},
+            { ExamExpired,             "This exam has expired"},
+            { QuestionNotExist,        "Question not exists"},
+            { ExamNotPermitToEdit,     "You have no permission to edit this exam"},
+            { ExamAlreadyJoined,       "You have already joined the exam"},
+            { ExamAlreadyProctored,    "The selected user is already a proctor of the exam"},
+            { ExamTakerBanned,         "You have been banned from the exam"}
         };
     }
 }

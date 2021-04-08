@@ -5,21 +5,25 @@
     <div class="proctor-video-bar proctor-video-bar-top" style="@("display:" + (_showToolBar ? "flex" : "none"))">
         @ExamTakerName
     </div>
-    
-    @if (_loading)
+
+    @if (Banned)
+    {
+        <Icon Type="stop" Theme="outline" Class="proctor-video-icon"/>
+    }
+    else if (Loading)
     {
         <Icon Type="loading" Theme="outline" Class="proctor-video-icon"/>
     }
-    <video id="@("video-" + ExamTakerName)" class="proctor-video" autoplay/>
+    <video id="@(ExamTakerName + "-video")" class="proctor-video" autoplay/>
     <div class="proctor-video-bar proctor-video-bar-bottom" style="@("display:" + (_showToolBar ? "flex" : "none"))">
         <Space>
             <SpaceItem>
                 <Tooltip Title="@("Toggle camera/desktop")">
                     <RadioGroup Size="small" @bind-Value="_showingDesktop" ButtonStyle="solid">
-                        <Radio RadioButton Value="@false">
+                        <Radio RadioButton Value="@false" CheckedChanged="_ => ToggleDesktopCamera()">
                             <Icon Type="video-camera" Theme="outline"/>
                         </Radio>
-                        <Radio RadioButton Value="@true">
+                        <Radio RadioButton Value="@true" CheckedChanged="_ => ToggleDesktopCamera()">
                             <Icon Type="desktop" Theme="outline"/>
                         </Radio>
                     </RadioGroup>
@@ -42,6 +46,15 @@
                         </Button>
                     </Tooltip>
                 }
+            </SpaceItem>
+            <SpaceItem>
+                <Tooltip Title="@("Messages")">
+                    <Badge Dot Count="@(_haveNewMessage ? 1 : 0)">
+                        <Button Type="default" Size="small">
+                            <Icon Type="message" Theme="outline"/>
+                        </Button>
+                    </Badge>
+                </Tooltip>
             </SpaceItem>
             <SpaceItem>
                 <Tooltip Title="@("Ban the test taker")">

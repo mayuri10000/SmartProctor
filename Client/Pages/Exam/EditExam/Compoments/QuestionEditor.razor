@@ -1,16 +1,23 @@
 ﻿@using SmartProctor.Shared.Questions
 @namespace SmartProctor.Client.Pages.Exam
 
-<Card Title="@("Question " + QuestionNum)">
+<Card>
+    <TitleTemplate>
+        @("Question " + QuestionNum)
+        @if (_newQuestion)
+        {
+            <Tag Color="green">NEW</Tag>
+        }
+    </TitleTemplate>
     <Extra>
-        <Button Type="primary" Danger>
-            <Icon Type="close" Theme="outline"></Icon>
+        <Button Type="primary" Danger OnClick="_ => OnRemoveQuestion.InvokeAsync()">
+            <Icon Type="close" Theme="outline"/>
             Remove
         </Button>
     </Extra>
     <ChildContent>
         <HtmlEditor @ref="@_questionTextEditor" PlaceHolder="Question text here"/>
-        <Divider></Divider>
+        <Divider/>
         <Form Model="_question" LabelColSpan="8" WrapperColSpan="16">
             <FormItem Label="Question type">
                 <RadioGroup @bind-Value="@context.QuestionType">
@@ -71,7 +78,8 @@
                     <Checkbox @bind-Value="@sq.RichText"></Checkbox>
                 </FormItem>
             }
-        </Form></ChildContent>
+        </Form>
+    </ChildContent>
 </Card>
 <Modal Visible="_editChoice" OnOk="OnChoiceConfirmed" OnCancel="OnChoiceCancel" Title="Edit choice">
     <ChildContent>

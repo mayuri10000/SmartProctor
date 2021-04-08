@@ -1,0 +1,17 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@using SmartProctor.Shared.Responses
+@inherits AntDomComponentBase
+
+<Space Class="@ClassMapper.Class" Style="margin-right: 60px;">
+    <SpaceItem>
+        <!-- TODO: Add a countdown timer -->
+    </SpaceItem>
+    <SpaceItem>
+        <UserDropdown/>
+    </SpaceItem>
+</Space>
+
+@code {
+    [Parameter]
+    public int ExamId { get; set; }
+}

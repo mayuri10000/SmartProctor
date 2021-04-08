@@ -62,7 +62,8 @@
                 // Bug of Blazor, @ref cannot directly use the index variable, see
                 // https://stackoverflow.com/questions/58205090/using-ref-inside-for-loop-to-get-element-reference
                 var index = i;
-                <QuestionEditor @ref="@_questionEditors[index]" ExamId="@_examId" QuestionNum="@(i + 1)"/>
+                <QuestionEditor @ref="@_questionEditors[index]" ExamId="@_examId" 
+                                 QuestionNum="@(i + 1)" OnRemoveQuestion="() => RemoveQuestion(index)"/>
             }
 
             <Card>

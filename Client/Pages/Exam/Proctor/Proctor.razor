@@ -3,5 +3,30 @@
 @layout EmptyLayout
 
 <BasicLayout
-    Title="SmartProctor">
+    Title="@(_examDetails?.Name ?? "")"
+    MenuRender="false"
+    Logo="_logo">
+    <RightContentRender>
+        <RightContentProctor ExamId="_examId"/>
+    </RightContentRender>
+    <ChildContent>
+        @for (var rows = 0; rows < _testTakers.Length / NUM_COLS; rows++)
+        {
+            <Row>
+                @for (var i = rows * NUM_COLS; i < Math.Min(_testTakers.Length, NUM_COLS); i++)
+                {
+                    var index = i;
+                    <Col Span="@(24 / NUM_COLS)">
+                        <ExamTakerVideoCard @ref="@_examTakerVideoCards[index]"
+                                             ExamTakerName="@_testTakers[index]"
+                                             OnBanExamTaker="() => BanTestTaker(_testTakers[index])"
+                                             OnToggleCamera="() => OnToggleCamera(_testTakers[index])"
+                                             OnToggleDesktop="() => OnToggleDesktop(_testTakers[index])"/>
+                    </Col>
+                }
+            </Row>
+        }
+    </ChildContent>
+    <FooterRender>
+    </FooterRender>
 </BasicLayout>

@@ -139,5 +139,10 @@ namespace SmartProctor.Client.Pages.Exam
                 await e.SaveQuestion();
             }
         }
+
+        private async Task RemoveQuestion(int index)
+        {
+            
+        }
     }
 }
