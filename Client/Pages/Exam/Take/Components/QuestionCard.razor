@@ -14,7 +14,7 @@
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <CheckBox @bind-Value="@_choiceChecked[index]">@((MarkupString) choiceQuestion.Choices[index])</CheckBox>
+                        <CheckBox Value="@_choiceChecked[index]">@((MarkupString) choiceQuestion.Choices[index])</CheckBox>
                         <br/>
                     }
                 </div>

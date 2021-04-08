@@ -15,7 +15,15 @@
         <ChildContent>
             <div class="standardList">
                 <Card Title="Test Page">
-                    <TextArea OnBlur="OnBlur"></TextArea>
+                    <Row>
+                        <Col Span="8">
+                            <ExamTakerVideoCard ExamTakerName="Test"></ExamTakerVideoCard>
+                        </Col>
+                        <Col Span="8">
+                                                    <ExamTakerVideoCard ExamTakerName="Test"></ExamTakerVideoCard>
+                                                </Col>
+                    </Row>
+                    
                 </Card>
             </div>
         </ChildContent>
@@ -24,8 +32,4 @@
 
 @code
 {
-    private async Task OnBlur()
-    {
-        await msg.Info("OnBlur");
-    }
 }

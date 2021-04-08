@@ -34,7 +34,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         [Parameter] public EventCallback OnFinish { get; set; }
 
-        [Parameter] public string ExamId { get; set; }
+        [Parameter] public int ExamId { get; set; }
 
         [Parameter] public bool Visible { get; set; }
 
