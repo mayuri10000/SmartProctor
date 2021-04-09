@@ -19,9 +19,9 @@
                 </Descriptions> 
             </Content>
             <ChildContent>
-                @for (var i = 0; i < _questionNum; i++)
+                @for (var i = 0; i < _examDetails.QuestionCount; i++)
                 {
-                    <QuestionCard ExamId="_examId" QuestionNum="@i"/>
+                    <QuestionCard ExamId="_examId" QuestionNum="@(i + 1)"/>
                 }
             </ChildContent>
         </PageContainer>
