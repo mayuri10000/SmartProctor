@@ -95,7 +95,7 @@ namespace SmartProctor.Client.Pages.Exam
             _updateExamDetailsModel.Name = details.Name;
             _updateExamDetailsModel.Description = details.Description;
             _updateExamDetailsModel.StartTime = details.StartTime;
-            _updateExamDetailsModel.Duration = new DateTime(1999, 04, 27, hours, minutes, seconds);
+            _updateExamDetailsModel.Duration = new DateTime(1999, 04, 27, 10, minutes, seconds);
             _updateExamDetailsModel.OpenBook = details.OpenBook;
             _updateExamDetailsModel.MaximumTakersNum = details.MaxTakers;
 

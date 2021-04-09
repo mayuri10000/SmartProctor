@@ -36,7 +36,7 @@
                              Style="margin-right: 100px; margin-left: 10px; max-height: 50%; overflow: scroll">
                         <ChildContent Context="item">
                             <ListItem>
-                                <span>@((MarkupString) item)</span>
+                                <span>@item</span>
                                 <div>
                                     <Button Type="@ButtonType.Link"
                                             Style="padding-left: 2px; padding-right: 2px" OnClick="() => OnEditChoice(item)">
@@ -83,6 +83,6 @@
 </Card>
 <Modal Visible="_editChoice" OnOk="OnChoiceConfirmed" OnCancel="OnChoiceCancel" Title="Edit choice">
     <ChildContent>
-        <HtmlEditor @ref="@_choiceEditor"/>
+        <TextArea @bind-Value="@_choiceEditor"/>
     </ChildContent>
 </Modal>

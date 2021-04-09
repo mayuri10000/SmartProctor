@@ -311,7 +311,7 @@ namespace SmartProctor.Client.Services
                 json.WriteString("answer", shortAnswer.Answer);
             }
             
-            json.WriteEndArray();
+            json.WriteEndObject();
             json.Flush();
             
             return Encoding.UTF8.GetString(ms.ToArray());

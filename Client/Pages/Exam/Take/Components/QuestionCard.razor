@@ -5,7 +5,6 @@
         <Paragraph>
             @((MarkupString) _question.Question)
         </Paragraph>
-        <Divider/>
         @if (_question is ChoiceQuestion choiceQuestion)
         {
             if (choiceQuestion.MultiChoice)
@@ -14,7 +13,7 @@
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <CheckBox Value="@_choiceChecked[index]">@((MarkupString) choiceQuestion.Choices[index])</CheckBox>
+                        <Checkbox Value="@_choiceChecked[index]">@choiceQuestion.Choices[index]</Checkbox>
                         <br/>
                     }
                 </div>
@@ -25,7 +24,7 @@
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <Radio Value="index">@((MarkupString) choiceQuestion.Choices[index])</Radio>
+                        <Radio Value="index">@choiceQuestion.Choices[index]</Radio>
                         <br/>
                     }
                 </RadioGroup>
@@ -44,5 +43,5 @@
             }
             <Button Type="primary" OnClick="OnSubmitAnswer">Save</Button>
         }
-        </ChildContent>
+    </ChildContent>
 </Card>

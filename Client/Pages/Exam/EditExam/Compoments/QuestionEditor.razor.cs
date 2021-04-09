@@ -35,7 +35,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         private string _currentEditChoice = null;
         private HtmlEditor _questionTextEditor;
-        private HtmlEditor _choiceEditor;
+        private string _choiceEditor;
 
         private bool _choiceModalLoaded = false;
 
@@ -115,7 +115,7 @@ namespace SmartProctor.Client.Pages.Exam
                 _choiceModalLoaded = true;
             }
 
-            await _choiceEditor.LoadHtmlString("");
+            _choiceEditor = "";
         }
 
         private async Task OnEditChoice(string choice)
@@ -128,7 +128,7 @@ namespace SmartProctor.Client.Pages.Exam
                 _choiceModalLoaded = true;
             }
 
-            await _choiceEditor.LoadHtmlString(_currentEditChoice);
+            _choiceEditor = _currentEditChoice;
         }
 
         private void OnRemoveChoice(string choice)
@@ -170,7 +170,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async Task OnChoiceConfirmed()
         {
-            var content = await _choiceEditor.GetHtmlString();
+            var content = _choiceEditor;
             if (_question is ChoiceQuestion q)
             {
                 if (q.Choices.Contains(content) && _currentEditChoice != content)
