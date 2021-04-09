@@ -59,11 +59,16 @@ namespace SmartProctor.Client.Pages.Exam
             if (await Attempt())
             {
                 await GetExamDetails();
+                Console.WriteLine("GetExamDetails()");
                 await GetExamTakers();
+                Console.WriteLine("GetExamTakers()");
                 await SetupSignalRClient();
+                Console.WriteLine("SetupSignalRClient()");
                 SetupWebRTC();
+                Console.WriteLine("SetupWebRTC()");
                 await _hubConnection.SendAsync("ProctorJoin", ExamId);
                 StateHasChanged();
+                Console.WriteLine("_hubConnection.SendAsync(\"ProctorJoin\", ExamId);");
             }
         }
 
@@ -110,8 +115,9 @@ namespace SmartProctor.Client.Pages.Exam
             var (err, takers) = await ExamServices.GetTestTakers(_examId);
             if (err == ErrorCodes.Success)
             {
-                _examTakerVideoCards = new ExamTakerVideoCard[_testTakers.Length];
+                _examTakerVideoCards = new ExamTakerVideoCard[takers.Length];
                 _testTakers = takers;
+                Console.WriteLine("_testTakers.Length = " + _testTakers.Length);
             }
         }
 
@@ -130,6 +136,18 @@ namespace SmartProctor.Client.Pages.Exam
             
             _webRtcClient.OnCameraIceCandidate += (_, e) =>
                 _hubConnection.SendAsync("CameraIceCandidateFromProctor", e.Item1, e.Item2);
+
+            _webRtcClient.OnCameraMuted += (_, e) =>
+                getExamTakerVideoCard(e).CameraLoading = true;
+
+            _webRtcClient.OnCameraUnmuted += (_, e) =>
+                getExamTakerVideoCard(e).CameraLoading = false;
+
+            _webRtcClient.OnDesktopMuted += (_, e) =>
+                getExamTakerVideoCard(e).DesktopLoading = true;
+
+            _webRtcClient.OnDesktopUnmuted += (_, e) =>
+                getExamTakerVideoCard(e).DesktopLoading = false;
         }
         
         private async Task SetupSignalRClient()
@@ -138,8 +156,8 @@ namespace SmartProctor.Client.Pages.Exam
                 .WithUrl(NavManager.ToAbsoluteUri("/hub"))
                 .Build();
 
-            _hubConnection.On<string>("ReceiveMessage",
-                (message) =>
+            _hubConnection.On<string, string>("ReceiveMessage",
+                (testTaker, message) =>
                 {
                     // TODO: Process and display message
                 });
@@ -165,16 +183,32 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async Task OnToggleDesktop(string testTaker)
         {
+            Console.WriteLine($"OnToggleDesktop({testTaker})");
             await _webRtcClient.SetDesktopVideoElem(testTaker, testTaker + "-video");
         }
         
         private async Task OnToggleCamera(string testTaker)
         {
+            Console.WriteLine($"OnToggleCamera({testTaker})");
             await _webRtcClient.SetCameraVideoElem(testTaker, testTaker + "-video");
         }
         private async Task BanTestTaker(string testTaker)
         {
             // TODO
+        }
+
+        private ExamTakerVideoCard getExamTakerVideoCard(string testTaker)
+        {
+            Console.WriteLine("getExamTakerVideoCard(" + testTaker + ")");
+            foreach (var i in _examTakerVideoCards)
+            {
+                if (i.ExamTakerName == testTaker)
+                {
+                    return i;
+                }
+            }
+
+            return null;
         }
     }
 }

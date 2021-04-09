@@ -64,12 +64,32 @@ var SmartProctor;
                             desktopStream: null,
                             cameraStream: null
                         };
-                        // @ts-ignore
-                        desktopConnection.onaddstream = function (e) {
+                        desktopConnection.ontrack = function (e) {
+                            var track = e.track;
+                            track.onmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopMuted", testTaker)];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            track.onunmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopUnmuted", testTaker)];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
                             if (_this.testTakerConnections[testTaker].desktopVideoElem != null)
                                 // @ts-ignore
-                                _this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.stream;
-                            _this.testTakerConnections[testTaker].desktopStream = e.stream;
+                                _this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.streams[0];
+                            _this.testTakerConnections[testTaker].desktopStream = e.streams[0];
                             console.log("get desktop stream: " + testTaker);
                         };
                         desktopConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
@@ -95,11 +115,32 @@ var SmartProctor;
                             });
                         }); };
                         // @ts-ignore
-                        cameraConnection.onaddstream = function (e) {
+                        cameraConnection.ontrack = function (e) {
+                            var track = e.track;
+                            track.onmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraMuted", testTaker)];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
+                            track.onunmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraUnmuted", testTaker)];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
                             if (_this.testTakerConnections[testTaker].cameraVideoElem != null)
                                 // @ts-ignore
-                                _this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.stream;
-                            _this.testTakerConnections[testTaker].cameraStream = e.stream;
+                                _this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.streams[0];
+                            _this.testTakerConnections[testTaker].cameraStream = e.streams[0];
                         };
                         cameraConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {

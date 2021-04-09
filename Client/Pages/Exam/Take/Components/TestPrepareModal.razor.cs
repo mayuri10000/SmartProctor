@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
@@ -34,7 +35,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         [Parameter] public EventCallback OnFinish { get; set; }
 
-        [Parameter] public int ExamId { get; set; }
+        [Parameter] public string ExamId { get; set; }
 
         [Parameter] public bool Visible { get; set; }
 
@@ -135,7 +136,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         public bool ShareScreenComplete(string streamLabel)
         {
-            if (streamLabel == "screen:0:0")
+            if (streamLabel == "screen:0:0" || streamLabel == "Screen 1") // Capable with Chrome and Firefox
             {
                 tipType = 1;
                 tipText = "Screen capture obtained successfully";

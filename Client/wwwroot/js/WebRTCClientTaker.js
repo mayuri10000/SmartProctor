@@ -110,6 +110,7 @@ var SmartProctor;
         WebRTCClientTaker.prototype.obtainDesktopStream = function () {
             return __awaiter(this, void 0, void 0, function () {
                 var _a;
+                var _this = this;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -119,6 +120,17 @@ var SmartProctor;
                         case 1:
                             // @ts-ignore
                             _a.desktopStream = _b.sent();
+                            // @ts-ignore
+                            this.desktopStream.oninactive = function (_) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopInactivated")];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); };
                             return [2 /*return*/, this.desktopStream.getTracks()[0].label];
                     }
                 });

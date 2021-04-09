@@ -16,12 +16,16 @@ namespace SmartProctor.Client.Pages.Exam
         
         [Parameter]
         public EventCallback OnToggleCamera { get; set; }
-        
-        [Parameter]
-        public bool Loading { get; set; }
+
+        [Parameter] public bool DesktopLoading { get; set; } = true;
+
+        [Parameter] public bool CameraLoading { get; set; } = true;
         
         [Parameter]
         public bool Banned { get; set; }
+        
+        [Parameter]
+        public int CardsEachRow { get; set; }
 
         private bool _showToolBar = false;
         private bool _showingDesktop = false;
@@ -53,14 +57,12 @@ namespace SmartProctor.Client.Pages.Exam
         {
             if (_showingDesktop)
             {
-                await OnToggleCamera.InvokeAsync();
+                await OnToggleDesktop.InvokeAsync();
             }
             else
             {
-                await OnToggleDesktop.InvokeAsync();
+                await OnToggleCamera.InvokeAsync();
             }
-
-            _showingDesktop = !_showingDesktop;
         }
     }
 }

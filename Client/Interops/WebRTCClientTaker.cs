@@ -20,7 +20,7 @@ namespace SmartProctor.Client.Interops
         public event EventHandler<(string, RTCSessionDescriptionInit)> OnProctorSdp;
         public event EventHandler<string> OnCameraConnectionStateChange;
         public event EventHandler<(string, string)> OnProctorConnectionStateChange;
-        public event EventHandler OnDesktopMuted;
+        public event EventHandler OnDesktopInactivated;
 
         public WebRTCClientTaker(IJSRuntime jsRuntime, string[] proctors)
         {
@@ -142,9 +142,9 @@ namespace SmartProctor.Client.Interops
         }
 
         [JSInvokable]
-        public ValueTask _onDesktopMuted()
+        public ValueTask _onDesktopInactivated()
         {
-            OnDesktopMuted?.Invoke(this, EventArgs.Empty);
+            OnDesktopInactivated?.Invoke(this, EventArgs.Empty);
             return ValueTask.CompletedTask;
         }
     }

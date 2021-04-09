@@ -102,5 +102,10 @@ namespace SmartProctor.Client.Pages.Exam
 
             return sb.ToString();
         }
+
+        private void OnCreateExamClicked()
+        {
+            NavManager.NavigateTo("/Exam/Create");
+        }
     }
 }

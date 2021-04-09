@@ -1,68 +1,71 @@
 ﻿@namespace SmartProctor.Client.Pages.Exam
 
-<div @onmouseover="OnMouseOver" @onmouseout="OnMouseOut"
-      class="@(_fullscreen ? "proctor-video-container-fullscreen" : "proctor-video-container")">
-    <div class="proctor-video-bar proctor-video-bar-top" style="@("display:" + (_showToolBar ? "flex" : "none"))">
-        @ExamTakerName
-    </div>
+@** This component should be placed in one Row **@
+<Col Span="@(24 / CardsEachRow)" Class="@(_haveNewMessage ? "proctor-video-card-with-notification" : "proctor-video-card")">
+    <div @onmouseover="OnMouseOver" @onmouseout="OnMouseOut"
+          class="@(_fullscreen ? "proctor-video-container-fullscreen" : "proctor-video-container")">
+        <div class="proctor-video-bar proctor-video-bar-top" style="@("display:" + (_showToolBar ? "flex" : "none"))">
+            @ExamTakerName
+        </div>
 
-    @if (Banned)
-    {
-        <Icon Type="stop" Theme="outline" Class="proctor-video-icon"/>
-    }
-    else if (Loading)
-    {
-        <Icon Type="loading" Theme="outline" Class="proctor-video-icon"/>
-    }
-    <video id="@(ExamTakerName + "-video")" class="proctor-video" autoplay/>
-    <div class="proctor-video-bar proctor-video-bar-bottom" style="@("display:" + (_showToolBar ? "flex" : "none"))">
-        <Space>
-            <SpaceItem>
-                <Tooltip Title="@("Toggle camera/desktop")">
-                    <RadioGroup Size="small" @bind-Value="_showingDesktop" ButtonStyle="solid">
-                        <Radio RadioButton Value="@false" CheckedChanged="_ => ToggleDesktopCamera()">
-                            <Icon Type="video-camera" Theme="outline"/>
-                        </Radio>
-                        <Radio RadioButton Value="@true" CheckedChanged="_ => ToggleDesktopCamera()">
-                            <Icon Type="desktop" Theme="outline"/>
-                        </Radio>
-                    </RadioGroup>
-                </Tooltip>
-            </SpaceItem>
-            <SpaceItem>
-                @if (_fullscreen)
-                {
-                    <Tooltip Title="@("Exit fullscreen")">
-                        <Button Type="primary" Size="small" OnClick="ToggleFullscreen">
-                            <Icon Type="fullscreen-exit" Theme="outline"/>
+        @if (Banned)
+        {
+            <Icon Type="stop" Theme="outline" Class="proctor-video-icon"/>
+        }
+        else if ((_showingDesktop && DesktopLoading) || (!_showingDesktop && CameraLoading))
+        {
+            <Icon Type="loading" Theme="outline" Class="proctor-video-icon"/>
+        }
+        <video id="@(ExamTakerName + "-video")" class="proctor-video" autoplay/>
+        <div class="proctor-video-bar proctor-video-bar-bottom" style="@("display:" + (_showToolBar ? "flex" : "none"))">
+            <Space>
+                <SpaceItem>
+                    <Tooltip Title="@("Toggle camera/desktop")">
+                        <RadioGroup Size="small" @bind-Value="_showingDesktop" ButtonStyle="solid">
+                            <Radio RadioButton Value="@false" CheckedChanged="_ => ToggleDesktopCamera()">
+                                <Icon Type="video-camera" Theme="outline"/>
+                            </Radio>
+                            <Radio RadioButton Value="@true" CheckedChanged="_ => ToggleDesktopCamera()">
+                                <Icon Type="desktop" Theme="outline"/>
+                            </Radio>
+                        </RadioGroup>
+                    </Tooltip>
+                </SpaceItem>
+                <SpaceItem>
+                    @if (_fullscreen)
+                    {
+                        <Tooltip Title="@("Exit fullscreen")">
+                            <Button Type="primary" Size="small" OnClick="ToggleFullscreen">
+                                <Icon Type="fullscreen-exit" Theme="outline"/>
+                            </Button>
+                        </Tooltip>
+                    }
+                    else
+                    {
+                        <Tooltip Title="@("Show in fullscreen")">
+                            <Button Type="default" Size="small" OnClick="ToggleFullscreen">
+                                <Icon Type="fullscreen" Theme="outline"/>
+                            </Button>
+                        </Tooltip>
+                    }
+                </SpaceItem>
+                <SpaceItem>
+                    <Tooltip Title="@("Messages")">
+                        <Badge Dot Count="@(_haveNewMessage ? 1 : 0)">
+                            <Button Type="default" Size="small">
+                                <Icon Type="message" Theme="outline"/>
+                            </Button>
+                        </Badge>
+                    </Tooltip>
+                </SpaceItem>
+                <SpaceItem>
+                    <Tooltip Title="@("Ban the test taker")">
+                        <Button Danger Type="primary" Size="small">
+                            <Icon Type="stop" Theme="outline"/>
                         </Button>
                     </Tooltip>
-                }
-                else
-                {
-                    <Tooltip Title="@("Show in fullscreen")">
-                        <Button Type="default" Size="small" OnClick="ToggleFullscreen">
-                            <Icon Type="fullscreen" Theme="outline"/>
-                        </Button>
-                    </Tooltip>
-                }
-            </SpaceItem>
-            <SpaceItem>
-                <Tooltip Title="@("Messages")">
-                    <Badge Dot Count="@(_haveNewMessage ? 1 : 0)">
-                        <Button Type="default" Size="small">
-                            <Icon Type="message" Theme="outline"/>
-                        </Button>
-                    </Badge>
-                </Tooltip>
-            </SpaceItem>
-            <SpaceItem>
-                <Tooltip Title="@("Ban the test taker")">
-                    <Button Danger Type="primary" Size="small">
-                        <Icon Type="stop" Theme="outline"/>
-                    </Button>
-                </Tooltip>
-            </SpaceItem>
-        </Space>
+                </SpaceItem>
+            </Space>
+        </div>
     </div>
-</div>
+</Col>

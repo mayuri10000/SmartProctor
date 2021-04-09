@@ -68,6 +68,7 @@ namespace SmartProctor.Client.Pages.Exam
             else if (res == ErrorCodes.QuestionNotExist)
             {
                 _newQuestion = true;
+                return;
             }
 
             _question = question;

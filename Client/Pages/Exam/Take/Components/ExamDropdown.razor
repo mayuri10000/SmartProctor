@@ -5,7 +5,7 @@
         <Popover Placement="PlacementType.BottomRight" OnVisibleChange="OnCameraVideoVisibleChange">
             <ContentTemplate>
                 <Spin Spinning="_cameraVideoLoading">
-                    <video id="local-camera" autoplay class="proctor-video"></video>
+                    <video id="local-camera" autoplay class="taker-video"></video>
                 </Spin>
             </ContentTemplate>
             <ChildContent>
@@ -18,7 +18,7 @@
     <SpaceItem>
         <Popover Placement="PlacementType.BottomRight" OnVisibleChange="OnDesktopVideoVisibleChange">
             <ContentTemplate>
-                <video id="local-desktop" autoplay class="proctor-video"></video>
+                <video id="local-desktop" autoplay class="taker-video"></video>
             </ContentTemplate>
             <ChildContent>
                 <span class="action account">
@@ -31,3 +31,7 @@
 <TestPrepareModal @ref="@_testPrepareModal" ExamId="@ExamId"
                    OnShareScreen="OnShareScreen" OnFinish="OnPrepareFinish"
                    Visible="@_inPrepare"/>
+<ReshareScreenModal @ref="@_reshareScreenModal" 
+                     OnShareScreen="OnReshareScreen" 
+                     OnFinish="OnReshareScreenFinish" 
+                     Visible="@_inReshare"/>

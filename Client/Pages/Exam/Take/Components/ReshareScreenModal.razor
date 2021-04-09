@@ -1,0 +1,31 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@using SmartProctor.Shared.Responses
+
+@{
+    RenderFragment footer = @<div>
+                                <Button Type="primary" Disabled="!_validScreenShare"
+                                        OnClick="async () => await OnFinish.InvokeAsync()">
+                                    Finish
+                                </Button>
+                            </div>;
+}
+
+<Modal Title="Reconnect desktop capture" Footer="footer" Visible="Visible" Style="width:800px;" DestroyOnClose>
+        <Paragraph>
+            Your desktop capture dropped, you might accidently clicked the "Stop sharing" button of the browser's screen 
+            sharing toolbar, or something on your PC have blocked the screen sharing. Please reconnect your screen capture
+            by clicking "Share screen" below.
+        </Paragraph>
+        <Paragraph>
+            <Button Type="primary" OnClick="() => OnShareScreen.InvokeAsync()">Share screen</Button>
+        </Paragraph>
+        <Paragraph>
+            <video class="taker-video-large" id="desktop-video-dialog" autoplay></video>
+        </Paragraph>
+    @if (tipType != 0)
+    {
+        <Alert Type="@(tipType == 1 ? AlertType.Success : AlertType.Error)"
+               Message="@tipText" ShowIcon>
+        </Alert>
+    }
+</Modal>

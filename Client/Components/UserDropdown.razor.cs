@@ -8,20 +8,31 @@ namespace SmartProctor.Client.Components
 {
     public partial class UserDropdown
     {
-        [Parameter]
-        public string UserAvatar { get; set; }
-    
-        [Parameter]
-        public string UserName { get; set; }
-        
-        [Inject]
-        public IUserServices UserServices { get; set; }
-        
         [Inject]
         public ModalService Modal { get; set; }
         
         [Inject]
         public NavigationManager NavManager { get; set; }
+        
+        [Inject]
+        public IUserServices UserServices { get; set; }
+
+        private string _avatar = "";
+
+        private string _userName = "Not logged in";
+
+        protected override async Task OnInitializedAsync()
+        {
+            var (res, details) = await UserServices.GetUserDetails();
+            
+            if (res == ErrorCodes.Success)
+            {
+                _avatar = details.Avatar ?? "";
+                _userName = details.NickName;
+            }
+
+            StateHasChanged();
+        }
 
         private void GoToSettings()
         {

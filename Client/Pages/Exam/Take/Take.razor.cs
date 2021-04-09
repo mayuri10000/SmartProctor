@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using SmartProctor.Shared.Questions;
 using SmartProctor.Shared.Responses;
 
@@ -18,5 +19,9 @@ namespace SmartProctor.Client.Pages.Exam
         private ExamDetails _examDetails = new ExamDetails();
 
         private int _questionNum;
+
+        protected override async Task OnInitializedAsync()
+        {
+        }
     }
 }

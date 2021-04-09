@@ -6,7 +6,7 @@
 @inject IExamServices ExamServices
 
 <div>
-    <PageContainer Title="Exams to proctor">
+    <PageContainer Title="My Exams">
         <Breadcrumb>
             <Breadcrumb>
                 <BreadcrumbItem>Exams</BreadcrumbItem>
@@ -31,6 +31,10 @@
                         </div>
                     </Extra>
                     <ChildContent>
+                        <Button Type="dashed" Style="width: 100%; margin-bottom: 8px;" OnClick="OnCreateExamClicked">
+                            <Icon Type="plus" Theme="outline"/>
+                            Create new exam
+                        </Button>
                         <AntList TItem="ExamDetails"
                                  DataSource="_filteredExamList"
                                  ItemLayout="ListItemLayout.Horizontal">

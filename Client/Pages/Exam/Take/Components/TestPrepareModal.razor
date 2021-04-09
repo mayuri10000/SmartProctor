@@ -17,7 +17,7 @@
                             </div>;
 }
 
-<Modal Title="Enter the test" Footer="footer" Visible="Visible" Style="width:800px; ">
+<Modal Title="Enter the test" Footer="footer" Visible="Visible" Style="width:800px; " DestroyOnClose>
     <div style="@(currentStep == 1 ? "" : "display:none")">
         <Paragraph>
             Before entering the test, please get your DeepLens hardware connected. To
@@ -103,7 +103,7 @@
             your DeepLens hardware on an angle where your entire desktop, your computer screen is visible.
         </Paragraph>
         <Paragraph>
-            <video class="proctor-video-large" id="camera-video-dialog" autoplay></video>
+            <video class="taker-video-large" id="camera-video-dialog" autoplay></video>
         </Paragraph>
     </div>
     <div style="@(currentStep == 4 ? "" : "display:none")">
@@ -115,7 +115,7 @@
             <Button Type="primary" OnClick="() => OnShareScreen.InvokeAsync()">Share screen</Button>
         </Paragraph>
         <Paragraph>
-            <video class="proctor-video-large" id="desktop-video-dialog" autoplay></video>
+            <video class="taker-video-large" id="desktop-video-dialog" autoplay></video>
         </Paragraph>
     </div>
     @if (tipType != 0)
