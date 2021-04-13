@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AntDesign;
+using BrowserInterop;
+using BrowserInterop.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
@@ -46,6 +48,8 @@ namespace SmartProctor.Client.Pages.Exam
         private TestPrepareModal _testPrepareModal;
         private ReshareScreenModal _reshareScreenModal;
 
+        private WindowInterop _window;
+
         protected override async Task OnInitializedAsync()
         {
             _examId = int.Parse(ExamId);
@@ -54,11 +58,31 @@ namespace SmartProctor.Client.Pages.Exam
                 _inPrepare = true;
                 await GetProctors();
                 await SetupSignalRClient();
+                await SetupBlurMonitor();
                 SetupWebRTCClient();
                 StateHasChanged();
             }
         }
-        
+
+        private async Task SetupBlurMonitor()
+        {
+            _window = await JsRuntime.Window();
+            await _window.OnBlur(OnBlur);
+        }
+
+        private async ValueTask OnBlur()
+        {
+            await _window.Focus();
+            await _hubConnection.SendAsync("TestTakerMessage", ExamId, "warning", "The exam taker left the exam page")
+                .ConfigureAwait(false);
+            await Modal.ErrorAsync(new ConfirmOptions()
+            {
+                Title = "DO NOT LEAVE THE EXAM PAGE!",
+                Content = "Your screen monitored by the proctors."
+            }).ConfigureAwait(false);
+            
+        }
+
         private async Task GetProctors()
         {
             var (ret, proctors) = await ExamServices.GetProctors(_examId);
@@ -116,17 +140,19 @@ namespace SmartProctor.Client.Pages.Exam
 
             _webRtcClient.OnCameraIceCandidate += (_, candidate) =>
             {
-                _hubConnection.SendAsync("CameraIceCandidateToTaker", candidate);
+                _hubConnection.SendAsync("CameraIceCandidateFromTaker", candidate);
             };
             
             _webRtcClient.OnCameraConnectionStateChange += (_, state) =>
             {
+                Console.WriteLine("Camera connection state changed to " + state);
                 _cameraVideoLoading = state != "connected";
             };
 
             _webRtcClient.OnDesktopInactivated += (_, __) =>
             {
-                Console.WriteLine("Desktop capture dropped");
+                _hubConnection.SendAsync("TestTakerMessage", ExamId,"warning",
+                    "The test taker's desktop capture was cancelled");
                 _inReshare = true;
             };
         }

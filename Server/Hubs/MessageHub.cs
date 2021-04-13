@@ -14,19 +14,13 @@ namespace SmartProctor.Server.Hubs
         private IUserServices _userServices;
         private IExamServices _examServices;
 
-        private IDictionary<string, string> _userGroupDict = new Dictionary<string, string>();
-
         public MessageHub(IExamServices examServices, IUserServices userServices)
         {
             _examServices = examServices;
             _userServices = userServices;
         }
 
-        public async Task Test()
-        {
-            await Clients.Caller.SendAsync("TestBack",
-                Context.UserIdentifier ?? "null");
-        }
+        
 
         public async Task ProctorJoin(string examId)
         {
@@ -41,34 +35,34 @@ namespace SmartProctor.Server.Hubs
         }
         
 
-        public override async Task OnDisconnectedAsync(Exception? exception)
+        public async Task ProctorMessageIndividual(string user, string message)
         {
-            if (_userGroupDict.ContainsKey(Context.ConnectionId))
+            await Clients.User(user).SendAsync("ReceiveMessage", Context.UserIdentifier, message);
+        }
+
+        public async Task TestTakerMessage(string examId, string messageType, string message)
+        {
+            var proctors = _examServices.GetProctors(int.Parse(examId));
+            if (proctors != null)
             {
-                await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
-                    .SendAsync("ExamTakerLeave", Context.Items["uid"]);
-                _userGroupDict.Remove(Context.ConnectionId);
+                foreach (var proctor in proctors)
+                {
+                    await Clients.User(proctor)
+                        .SendAsync("ReceiveMessage", Context.UserIdentifier, messageType, message);
+                }
             }
         }
-
-        public async Task ExamTakerMessage(string message)
-        {
-            if (_userGroupDict.ContainsKey(Context.ConnectionId))
-                await Clients.Group(_userGroupDict[Context.ConnectionId] + "-proctors")
-                    .SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
-        }
-
-        public async Task ProctorMessage(string message, string uid)
-        {
-            if (_userGroupDict.ContainsKey(Context.ConnectionId))
-                await Clients.User(uid).SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
-        }
         
-        public async Task ProctorMessageGroup(string message)
+        public async Task ProctorMessageGroup(string examId, string messageType, string message)
         {
-            if (_userGroupDict.ContainsKey(Context.ConnectionId))
-                await Clients.Group(_userGroupDict[Context.ConnectionId] + "-takers")
-                    .SendAsync("ReceiveMessage", Context.User.Identity.Name, message);
+            var examTakers = _examServices.GetExamTakers(int.Parse(examId));
+            if (examTakers != null)
+            {
+                foreach (var taker in examTakers)
+                {
+                    await Clients.User(taker).SendAsync("ReceiveMessage", Context.UserIdentifier, message);
+                }
+            }
         }
 
         public async Task DesktopOffer(string proctor, RTCSessionDescriptionInit sdp)
@@ -129,5 +123,6 @@ namespace SmartProctor.Server.Hubs
         {
             await Clients.User(testTaker).SendAsync("CameraIceCandidateFromProctor", Context.User.Identity.Name, candidate);
         }
+        
     }
 }

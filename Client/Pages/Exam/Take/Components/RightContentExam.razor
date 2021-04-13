@@ -2,9 +2,9 @@
 @using SmartProctor.Shared.Responses
 @inherits AntDomComponentBase
 
-<Space Class="@ClassMapper.Class" Style="margin-right: 60px;">
+<Space Class="@ClassMapper.Class" Style="margin-right: 60px; color: white">
     <SpaceItem>
-        <!-- TODO: Add a countdown timer -->
+        <NewCountDown Deadline="@Deadline" SecondsBeforeAlert="600" OnEnded="_ => OnEnded.InvokeAsync()"/>
     </SpaceItem>
     <SpaceItem>
         <ExamDropdown ExamId="@ExamId"/>
@@ -14,4 +14,10 @@
 @code {
     [Parameter]
     public string ExamId { get; set; }
+    
+    [Parameter]
+    public DateTime Deadline { get; set; }
+    
+    [Parameter]
+    public EventCallback OnEnded { get; set; }
 }

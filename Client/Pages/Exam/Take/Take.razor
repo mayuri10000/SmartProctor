@@ -2,12 +2,14 @@
 @page "/Exam/Take/{ExamId}"
 @layout EmptyLayout
 
-<BasicLayout 
+@if (_examDetails != null)
+{
+<BasicLayout
     Logo="@_logo"
     Title="SmartProctor"
     MenuRender="false">
     <RightContentRender>
-        <RightContentExam ExamId="@ExamId"/>
+        <RightContentExam ExamId="@ExamId" Deadline="@_examDetails.StartTime.AddSeconds(_examDetails.Duration)"/>
     </RightContentRender>
     <ChildContent>
         <PageContainer Title="@_examDetails.Name">
@@ -16,7 +18,7 @@
                     <DescriptionsItem Title="Desciption">@_examDetails.Description</DescriptionsItem>
                     <DescriptionsItem Title="Duration">@_examDetails.Duration</DescriptionsItem>
                     <DescriptionsItem Title="Open book">@(_examDetails.OpenBook ? "Yes" : "No")</DescriptionsItem>
-                </Descriptions> 
+                </Descriptions>
             </Content>
             <ChildContent>
                 @for (var i = 0; i < _examDetails.QuestionCount; i++)
@@ -29,4 +31,4 @@
     <FooterRender>
     </FooterRender>
 </BasicLayout>
-
+}

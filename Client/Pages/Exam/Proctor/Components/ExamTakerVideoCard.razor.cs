@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -33,6 +34,15 @@ namespace SmartProctor.Client.Pages.Exam
         
         private bool _haveNewMessage = false;
         
+        private List<(string, string)> _messages = new List<(string, string)>();
+        private bool _messageVisible = false;
+
+        public void AddMessage(string messageType, string message)
+        {
+            _messages.Add((messageType, message));
+            _haveNewMessage = true;
+        }
+        
         private void OnMouseOver()
         {
             _showToolBar = true;
@@ -63,6 +73,17 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 await OnToggleCamera.InvokeAsync();
             }
+        }
+
+        private void OpenMessage()
+        {
+            _haveNewMessage = false;
+            _messageVisible = true;
+        }
+
+        private void CloseMessage()
+        {
+            _messageVisible = false;
         }
     }
 }

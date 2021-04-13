@@ -156,10 +156,10 @@ namespace SmartProctor.Client.Pages.Exam
                 .WithUrl(NavManager.ToAbsoluteUri("/hub"))
                 .Build();
 
-            _hubConnection.On<string, string>("ReceiveMessage",
-                (testTaker, message) =>
+            _hubConnection.On<string, string, string>("ReceiveMessage",
+                (testTaker, messageType, message) =>
                 {
-                    // TODO: Process and display message
+                    getExamTakerVideoCard(testTaker)?.AddMessage(messageType, message);
                 });
 
             _hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedDesktopOffer",

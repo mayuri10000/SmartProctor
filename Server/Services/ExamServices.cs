@@ -64,6 +64,8 @@ namespace SmartProctor.Server.Services
 
         int GetQuestionCount(int examId);
         IList<ExamDetails> GetCreatedExams(string uid);
+        
+        int BanExamTaker(int eid, string uid, string takerUid, string reason);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -397,6 +399,41 @@ namespace SmartProctor.Server.Services
             catch
             {
                 return null;
+            }
+        }
+
+        public int BanExamTaker(int eid, string uid, string takerUid, string reason)
+        {
+            try
+            {
+                var e = GetObject(eid);
+
+                if (e == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
+
+                var q1 = _examUserRepo.GetFirstOrDefaultObject(x =>
+                    x.ExamId == eid && x.UserId == uid && x.UserRole == 2);
+                if (q1 == null)
+                {
+                    return ErrorCodes.ExamNotPermitToProctor;
+                }
+
+                var q2 = _examUserRepo.GetFirstOrDefaultObject(x =>
+                    x.ExamId == eid && x.UserId == takerUid && x.UserRole == 1);
+
+                if (q2 != null)
+                {
+                    q2.BanReason = reason;
+                    _examUserRepo.Save(q2);
+                }
+
+                return ErrorCodes.Success;
+            }
+            catch
+            {
+                return ErrorCodes.UnknownError;
             }
         }
 

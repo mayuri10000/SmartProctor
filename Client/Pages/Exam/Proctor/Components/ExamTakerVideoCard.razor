@@ -52,7 +52,7 @@
                 <SpaceItem>
                     <Tooltip Title="@("Messages")">
                         <Badge Dot Count="@(_haveNewMessage ? 1 : 0)">
-                            <Button Type="default" Size="small">
+                            <Button Type="default" Size="small" OnClick="OpenMessage">
                                 <Icon Type="message" Theme="outline"/>
                             </Button>
                         </Badge>
@@ -69,3 +69,25 @@
         </div>
     </div>
 </Col>
+
+@{
+    RenderFragment _modalFooter = @<div>
+                                      <Button OnClick="CloseMessage">Close</Button>
+                                  </div>;
+}
+
+
+<Modal Title="Messages from test taker" Visible="_messageVisible" Closable="false" Footer="_modalFooter">
+    <ChildContent>
+        <AntList DataSource="_messages">
+            <ChildContent Context="item">
+                <ListItem>
+                    <span>
+                        <Icon Type="@item.Item1" Theme="outline"/>
+                    </span>
+                    @item.Item2
+                </ListItem>
+            </ChildContent>
+        </AntList>
+    </ChildContent>
+</Modal>

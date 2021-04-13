@@ -279,4 +279,3 @@ export function create(helper, testTakers) {
     }
     return webRTCClientProctor;
 }
-//# sourceMappingURL=WebRTCClientProctor.js.map

@@ -1,0 +1,5 @@
+﻿@inherits AntDomComponentBase
+
+<div class="@(ClassMapper.Class + (_isAlert ? " timer-warn" : ""))" style="@Style">
+    @_displayString
+</div>

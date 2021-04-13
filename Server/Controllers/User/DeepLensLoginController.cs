@@ -33,7 +33,7 @@ namespace SmartProctor.Server.Controllers.User
             
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, uid),
+                new Claim(ClaimTypes.Name, uid + "_cam"),
                 new Claim(ClaimTypes.NameIdentifier, uid + "_cam"),
                 new Claim(ClaimTypes.Role, "DeepLens"),
             };

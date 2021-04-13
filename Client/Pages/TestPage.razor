@@ -1,7 +1,11 @@
 @page "/TestPage"
 @using SmartProctor.Client.Pages.Exam
+@using BrowserInterop
 @using System.Collections.Concurrent
+@using BrowserInterop.Extensions
+@using _Imports = SmartProctor.Client._Imports
 @inject MessageService msg
+@inject IJSRuntime JsRuntime
 @layout StandardLayout
 
 <div>
@@ -14,16 +18,10 @@
         </Breadcrumb>
         <ChildContent>
             <div class="standardList">
-                <Card Title="Test Page">
-                    <Row>
-                        <Col Span="8">
-                            <ExamTakerVideoCard ExamTakerName="Test"></ExamTakerVideoCard>
-                        </Col>
-                        <Col Span="8">
-                                                    <ExamTakerVideoCard ExamTakerName="Test"></ExamTakerVideoCard>
-                                                </Col>
-                    </Row>
-                    
+                <Card>
+                    @* In development, new components will be tested here, this page
+                    will be removed when the project is finished *@
+                    <NewCountDown Deadline="@(new DateTime(2021, 04, 27))" OnEnded="OnFinish"/>
                 </Card>
             </div>
         </ChildContent>
@@ -32,4 +30,19 @@
 
 @code
 {
+    protected override async Task OnInitializedAsync()
+    {
+        var window = await JsRuntime.Window();
+        await window.OnBlur(OnOffline).ConfigureAwait(false);
+    }
+
+    private async ValueTask OnOffline()
+    {
+        await msg.Info("Blur").ConfigureAwait(false);
+    }
+
+    private async Task OnFinish()
+    {
+        await msg.Info("Finish");
+    }
 }

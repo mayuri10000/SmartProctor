@@ -21,8 +21,8 @@ namespace SmartProctor.Client.Pages.Exam
         public string ExamId { get; set; }
 
         private int _examId;
-        private ExamDetailsResponseModel _examDetails = new ExamDetailsResponseModel();
 
+        private ExamDetailsResponseModel _examDetails;
         protected override async Task OnInitializedAsync()
         {
             _examId = int.Parse(ExamId);

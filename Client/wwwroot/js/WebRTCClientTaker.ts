@@ -13,13 +13,14 @@
 
         public async init(helper, proctors: string[]) {
             this.helper = helper;
-            this.cameraConnection = new RTCPeerConnection();
+            this.cameraConnection = new RTCPeerConnection(null);
 
             this.cameraConnection.onicecandidate = async (e) => {
                 await helper.invokeMethodAsync("_onCameraIceCandidate", e.candidate);
             };
 
             this.cameraConnection.onconnectionstatechange = async (e) => {
+                console.log("connection state of camera changed to '" + this.cameraConnection.connectionState + "'");
                 await helper.invokeMethodAsync("_onCameraConnectionStateChange", this.cameraConnection.connectionState);
             };
             
