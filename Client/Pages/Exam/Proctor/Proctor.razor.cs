@@ -35,6 +35,9 @@ namespace SmartProctor.Client.Pages.Exam
         [Inject]
         public NavigationManager NavManager { get; set; }
         
+        [Inject]
+        public NotificationService Notification { get; set; }
+        
         [Parameter]
         public string ExamId { get; set; }
 
@@ -157,9 +160,15 @@ namespace SmartProctor.Client.Pages.Exam
                 .Build();
 
             _hubConnection.On<string, string, string>("ReceiveMessage",
-                (testTaker, messageType, message) =>
+                async (testTaker, messageType, message) =>
                 {
                     getExamTakerVideoCard(testTaker)?.AddMessage(messageType, message);
+                    await Notification.Open(new NotificationConfig()
+                    {
+                        Message = (messageType == "warning" ? "Warning from " : "Message from ") + testTaker,
+                        NotificationType = messageType == "warning" ? NotificationType.Warning : NotificationType.Info,
+                        Description = message
+                    });
                 });
 
             _hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedDesktopOffer",

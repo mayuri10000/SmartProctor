@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AntDesign;
 using Microsoft.AspNetCore.Components;
@@ -33,6 +35,9 @@ namespace SmartProctor.Client.Pages.Exam
 
         private BaseAnswer _answer;
 
+        private Checkbox[] _checkboxes;
+        private Radio<int>[] _radios;
+
         private HtmlEditor _answerRichTextEditor;
         private string _answerString;
         private int _choiceSingle;
@@ -54,12 +59,14 @@ namespace SmartProctor.Client.Pages.Exam
 
             _question = question;
 
-            if (question.QuestionType == "choice")
+            if (question is ChoiceQuestion)
             {
                 _answer = new ChoiceAnswer();
                 _choiceChecked = new bool[((ChoiceQuestion)question).Choices.Count];
+                _checkboxes = new Checkbox[((ChoiceQuestion)question).Choices.Count];
+                _radios = new Radio<int>[((ChoiceQuestion)question).Choices.Count];
             }
-            else if (question.QuestionType == "short_answer")
+            else if (question is ShortAnswerQuestion)
             {
                 _answer = new ShortAnswer();
             }
@@ -84,12 +91,15 @@ namespace SmartProctor.Client.Pages.Exam
             } 
             else if (_question is ChoiceQuestion cq)
             {
+                ((ChoiceAnswer) _answer).Choices = new List<int>();
                 if (cq.MultiChoice)
                 {
                     for (var i = 0; i < _choiceChecked.Length; i++)
                     {
-                        if (_choiceChecked[i]) 
+                        if (_choiceChecked[i])
+                        {
                             ((ChoiceAnswer) _answer).Choices.Add(i);
+                        }
                     }
                 }
                 else
@@ -112,6 +122,11 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 await Message.Success($"Answer for question {QuestionNum} submitted");
             }
+        }
+
+        private void OnRadioChange(int a)
+        {
+            OnSubmitAnswer();
         }
     }
 }

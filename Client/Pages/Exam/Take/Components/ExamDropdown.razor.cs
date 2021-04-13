@@ -72,15 +72,18 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async ValueTask OnBlur()
         {
-            await _window.Focus();
-            await _hubConnection.SendAsync("TestTakerMessage", ExamId, "warning", "The exam taker left the exam page")
-                .ConfigureAwait(false);
-            await Modal.ErrorAsync(new ConfirmOptions()
+            if (!_inPrepare)
             {
-                Title = "DO NOT LEAVE THE EXAM PAGE!",
-                Content = "Your screen monitored by the proctors."
-            }).ConfigureAwait(false);
-            
+                await _window.Focus();
+                await _hubConnection.SendAsync("TestTakerMessage", ExamId, "warning",
+                        "The exam taker left the exam page")
+                    .ConfigureAwait(false);
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "DO NOT LEAVE THE EXAM PAGE!",
+                    Content = "Your screen monitored by the proctors."
+                }).ConfigureAwait(false);
+            }
         }
 
         private async Task GetProctors()
