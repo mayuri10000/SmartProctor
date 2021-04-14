@@ -42,6 +42,7 @@ namespace SmartProctor.Client.Pages.Exam
         private bool _localCameraVideoLoaded = false;
         private bool _cameraVideoLoading = true;
         private bool _inPrepare = false;
+        private bool _pageLeft = false;
 
         private bool _inReshare = false;
 
@@ -72,8 +73,9 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async ValueTask OnBlur()
         {
-            if (!_inPrepare)
+            if (!_inPrepare && !_pageLeft)
             {
+                _pageLeft = true;
                 await _window.Focus();
                 await _hubConnection.SendAsync("TestTakerMessage", ExamId, "warning",
                         "The exam taker left the exam page")
@@ -83,6 +85,7 @@ namespace SmartProctor.Client.Pages.Exam
                     Title = "DO NOT LEAVE THE EXAM PAGE!",
                     Content = "Your screen monitored by the proctors."
                 }).ConfigureAwait(false);
+                _pageLeft = false;
             }
         }
 
