@@ -100,7 +100,7 @@ namespace SmartProctor.Client.Pages.Exam
             var (err, takers) = await ExamServices.GetTestTakers(_examId);
             if (err == ErrorCodes.Success)
             {
-                _testTakers = takers;
+                _testTakers = takers.Select(x => x.Id).ToList();
             }
         }
 

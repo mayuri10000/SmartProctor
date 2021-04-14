@@ -21,11 +21,13 @@
                 </Descriptions>
             </Content>
             <ChildContent>
-                <Alert Type="@AlertType.Warning">Answers of questions with "Save" button cannot be automacially saved.</Alert>
-                @for (var i = 0; i < _examDetails.QuestionCount; i++)
-                {
-                    <QuestionCard ExamId="_examId" QuestionNum="@(i + 1)"/>
-                }
+                <div class="standardList">
+                    <Alert Type="@AlertType.Warning">Answers of questions with "Save" button cannot be automacially saved.</Alert>
+                    @for (var i = 0; i < _examDetails.QuestionCount; i++)
+                    {
+                        <QuestionCard ExamId="_examId" QuestionNum="@(i + 1)"/>
+                    }
+                </div>
             </ChildContent>
         </PageContainer>
     </ChildContent>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using SmartProctor.Server.Data;
 using SmartProctor.Server.Data.Entities;
@@ -60,7 +61,7 @@ namespace SmartProctor.Server.Services
 
         int SubmitAnswer(string uid, int eid, int num, string json);
 
-        int GetAnswer(string currentUid, string uid, int eid, int num, out string json);
+        int GetAnswer(string currentUid, string uid, int eid, int num, out string json, out DateTime time);
 
         int GetQuestionCount(int examId);
         IList<ExamDetails> GetCreatedExams(string uid);
@@ -176,6 +177,11 @@ namespace SmartProctor.Server.Services
                 return ErrorCodes.ExamNotExist;
             }
 
+            if (exam.StartTime.AddSeconds(exam.Duration) < DateTime.Now)
+            {
+                return ErrorCodes.ExamExpired;
+            }
+
             var eu = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid);
 
             if (eu != null)
@@ -261,6 +267,10 @@ namespace SmartProctor.Server.Services
                     {
                         return err;
                     }
+                }
+                else if (role == -1)
+                {
+                    return ErrorCodes.ExamTakerBanned;
                 }
                 else if (role != 3)
                 {
@@ -366,9 +376,52 @@ namespace SmartProctor.Server.Services
             }
         }
 
-        public int GetAnswer(string currentUid, string uid, int eid, int num, out string json)
+        public int GetAnswer(string currentUid, string uid, int eid, int num, out string json, out DateTime time)
         {
-            throw new NotImplementedException();
+            json = null;
+            time = DateTime.MinValue;
+            try
+            {
+                var exam = GetObject(eid);
+
+                if (exam == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
+
+                var role = GetUserRoleInExam(currentUid, eid);
+                if (role == 1)
+                {
+                    var ret = CheckEarlyOrLate(eid, true);
+                    if (ret == ErrorCodes.Success)
+                    {
+                        var answer =
+                            _answerRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == currentUid && x.QuestionNum == num);
+                        json = answer.AnswerJson;
+                        time = answer.AnswerTime ?? DateTime.MinValue;
+                    }
+
+                    return ret;
+                }
+                else if (role == 3)
+                {
+                    var answer =
+                        _answerRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid && x.QuestionNum == num);
+                    json = answer.AnswerJson;
+                    time = answer.AnswerTime ?? DateTime.MinValue;
+
+                    return ErrorCodes.Success;
+                }
+                else
+                {
+                    return ErrorCodes.ExamNotPermitToTake;
+                }
+
+            }
+            catch (Exception e)
+            {
+                return ErrorCodes.UnknownError;
+            }
         }
 
         public int GetQuestionCount(int examId)
@@ -473,6 +526,11 @@ namespace SmartProctor.Server.Services
             if (q == null)
             {
                 return 0;
+            }
+
+            if (q.BanReason != null)
+            {
+                return -1;
             }
 
             return q.UserRole ?? 0;

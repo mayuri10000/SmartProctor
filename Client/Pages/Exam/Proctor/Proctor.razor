@@ -10,7 +10,7 @@
         <RightContentProctor ExamId="_examId"/>
     </RightContentRender>
     <ChildContent>
-        @for (var r = 0; r < (_testTakers.Length / NUM_COLS) + 1; r++)
+        @for (var r = 0; r < (_testTakers.Count / NUM_COLS) + 1; r++)
         {
             var row = r;
             <Row>
@@ -21,10 +21,10 @@
                     if (_examTakerVideoCards.Length > index)
                     {
                         <ExamTakerVideoCard @ref="@_examTakerVideoCards[index]"
-                                             ExamTakerName="@_testTakers[index]"
-                                             OnBanExamTaker="() => BanTestTaker(_testTakers[index])"
-                                             OnToggleCamera="() => OnToggleCamera(_testTakers[index])"
-                                             OnToggleDesktop="() => OnToggleDesktop(_testTakers[index])"
+                                             ExamTakerName="@_testTakers[index].Id"
+                                             OnBanExamTaker="() => BanTestTaker(_testTakers[index].Id)"
+                                             OnToggleCamera="() => OnToggleCamera(_testTakers[index].Id)"
+                                             OnToggleDesktop="() => OnToggleDesktop(_testTakers[index].Id)"
                                              CardsEachRow="@(NUM_COLS)"/>
                     }
                 }

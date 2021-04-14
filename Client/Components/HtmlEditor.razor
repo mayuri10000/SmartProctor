@@ -43,6 +43,16 @@
     
     [Parameter]
     public string PlaceHolder { get; set; }
+    
+    [Parameter]
+    public string InitialContent { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await Task.Delay(500);
+        await _quillHtml.LoadHTMLContent(InitialContent);
+    }
 
     public async Task<string> GetHtmlString()
     {

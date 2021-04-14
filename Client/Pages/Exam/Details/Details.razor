@@ -1,0 +1,86 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@page "/Exam/Details/{ExamId}"
+@using SmartProctor.Shared.Responses
+<PageContainer Title="@_model.Name"
+               Class="pageHeader"
+               TabList="_tabList"
+               TabActiveKey="@_currentTab"
+               OnTabChange="OnTabChange">
+    <Breadcrumb>
+        <Breadcrumb>
+            <BreadcrumbItem>Exam</BreadcrumbItem>
+            <BreadcrumbItem>Mine</BreadcrumbItem>
+            <BreadcrumbItem>Details</BreadcrumbItem>
+        </Breadcrumb>
+    </Breadcrumb>
+    <Extra>
+        <Button Type="primary">
+            <Icon Type="edit" Theme="outline" OnClick="ToEdit"/>
+            Edit
+        </Button>
+    </Extra>
+    <ExtraContent>
+        <div class="moreInfo">
+            <Statistic Title="@("Exam ID")" Value="_examId"/>
+        </div>
+    </ExtraContent>
+    <Content>
+        <Descriptions Class="headerList" Size="small" Column="2">
+            <Descriptions Title="@("Description")">@_model.Description</Descriptions>
+            <Descriptions Title="@("Start Time")">@_model.StartTime.ToString()</Descriptions>
+            <Descriptions Title="@("Duration")">@ConvertExamDuration(_model.Duration)</Descriptions>
+            <Descriptions Title="@("Open book")">@(_model.OpenBook ? "Yes" : "No")</Descriptions>
+        </Descriptions>
+    </Content>
+    <ChildContent>
+        <div class="main__b__3">
+            <GridContent>
+                @if (_currentTab == "questions")
+                {
+                    <Card>//TODO</Card>
+                }
+                else if (_currentTab == "takers")
+                {
+                    <Card Class="listCard" 
+                          Title="Exam takers" 
+                          Style="margin-top: 24px;"
+                          BodyStyle="padding: 0 32px 40px 32px">
+                        <ChildContent>
+                            <AntList TItem="UserBasicInfo"
+                                     DataSource="_takers">
+                                <ListItem>
+                                    <ListItemMeta Title="@context.Nickname"
+                                                  Avatar="@context.Avatar" 
+                                                  Description="@("@" + context.Id)"/>
+                                </ListItem>
+                            </AntList>
+                        </ChildContent>
+                    </Card>
+                }
+                else
+                {
+                    <Card Class="listCard" 
+                          Title="Exam takers" 
+                          Style="margin-top: 24px;"
+                          BodyStyle="padding: 0 32px 40px 32px">
+                        <ChildContent>
+                            <Button Type="dashed"
+                                    Style="width: 100%; margin-bottom: 8px;">
+                                <Icon Type="plus" Theme="outline" />
+                                 Add
+                            </Button>
+                            <AntList TItem="UserBasicInfo"
+                                     DataSource="_proctors">
+                                <ListItem>
+                                    <ListItemMeta Title="@context.Nickname"
+                                                  Avatar="@context.Avatar"
+                                                  Description="@("@" + context.Id)"/>
+                                </ListItem>
+                            </AntList>
+                        </ChildContent>
+                    </Card>
+                }
+            </GridContent>
+        </div>
+    </ChildContent>
+</PageContainer>

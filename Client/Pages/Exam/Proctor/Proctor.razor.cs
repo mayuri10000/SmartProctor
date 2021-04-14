@@ -53,7 +53,7 @@ namespace SmartProctor.Client.Pages.Exam
         private bool _enlargedDesktop;
         private bool _enlargeModalLoaded;
 
-        private string[] _testTakers = new string[0];
+        private IList<UserBasicInfo> _testTakers = new List<UserBasicInfo>();
         private ExamTakerVideoCard[] _examTakerVideoCards = new ExamTakerVideoCard[0];
         
         protected override async Task OnInitializedAsync()
@@ -118,15 +118,14 @@ namespace SmartProctor.Client.Pages.Exam
             var (err, takers) = await ExamServices.GetTestTakers(_examId);
             if (err == ErrorCodes.Success)
             {
-                _examTakerVideoCards = new ExamTakerVideoCard[takers.Length];
+                _examTakerVideoCards = new ExamTakerVideoCard[takers.Count];
                 _testTakers = takers;
-                Console.WriteLine("_testTakers.Length = " + _testTakers.Length);
             }
         }
 
         private void SetupWebRTC()
         {
-            _webRtcClient = new WebRTCClientProctor(JsRuntime, _testTakers.ToArray());
+            _webRtcClient = new WebRTCClientProctor(JsRuntime, _testTakers.Select(x => x.Id).ToArray());
             
             _webRtcClient.OnCameraSdp += (_, e) =>
                 _hubConnection.SendAsync("CameraAnswerFromProctor", e.Item1, e.Item2);

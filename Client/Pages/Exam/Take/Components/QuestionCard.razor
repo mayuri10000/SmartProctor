@@ -1,6 +1,6 @@
 ﻿@namespace SmartProctor.Client.Pages.Exam
 @using SmartProctor.Shared.Questions
-<Card Title="@("Question " + QuestionNum)">
+<Card Title="@("Question " + QuestionNum)" Style="margin-top: 24px;" BodyStyle="padding: 0 32px 40px 32px">
     <ChildContent>
         <Paragraph>
             @((MarkupString) _question.Question)
@@ -35,7 +35,7 @@
         {
             if (shortAnswerQuestion.RichText)
             {
-                <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here"/>
+                <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here" InitialContent="@_answerString"/>
                 <br/>
                 <Button Type="primary" OnClick="OnSubmitAnswer">Save</Button>
             }

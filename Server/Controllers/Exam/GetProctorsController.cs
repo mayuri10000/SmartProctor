@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using SmartProctor.Server.Services;
 using SmartProctor.Server.Utils;
 using SmartProctor.Shared.Responses;
@@ -10,10 +11,12 @@ namespace SmartProctor.Server.Controllers.Exam
     public class GetProctorsController : ControllerBase
     {
         private IExamServices _services;
+        private IUserServices _userServices;
 
-        public GetProctorsController(IExamServices services)
+        public GetProctorsController(IExamServices services, IUserServices userServices)
         {
             _services = services;
+            _userServices = userServices;
         }
 
         [HttpGet("{eid}")]
@@ -22,10 +25,25 @@ namespace SmartProctor.Server.Controllers.Exam
             var e = _services.GetProctors(eid);
             if (e != null)
             {
+                var list = new List<UserBasicInfo>();
+                foreach (var uid in e)
+                {
+                    var u = _userServices.GetObject(uid);
+
+                    if (u != null)
+                    {
+                        list.Add(new UserBasicInfo()
+                        {
+                            Id = u.Id,
+                            Nickname = u.NickName,
+                            Avatar = u.Avatar
+                        });
+                    }
+                }
                 return new GetProctorsResponseModel()
                 {
                     Code = 0,
-                    Proctors = e
+                    Proctors = list
                 };
             }
 

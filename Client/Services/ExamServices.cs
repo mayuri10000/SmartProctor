@@ -25,12 +25,13 @@ namespace SmartProctor.Client.Services
         Task<int> AttemptProctor(int examId);
         Task<(int, IList<ExamDetails>)> GetExams(int role);
         Task<(int, ExamDetailsResponseModel)> GetExamDetails(int examId);
-        Task<(int, string[])> GetTestTakers(int examId);
-        Task<(int, string[])> GetProctors(int examId);
+        Task<(int, IList<UserBasicInfo>)> GetTestTakers(int examId);
+        Task<(int, IList<UserBasicInfo>)> GetProctors(int examId);
         Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum);
         Task<int> CreateExam(CreateExamRequestModel model);
         Task<int> UpdateQuestion(int examId, int questionNum, BaseQuestion baseQuestion);
         Task<int> SubmitAnswer(int examId, int questionNum, BaseAnswer answer);
+        Task<(int, BaseAnswer, DateTime)> GetAnswer(string uid, int examId, int questionNum);
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
     }
 
@@ -123,7 +124,7 @@ namespace SmartProctor.Client.Services
             }
         }
 
-        public async Task<(int, string[])> GetTestTakers(int examId)
+        public async Task<(int, IList<UserBasicInfo>)> GetTestTakers(int examId)
         {
             try
             {
@@ -131,7 +132,7 @@ namespace SmartProctor.Client.Services
 
                 if (res != null && res.Code == ErrorCodes.Success)
                 {
-                    return (res.Code, res.ExamTakers.ToArray());
+                    return (res.Code, res.ExamTakers);
                 }
 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
@@ -142,7 +143,7 @@ namespace SmartProctor.Client.Services
             }
         }
         
-        public async Task<(int, string[])> GetProctors(int examId)
+        public async Task<(int, IList<UserBasicInfo>)> GetProctors(int examId)
         {
             try
             {
@@ -150,7 +151,7 @@ namespace SmartProctor.Client.Services
 
                 if (res != null && res.Code == ErrorCodes.Success)
                 {
-                    return (res.Code, res.Proctors.ToArray());
+                    return (res.Code, res.Proctors);
                 }
 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
@@ -240,6 +241,31 @@ namespace SmartProctor.Client.Services
             catch
             {
                 return ErrorCodes.UnknownError;
+            }
+        }
+
+        public async Task<(int, BaseAnswer, DateTime)> GetAnswer(string uid, int examId, int questionNum)
+        {
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<GetAnswerRequestModel, GetAnswerResponseModel>(
+                    "/api/exam/GetAnswer", new GetAnswerRequestModel()
+                    {
+                        ExamId = examId,
+                        UserId = uid,
+                        QuestionNum = questionNum
+                    });
+
+                if (res.Code == ErrorCodes.Success)
+                {
+                    return (ErrorCodes.Success, DeserializeAnswerFromJson(res.AnswerJson), res.AnswerTime.Value);
+                }
+
+                return (res.Code, null, DateTime.MinValue);
+            }
+            catch
+            {
+                return (ErrorCodes.UnknownError, null, DateTime.MinValue);
             }
         }
 

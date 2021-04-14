@@ -56,18 +56,45 @@ namespace SmartProctor.Client.Pages.Exam
 
             _question = question;
 
-            if (question is ChoiceQuestion)
+            var (res2, answer, _) = await ExamServices.GetAnswer("", ExamId, QuestionNum);
+            if (res2 == ErrorCodes.Success)
             {
-                _answer = new ChoiceAnswer();
-                _choiceChecked = new bool[((ChoiceQuestion)question).Choices.Count];
-            }
-            else if (question is ShortAnswerQuestion)
-            {
-                _answer = new ShortAnswer();
+                _answer = answer;
+                if (answer is ChoiceAnswer choiceAnswer && question is ChoiceQuestion choiceQuestion)
+                {
+                    if (choiceQuestion.MultiChoice)
+                    {
+                        _choiceChecked = new bool[choiceQuestion.Choices.Count];
+                        foreach (var i in choiceAnswer.Choices)
+                        {
+                            _choiceChecked[i] = true;
+                        }
+                    }
+                    else
+                    {
+                        _choiceSingle = choiceAnswer.Choices[0];
+                    }
+                }
+                else if (answer is ShortAnswer shortAnswer && question is ShortAnswerQuestion shortAnswerQuestion)
+                {
+                    _answerString = shortAnswer.Answer;
+                }
+                else
+                {
+                    if (question is ChoiceQuestion)
+                    {
+                        _answer = new ChoiceAnswer();
+                        _choiceChecked = new bool[((ChoiceQuestion)question).Choices.Count];
+                    }
+                    else if (question is ShortAnswerQuestion)
+                    {
+                        _answer = new ShortAnswer();
+                    }
+
+                    _answer.Type = question.QuestionType;
+                }
             }
 
-            _answer.Type = question.QuestionType;
-            
             StateHasChanged();
         }
 

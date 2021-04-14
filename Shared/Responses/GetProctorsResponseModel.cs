@@ -4,6 +4,6 @@ namespace SmartProctor.Shared.Responses
 {
     public class GetProctorsResponseModel : BaseResponseModel
     {
-        public IList<string> Proctors { get; set; }
+        public IList<UserBasicInfo> Proctors { get; set; }
     }
 }

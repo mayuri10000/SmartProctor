@@ -91,7 +91,7 @@ namespace SmartProctor.Client.Pages.Exam
             var (ret, proctors) = await ExamServices.GetProctors(_examId);
             if (ret == ErrorCodes.Success)
             {
-                _proctors = proctors;
+                _proctors = proctors.Select(x => x.Id).ToList();
             }
         }
 
