@@ -35,9 +35,6 @@ namespace SmartProctor.Client.Pages.Exam
 
         private BaseAnswer _answer;
 
-        private Checkbox[] _checkboxes;
-        private Radio<int>[] _radios;
-
         private HtmlEditor _answerRichTextEditor;
         private string _answerString;
         private int _choiceSingle;
@@ -63,8 +60,6 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 _answer = new ChoiceAnswer();
                 _choiceChecked = new bool[((ChoiceQuestion)question).Choices.Count];
-                _checkboxes = new Checkbox[((ChoiceQuestion)question).Choices.Count];
-                _radios = new Radio<int>[((ChoiceQuestion)question).Choices.Count];
             }
             else if (question is ShortAnswerQuestion)
             {

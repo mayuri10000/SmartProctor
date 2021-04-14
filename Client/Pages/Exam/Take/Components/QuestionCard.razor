@@ -13,7 +13,7 @@
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <Checkbox @ref="@_checkboxes[index]" @bind-Value="@_choiceChecked[index]" CheckedChange="OnSubmitAnswer">@choiceQuestion.Choices[index]</Checkbox>
+                        <Checkbox @bind-Value="@_choiceChecked[index]" CheckedChange="OnSubmitAnswer">@choiceQuestion.Choices[index]</Checkbox>
                         <br/>
                     }
                 </div>
@@ -24,7 +24,7 @@
                     @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                     {
                         var index = i;
-                        <Radio @ref="@_radios[index]" Value="index">@choiceQuestion.Choices[index]</Radio>
+                        <Radio Value="index">@choiceQuestion.Choices[index]</Radio>
                         <br/>
                     }
                 </RadioGroup>
@@ -36,6 +36,7 @@
             if (shortAnswerQuestion.RichText)
             {
                 <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here"/>
+                <br/>
                 <Button Type="primary" OnClick="OnSubmitAnswer">Save</Button>
             }
             else
