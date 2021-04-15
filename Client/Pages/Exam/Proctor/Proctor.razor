@@ -34,3 +34,14 @@
     <FooterRender>
     </FooterRender>
 </BasicLayout>
+<Modal Visible="_banModalVisible" Title="@("Ban exam taker: " + _banTakerName)" OnOk="BanTestTakerConfirm" OnCancel="BanTestTakerCancel">
+    <ChildContent>
+        <Paragraph>
+            If you found the test taker is cheating, you can ban the test taker. Bannning will make exam takers 
+            leave the exam immediatly. 
+        </Paragraph>
+        <Paragraph>
+            <AutoComplete @bind-Value="_banReason" Placeholder="Specify the reason of banning" Options="@_banReasonOptions"/>
+        </Paragraph>
+    </ChildContent>
+</Modal>

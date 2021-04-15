@@ -41,17 +41,29 @@
                 }
                 else if (_currentTab == "takers")
                 {
-                    <Card Class="listCard" 
-                          Title="Exam takers" 
+                    <Card Class="listCard"
+                          Title="Exam takers"
                           Style="margin-top: 24px;"
                           BodyStyle="padding: 0 32px 40px 32px">
                         <ChildContent>
                             <AntList TItem="UserBasicInfo"
                                      DataSource="_takers">
                                 <ListItem>
-                                    <ListItemMeta Title="@context.Nickname"
-                                                  Avatar="@context.Avatar" 
-                                                  Description="@("@" + context.Id)"/>
+                                    <ListItemMeta Avatar="@(context.Avatar ?? "")"
+                                                  Description="@("@" + context.Id)">
+                                        <TitleTemplate>
+                                            @if (context.BanReason != null)
+                                            {
+                                                <s>@context.Nickname</s>
+                                                <Tag Color="red" OnClick="() => ShowBanReason(context.BanReason)">Banned</Tag>
+                                            }
+                                            else
+                                            {
+                                                <b>@context.Nickname</b>
+                                            }
+                                        </TitleTemplate>
+                                    </ListItemMeta>
+
                                 </ListItem>
                             </AntList>
                         </ChildContent>
@@ -59,15 +71,15 @@
                 }
                 else
                 {
-                    <Card Class="listCard" 
-                          Title="Exam takers" 
+                    <Card Class="listCard"
+                          Title="Exam takers"
                           Style="margin-top: 24px;"
                           BodyStyle="padding: 0 32px 40px 32px">
                         <ChildContent>
                             <Button Type="dashed"
                                     Style="width: 100%; margin-bottom: 8px;">
-                                <Icon Type="plus" Theme="outline" />
-                                 Add
+                                <Icon Type="plus" Theme="outline"/>
+                                Add
                             </Button>
                             <AntList TItem="UserBasicInfo"
                                      DataSource="_proctors">

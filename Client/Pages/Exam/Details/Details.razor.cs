@@ -123,5 +123,14 @@ namespace SmartProctor.Client.Pages.Exam
         {
             _currentTab = tab;
         }
+        
+        private void ShowBanReason(string reason)
+        {
+            Modal.Warning(new ConfirmOptions()
+            {
+                Title = "The test taker were banned from this test",
+                Content = "Reason: " + reason
+            });
+        }
     }
 }

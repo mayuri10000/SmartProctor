@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AntDesign;
@@ -108,7 +109,7 @@ namespace SmartProctor.Client.Pages.Exam
                 {
                     Title = "You must login first",
                 });
-                NavManager.NavigateTo("/User/Login");
+                NavManager.NavigateTo("/User/Login", true);
                 return false;
             }
             else if (result != ErrorCodes.Success)
@@ -118,7 +119,7 @@ namespace SmartProctor.Client.Pages.Exam
                     Title = "Enter test failed",
                     Content = ErrorCodes.MessageMap[result]
                 });
-                NavManager.NavigateTo("/");
+                NavManager.NavigateTo("/", true);
                 return false;
             }
 
@@ -201,6 +202,16 @@ namespace SmartProctor.Client.Pages.Exam
                 {
                     await _webRtcClient.ReconnectToProctor(proctor);
                 });
+            _hubConnection.On<string>("ExamTakerBanned",
+                async reason =>
+                {
+                    await Modal.ErrorAsync(new ConfirmOptions()
+                    {
+                        Title = "You have been banned by the proctor",
+                        Content = "Reason: " + reason
+                    });
+                    ExitExam();
+                });
 
             await _hubConnection.StartAsync();
         }
@@ -255,6 +266,13 @@ namespace SmartProctor.Client.Pages.Exam
                 await _webRtcClient.SetDesktopVideoElement("local-desktop");
             }
             _inReshare = false;
+        }
+
+        private async Task ExitExam()
+        {
+            await _hubConnection.SendAsync("ExamEnded");
+            await _hubConnection.StopAsync();
+            NavManager.NavigateTo("/", true);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartProctor.Server.Data.Entities;
@@ -11,20 +12,18 @@ namespace SmartProctor.Server.Hubs
 {
     public class MessageHub : Hub
     {
-        private IUserServices _userServices;
         private IExamServices _examServices;
 
         public MessageHub(IExamServices examServices, IUserServices userServices)
         {
             _examServices = examServices;
-            _userServices = userServices;
         }
 
         
 
         public async Task ProctorJoin(string examId)
         {
-            var examTakers = _examServices.GetExamTakers(int.Parse(examId));
+            var examTakers = _examServices.GetExamTakers(int.Parse(examId)).Select(x => x.Item1);
             if (examTakers != null)
             {
                 foreach (var taker in examTakers)
@@ -42,20 +41,26 @@ namespace SmartProctor.Server.Hubs
 
         public async Task TestTakerMessage(string examId, string messageType, string message)
         {
+            var uid = Context.UserIdentifier;
+            if (uid.EndsWith("_cam"))
+            {
+                uid = uid.Substring(0, Context.UserIdentifier.Length - 4);
+            }
+            
             var proctors = _examServices.GetProctors(int.Parse(examId));
             if (proctors != null)
             {
                 foreach (var proctor in proctors)
                 {
                     await Clients.User(proctor)
-                        .SendAsync("ReceiveMessage", Context.UserIdentifier, messageType, message);
+                        .SendAsync("ReceiveMessage", uid, messageType, message);
                 }
             }
         }
         
         public async Task ProctorMessageGroup(string examId, string messageType, string message)
         {
-            var examTakers = _examServices.GetExamTakers(int.Parse(examId));
+            var examTakers = _examServices.GetExamTakers(int.Parse(examId)).Select(x => x.Item1);
             if (examTakers != null)
             {
                 foreach (var taker in examTakers)
@@ -85,7 +90,7 @@ namespace SmartProctor.Server.Hubs
             var user = Context.User.Identity.Name.Substring(0, Context.User.Identity.Name.Length - 4);
             await Clients.User(user).SendAsync("CameraOfferToTaker", sdp);
         }
-        
+
         public async Task CameraAnswerFromTaker(RTCSessionDescriptionInit sdp)
         {
             var user = Context.User.Identity.Name + "_cam";
@@ -124,5 +129,10 @@ namespace SmartProctor.Server.Hubs
             await Clients.User(testTaker).SendAsync("CameraIceCandidateFromProctor", Context.User.Identity.Name, candidate);
         }
         
+        public async Task ExamEnded()
+        {
+            var user = Context.User.Identity.Name + "_cam";
+            await Clients.User(user).SendAsync("ExamEnded");
+        }
     }
 }

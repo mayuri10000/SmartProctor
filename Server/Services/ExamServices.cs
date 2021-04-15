@@ -37,7 +37,7 @@ namespace SmartProctor.Server.Services
         /// </summary>
         /// <param name="eid">Exam Id</param>
         /// <returns>List of user ids of the test takers, <code>null</code> if error occurs</returns>
-        IList<string> GetExamTakers(int eid);
+        IList<(string, string)> GetExamTakers(int eid);
         
         /// <summary>
         /// Returns the proctors for the current exam
@@ -148,7 +148,7 @@ namespace SmartProctor.Server.Services
             return ErrorCodes.Success;
         }
 
-        public IList<string> GetExamTakers(int eid)
+        public IList<(string, string)> GetExamTakers(int eid)
         {
             if (GetObject(eid) == null)
             {
@@ -158,10 +158,10 @@ namespace SmartProctor.Server.Services
             var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 1, x => x.UserId,
                 OrderingType.Ascending);
 
-            var ret = new List<string>();
+            var ret = new List<(string, string)>();
             foreach (var x in q)
             {
-                ret.Add(x.UserId);
+                ret.Add((x.UserId, x.BanReason));
             }
 
             return ret;

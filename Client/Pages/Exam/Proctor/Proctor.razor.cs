@@ -48,10 +48,19 @@ namespace SmartProctor.Client.Pages.Exam
         
         private HubConnection _hubConnection;
 
-        private string _enlargedTestTakerName;
-        private bool _enlarged;
-        private bool _enlargedDesktop;
-        private bool _enlargeModalLoaded;
+        private bool _banModalVisible = false;
+        private string _banTakerName = "";
+        private string _banReason;
+        
+        private IList<string> _banReasonOptions = new List<string>()
+        {
+            "Leaving the exam environment",
+            "Have other people in the exam environment",
+            "Using cellphones",
+            "Use books in closed-book exam",
+            "Leave the exam page during exam",
+            "Not attempted the exam in time"
+        };
 
         private IList<UserBasicInfo> _testTakers = new List<UserBasicInfo>();
         private ExamTakerVideoCard[] _examTakerVideoCards = new ExamTakerVideoCard[0];
@@ -202,7 +211,40 @@ namespace SmartProctor.Client.Pages.Exam
         }
         private async Task BanTestTaker(string testTaker)
         {
-            // TODO
+            _banTakerName = testTaker;
+            _banModalVisible = true;
+        }
+
+        private async Task BanTestTakerConfirm()
+        {
+            var res = await ExamServices.BanExamTaker(_examId, _banTakerName, _banReason);
+
+            if (res == ErrorCodes.Success)
+            {
+                await Modal.SuccessAsync(new ConfirmOptions()
+                {
+                    Content = $"Exam taker {_banTakerName} have been banned"
+                });
+
+                getExamTakerVideoCard(_banTakerName).Banned = true;
+            }
+            else
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Cannot ban exam taker",
+                    Content = ErrorCodes.MessageMap[res]
+                });
+            }
+
+            _banTakerName = null;
+            _banModalVisible = false;
+        }
+
+        private void BanTestTakerCancel()
+        {
+            _banTakerName = null;
+            _banModalVisible = false;
         }
 
         private ExamTakerVideoCard getExamTakerVideoCard(string testTaker)

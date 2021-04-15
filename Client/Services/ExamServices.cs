@@ -33,6 +33,7 @@ namespace SmartProctor.Client.Services
         Task<int> SubmitAnswer(int examId, int questionNum, BaseAnswer answer);
         Task<(int, BaseAnswer, DateTime)> GetAnswer(string uid, int examId, int questionNum);
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
+        Task<int> BanExamTaker(int examId, string userId, string reason);
     }
 
     public class ExamServices : IExamServices
@@ -284,6 +285,26 @@ namespace SmartProctor.Client.Services
             }
         }
 
+        public async Task<int> BanExamTaker(int examId, string userId, string reason)
+        {
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<BanExamTakerRequestModel, BaseResponseModel>(
+                    "/api/exam/BanExamTaker", new BanExamTakerRequestModel()
+                    {
+                        ExamId = examId,
+                        UserId = userId,
+                        Reason = reason
+                    });
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch
+            {
+                return ErrorCodes.UnknownError;
+            }
+        }
+        
         private string SerializeQuestionToJson(BaseQuestion question)
         {
             var ms = new MemoryStream();

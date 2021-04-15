@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using SmartProctor.Server.Services;
 using SmartProctor.Server.Utils;
@@ -28,7 +29,7 @@ namespace SmartProctor.Server.Controllers.Exam
                 var list = new List<UserBasicInfo>();
                 foreach (var uid in e)
                 {
-                    var u = _userServices.GetObject(uid);
+                    var u = _userServices.GetObject(uid.Item1);
 
                     if (u != null)
                     {
@@ -36,7 +37,8 @@ namespace SmartProctor.Server.Controllers.Exam
                         {
                             Id = u.Id,
                             Nickname = u.NickName,
-                            Avatar = u.Avatar
+                            Avatar = u.Avatar,
+                            BanReason = uid.Item2
                         });
                     }
                 }
