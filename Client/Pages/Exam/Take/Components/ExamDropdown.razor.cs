@@ -48,7 +48,6 @@ namespace SmartProctor.Client.Pages.Exam
         private bool _inReshare = false;
 
         private TestPrepareModal _testPrepareModal;
-        private ReshareScreenModal _reshareScreenModal;
 
         private WindowInterop _window;
 
@@ -74,7 +73,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async ValueTask OnBlur()
         {
-            if (!_inPrepare && !_pageLeft)
+            if (!_inPrepare && !_pageLeft && !_inReshare)
             {
                 _pageLeft = true;
                 await _window.Focus();
@@ -156,11 +155,9 @@ namespace SmartProctor.Client.Pages.Exam
                 _cameraVideoLoading = state != "connected";
             };
 
-            _webRtcClient.OnDesktopInactivated += (_, __) =>
+            _webRtcClient.OnDesktopInactivated += async (_, __) =>
             {
-                _hubConnection.SendAsync("TestTakerMessage", ExamId,"warning",
-                    "The test taker's desktop capture was cancelled");
-                _inReshare = true;
+                await OnReshareScreen();
             };
         }
         
@@ -246,11 +243,35 @@ namespace SmartProctor.Client.Pages.Exam
         
         private async Task OnReshareScreen()
         {
-            var streamId = await _webRtcClient.ObtainDesktopStream();
-            await _webRtcClient.SetDesktopVideoElement("desktop-video-dialog");
-            if (_reshareScreenModal.ShareScreenComplete(streamId))
+            await _hubConnection.SendAsync("TestTakerMessage", ExamId,"warning",
+                "The test taker's desktop capture was cancelled");
+            _inReshare = true;
+            await Modal.ErrorAsync(new ConfirmOptions()
             {
-                await _webRtcClient.StartStreamingDesktop();
+                Title = "Your desktop capture is interrupted",
+                Content =
+                    "You could probably clicked the 'Stop sharing' button, click 'OK' to re-initialize your screen capture"
+            });
+            while (_inReshare)
+            {
+                var streamId = await _webRtcClient.ObtainDesktopStream();
+                if (streamId == "screen:0:0" || streamId == "Screen 1")
+                {
+                    if (_localDesktopVideoLoaded)
+                        await _webRtcClient.SetDesktopVideoElement("local-desktop");
+                    await _webRtcClient.StartStreamingDesktop();
+                    _inReshare = false;
+                }
+                else
+                {
+                    await Modal.ErrorAsync(new ConfirmOptions()
+                    {
+                        Title = "Your screen capture is not valid",
+                        Content =
+                            "Please make sure you have shared your entire screen instead of a window, and make sure" +
+                            "that you have only one monitor."
+                    });
+                }
             }
         }
 

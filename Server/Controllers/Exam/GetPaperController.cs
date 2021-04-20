@@ -8,31 +8,31 @@ namespace SmartProctor.Server.Controllers.Exam
 {
     [ApiController]
     [Route("api/exam/[controller]")]
-    public class GetQuestionController : ControllerBase
+    public class GetPaperController : ControllerBase
     {
         private IExamServices _examServices;
 
-        public GetQuestionController(IExamServices examServices)
+        public GetPaperController(IExamServices examServices)
         {
             _examServices = examServices;
         }
 
-        [HttpPost]
-        public BaseResponseModel Post(GetQuestionRequestModel model)
+        [HttpGet("{examId}")]
+        public BaseResponseModel Get(int examId)
         {
             if (User.Identity?.Name == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
             }
 
-            var res = _examServices.GetQuestion(User.Identity?.Name, model.ExamId, model.QuestionNumber, out var q);
+            var res = _examServices.GetPaper(User.Identity?.Name, examId, out var q);
 
             if (res == ErrorCodes.Success)
             {
-                return new GetQuestionResponseModel()
+                return new GetPaperResponseModel()
                 {
                     Code = res,
-                    QuestionJson = q.QuestionJson
+                    QuestionJsons = q
                 };
             }
             else

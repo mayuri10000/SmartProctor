@@ -1,0 +1,23 @@
+﻿@using System.Text
+<h3>TestComponent</h3>
+<Button OnClick="OnClick">TEST</Button>
+
+@code {
+    [Parameter]
+    public StringBuilder StringBuilder { get; set; }
+    
+    [Parameter]
+    public EventCallback<StringBuilder> StringBuilderUpdated { get; set; }
+
+    protected override void OnInitialized()
+    {
+        StringBuilder.Append("Test");
+    }
+
+    private void OnClick()
+    {
+        StringBuilder = new StringBuilder();
+        StringBuilder.Append("Mayuri");
+        StringBuilderUpdated.InvokeAsync(StringBuilder);
+    }
+}

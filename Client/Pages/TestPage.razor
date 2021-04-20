@@ -2,6 +2,7 @@
 @using SmartProctor.Client.Pages.Exam
 @using BrowserInterop
 @using System.Collections.Concurrent
+@using System.Text
 @using BrowserInterop.Extensions
 @using _Imports = SmartProctor.Client._Imports
 @inject MessageService msg
@@ -21,7 +22,8 @@
                 <Card>
                     @* In development, new components will be tested here, this page
                     will be removed when the project is finished *@
-                    <NewCountDown Deadline="@(new DateTime(2021, 04, 27))" OnEnded="OnFinish"/>
+                    <TestComponent StringBuilder="@sb" StringBuilderUpdated="StringBuilderUpdated"/>
+                    <Paragraph>@sb.ToString()</Paragraph>
                 </Card>
             </div>
         </ChildContent>
@@ -30,19 +32,10 @@
 
 @code
 {
-    protected override async Task OnInitializedAsync()
-    {
-        var window = await JsRuntime.Window();
-        await window.OnBlur(OnOffline).ConfigureAwait(false);
-    }
+    private StringBuilder sb = new StringBuilder();
 
-    private async ValueTask OnOffline()
+    private void StringBuilderUpdated(StringBuilder sb)
     {
-        await msg.Info("Blur").ConfigureAwait(false);
-    }
-
-    private async Task OnFinish()
-    {
-        await msg.Info("Finish");
+        this.sb = sb;
     }
 }

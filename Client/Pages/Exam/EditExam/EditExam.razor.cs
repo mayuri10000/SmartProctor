@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AntDesign;
 using Microsoft.AspNetCore.Components;
 using SmartProctor.Client.Services;
 using SmartProctor.Client.Utils;
+using SmartProctor.Shared.Questions;
 using SmartProctor.Shared.Requests;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -25,6 +27,7 @@ namespace SmartProctor.Client.Pages.Exam
         [Inject]
         public MessageService Message { get; set; }
         
+        #region Layout parameters
         private readonly FormItemLayout _formItemLayout = new FormItemLayout
         {
             LabelCol = new ColLayoutParam
@@ -49,12 +52,14 @@ namespace SmartProctor.Client.Pages.Exam
                 Sm = new EmbeddedProperty { Span = 10, Offset = 7},
             }
         };
+        #endregion
         
         private UpdateExamDetailsRequestModel _updateExamDetailsModel = new UpdateExamDetailsRequestModel();
 
         private int _examId;
         private int _questionCount;
 
+        private IList<BaseQuestion> _questions;
         private QuestionEditor[] _questionEditors;
 
         protected override async Task OnInitializedAsync()
@@ -99,9 +104,20 @@ namespace SmartProctor.Client.Pages.Exam
             _updateExamDetailsModel.OpenBook = details.OpenBook;
             _updateExamDetailsModel.MaximumTakersNum = details.MaxTakers;
 
-            _questionCount = details.QuestionCount;
-            _questionEditors = new QuestionEditor[_questionCount];
-            
+            var (res2, questions) = await ExamServices.GetPaper(_examId);
+            if (res2 != ErrorCodes.Success)
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Cannot obtain exam paper",
+                    Content = ErrorCodes.MessageMap[res2]
+                });
+                
+                return;
+            }
+
+            _questions = questions;
+            _questionEditors = new QuestionEditor[_questions.Count];
             StateHasChanged();
         }
 
@@ -121,13 +137,32 @@ namespace SmartProctor.Client.Pages.Exam
             }
 
             await Message.Success("Exam information updated");
-            // TODO: Reload basic information
+            var (res2, details) = await ExamServices.GetExamDetails(_examId);
+
+            if (res2 == ErrorCodes.Success)
+            {
+                var secs = details.Duration;
+                var hours = secs / 3600;
+                var minutes = (secs - hours * 3600) / 60;
+                var seconds = secs - minutes * 60 - hours * 3600;
+                
+                _updateExamDetailsModel.Name = details.Name;
+                _updateExamDetailsModel.Description = details.Description;
+                _updateExamDetailsModel.StartTime = details.StartTime;
+                _updateExamDetailsModel.Duration = new DateTime(1999, 04, 27, 10, minutes, seconds);
+                _updateExamDetailsModel.OpenBook = details.OpenBook;
+                _updateExamDetailsModel.MaximumTakersNum = details.MaxTakers;
+            }
         }
 
         private void OnAddQuestion()
         {
-            _questionCount++;
-            Array.Resize(ref _questionEditors, _questionCount);
+            _questions.Add(new ChoiceQuestion()
+            {
+                QuestionType = "choice",
+                Choices = new List<string>()
+            });
+            Array.Resize(ref _questionEditors, _questions.Count);
             StateHasChanged();
         }
 
@@ -138,11 +173,30 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 await e.SaveQuestion();
             }
+
+            var res = await ExamServices.UpdatePaper(_examId, _questions);
+            if (res != ErrorCodes.Success)
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Cannot save exam paper",
+                    Content = ErrorCodes.MessageMap[res]
+                });
+                
+                return;
+            }
+
+            await Message.Success("Exam paper saved");
         }
 
         private async Task RemoveQuestion(int index)
         {
-            
+            foreach (var e in _questionEditors)
+            {
+                await e.SaveQuestion();
+            }
+            _questions.RemoveAt(index);
+            StateHasChanged();
         }
     }
 }

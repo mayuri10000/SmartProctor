@@ -57,13 +57,16 @@
                 </Form>
             </Card>
 
-            @for (var i = 0; i < _questionCount; i++)
+            @if (_questions != null)
             {
-                // Bug of Blazor, @ref cannot directly use the index variable, see
-                // https://stackoverflow.com/questions/58205090/using-ref-inside-for-loop-to-get-element-reference
-                var index = i;
-                <QuestionEditor @ref="@_questionEditors[index]" ExamId="@_examId" 
-                                 QuestionNum="@(i + 1)" OnRemoveQuestion="() => RemoveQuestion(index)"/>
+                for (var i = 0; i < _questions.Count; i++)
+                {
+                    // Bug of Blazor, @ref cannot directly use the index variable, see
+                    // https://stackoverflow.com/questions/58205090/using-ref-inside-for-loop-to-get-element-reference
+                    var index = i;
+                    <QuestionEditor @ref="@_questionEditors[index]" Question="@_questions[index]"
+                                     QuestionNum="@(i + 1)" OnRemoveQuestion="() => RemoveQuestion(index)"/>
+                }
             }
 
             <Card Style="margin-top: 24px;" BodyStyle="padding: 0 32px 40px 32px">

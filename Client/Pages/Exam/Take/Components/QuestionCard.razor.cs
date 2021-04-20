@@ -26,12 +26,10 @@ namespace SmartProctor.Client.Pages.Exam
         public int ExamId { get; set; }
     
         [Parameter]
+        public BaseQuestion Question { get; set; }
+        
+        [Parameter]
         public int QuestionNum { get; set; }
-
-        private BaseQuestion _question = new BaseQuestion()
-        {
-            Question = "Loading question, please wait..."
-        };
 
         private BaseAnswer _answer;
 
@@ -40,27 +38,15 @@ namespace SmartProctor.Client.Pages.Exam
         private int _choiceSingle;
         private bool[] _choiceChecked;
 
+        private bool _initialized = false;
+
         protected override async Task OnInitializedAsync()
         {
-            var (res, question) = await ExamServices.GetQuestion(ExamId, QuestionNum);
-
-            if (res != ErrorCodes.Success)
-            {
-                await Modal.ErrorAsync(new ConfirmOptions()
-                {
-                    Title = $"Cannot load question {QuestionNum}",
-                    Content = ErrorCodes.MessageMap[res]
-                });
-                return;
-            }
-
-            _question = question;
-
             var (res2, answer, _) = await ExamServices.GetAnswer("", ExamId, QuestionNum);
             if (res2 == ErrorCodes.Success)
             {
                 _answer = answer;
-                if (answer is ChoiceAnswer choiceAnswer && question is ChoiceQuestion choiceQuestion)
+                if (answer is ChoiceAnswer choiceAnswer && Question is ChoiceQuestion choiceQuestion)
                 {
                     if (choiceQuestion.MultiChoice)
                     {
@@ -75,32 +61,33 @@ namespace SmartProctor.Client.Pages.Exam
                         _choiceSingle = choiceAnswer.Choices[0];
                     }
                 }
-                else if (answer is ShortAnswer shortAnswer && question is ShortAnswerQuestion shortAnswerQuestion)
+                else if (answer is ShortAnswer shortAnswer && Question is ShortAnswerQuestion shortAnswerQuestion)
                 {
                     _answerString = shortAnswer.Answer;
                 }
                 else
                 {
-                    if (question is ChoiceQuestion)
+                    if (Question is ChoiceQuestion)
                     {
                         _answer = new ChoiceAnswer();
-                        _choiceChecked = new bool[((ChoiceQuestion)question).Choices.Count];
+                        _choiceChecked = new bool[((ChoiceQuestion)Question).Choices.Count];
                     }
-                    else if (question is ShortAnswerQuestion)
+                    else if (Question is ShortAnswerQuestion)
                     {
                         _answer = new ShortAnswer();
                     }
 
-                    _answer.Type = question.QuestionType;
+                    _answer.Type = Question.QuestionType;
                 }
             }
 
+            _initialized = true;
             StateHasChanged();
         }
 
         private async Task OnSubmitAnswer()
         {
-            if (_question is ShortAnswerQuestion saq)
+            if (Question is ShortAnswerQuestion saq)
             {
                 if (saq.RichText && _answerRichTextEditor != null)
                 {
@@ -111,7 +98,7 @@ namespace SmartProctor.Client.Pages.Exam
                     ((ShortAnswer) _answer).Answer = _answerString;
                 }
             } 
-            else if (_question is ChoiceQuestion cq)
+            else if (Question is ChoiceQuestion cq)
             {
                 ((ChoiceAnswer) _answer).Choices = new List<int>();
                 if (cq.MultiChoice)

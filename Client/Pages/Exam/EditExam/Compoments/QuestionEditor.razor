@@ -4,10 +4,6 @@
 <Card Style="margin-top: 24px;" BodyStyle="padding: 0 32px 40px 32px">
     <TitleTemplate>
         @("Question " + QuestionNum)
-        @if (_newQuestion)
-        {
-            <Tag Color="green">NEW</Tag>
-        }
     </TitleTemplate>
     <Extra>
         <Button Type="primary" Danger OnClick="_ => OnRemoveQuestion.InvokeAsync()">
@@ -16,9 +12,9 @@
         </Button>
     </Extra>
     <ChildContent>
-        <HtmlEditor @ref="@_questionTextEditor" PlaceHolder="Question text here"/>
+        <HtmlEditor @ref="@_questionTextEditor" PlaceHolder="Question text here" InitialContent="@Question.Question"/>
         <Divider/>
-        <Form Model="_question" LabelColSpan="8" WrapperColSpan="16">
+        <Form Model="Question" LabelColSpan="8" WrapperColSpan="16">
             <FormItem Label="Question type">
                 <RadioGroup @bind-Value="@context.QuestionType">
                     <Radio RadioButton Value="@("choice")" CheckedChanged="_ => OnQuestionTypeChange()">Choices</Radio>
@@ -26,6 +22,7 @@
                     <Radio RadioButton Value="@("short_answer")" CheckedChanged="_ => OnQuestionTypeChange()">Short answer</Radio>
                 </RadioGroup>
             </FormItem>
+            
             @if (context is ChoiceQuestion q)
             {
                 <FormItem Label="Multi-choice">

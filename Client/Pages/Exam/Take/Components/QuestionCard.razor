@@ -3,45 +3,48 @@
 <Card Title="@("Question " + QuestionNum)" Style="margin-top: 24px;" BodyStyle="padding: 0 32px 40px 32px">
     <ChildContent>
         <Paragraph>
-            @((MarkupString) _question.Question)
+            @((MarkupString) Question.Question)
         </Paragraph>
-        @if (_question is ChoiceQuestion choiceQuestion)
+        @if (_initialized)
         {
-            if (choiceQuestion.MultiChoice)
+            if (Question is ChoiceQuestion choiceQuestion)
             {
-                <div>
-                    @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
-                    {
-                        var index = i;
-                        <Checkbox @bind-Value="@_choiceChecked[index]" CheckedChange="OnSubmitAnswer">@choiceQuestion.Choices[index]</Checkbox>
-                        <br/>
-                    }
-                </div>
+                if (choiceQuestion.MultiChoice)
+                {
+                    <div>
+                        @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
+                        {
+                            var index = i;
+                            <Checkbox @bind-Value="@_choiceChecked[index]" CheckedChange="OnSubmitAnswer">@choiceQuestion.Choices[index]</Checkbox>
+                            <br/>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <RadioGroup TValue="int" @bind-Value="@_choiceSingle" OnChange="OnRadioChange">
+                        @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
+                        {
+                            var index = i;
+                            <Radio Value="index">@choiceQuestion.Choices[index]</Radio>
+                            <br/>
+                        }
+                    </RadioGroup>
+                }
+
             }
-            else
+            else if (Question is ShortAnswerQuestion shortAnswerQuestion)
             {
-                <RadioGroup TValue="int" @bind-Value="@_choiceSingle" OnChange="OnRadioChange">
-                    @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
-                    {
-                        var index = i;
-                        <Radio Value="index">@choiceQuestion.Choices[index]</Radio>
-                        <br/>
-                    }
-                </RadioGroup>
-            }
-            
-        }
-        else if (_question is ShortAnswerQuestion shortAnswerQuestion)
-        {
-            if (shortAnswerQuestion.RichText)
-            {
-                <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here" InitialContent="@_answerString"/>
-                <br/>
-                <Button Type="primary" OnClick="OnSubmitAnswer">Save</Button>
-            }
-            else
-            {
-                <TextArea Placeholder="Answer here" @bind-Value="_answerString" OnBlur="OnSubmitAnswer"/>
+                if (shortAnswerQuestion.RichText)
+                {
+                    <HtmlEditor @ref="@_answerRichTextEditor" PlaceHolder="Answer here" InitialContent="@_answerString"/>
+                    <br/>
+                    <Button Type="primary" OnClick="OnSubmitAnswer">Save</Button>
+                }
+                else
+                {
+                    <TextArea Placeholder="Answer here" @bind-Value="_answerString" OnBlur="OnSubmitAnswer"/>
+                }
             }
         }
     </ChildContent>

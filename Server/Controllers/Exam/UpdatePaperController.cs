@@ -8,17 +8,17 @@ namespace SmartProctor.Server.Controllers.Exam
 {
     [ApiController]
     [Route("api/exam/[controller]")]
-    public class UpdateQuestionController : ControllerBase
+    public class UpdatePaperController : ControllerBase
     { 
         private IExamServices _examServices;
 
-        public UpdateQuestionController(IExamServices examServices)
+        public UpdatePaperController(IExamServices examServices)
         {
             _examServices = examServices;
         }
         
         [HttpPost]
-        public BaseResponseModel Post(UpdateQuestionRequestModel model)
+        public BaseResponseModel Post(UpdatePaperRequestModel model)
         {
             if (User.Identity?.Name == null)
             {
@@ -26,8 +26,8 @@ namespace SmartProctor.Server.Controllers.Exam
             }
 
             return ErrorCodes.CreateSimpleResponse(
-                _examServices.EditQuestion(User.Identity?.Name, 
-                    model.ExamId, model.QuestionNumber, model.QuestionJson));
+                _examServices.EditPaper(User.Identity?.Name, 
+                    model.ExamId, model.QuestionJsons));
         }
     }
 }

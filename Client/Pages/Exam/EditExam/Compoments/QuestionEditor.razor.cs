@@ -21,11 +21,14 @@ namespace SmartProctor.Client.Pages.Exam
         [Inject]
         public IExamServices ExamServices { get; set; }
 
-        [Parameter] 
-        public int ExamId { get; set; }
+        [Parameter]
+        public int QuestionNum { get; set; }
 
         [Parameter] 
-        public int QuestionNum { get; set; }
+        public BaseQuestion Question { get; set; }
+        
+        [Parameter]
+        public EventCallback<BaseQuestion> QuestionUpdated { get; set; }
         
         [Parameter] 
         public EventCallback OnRemoveQuestion { get; set; }
@@ -38,68 +41,13 @@ namespace SmartProctor.Client.Pages.Exam
         private string _choiceEditor;
 
         private bool _choiceModalLoaded = false;
+        private bool _parameterSetState = false;
 
         private string _lastQuestionType = "";
-        private bool _newQuestion = false;
-
-        private BaseQuestion _question = new ChoiceQuestion()
-        {
-            QuestionType = "choice",
-            Choices = new List<string>()
-            {
-                "Choice 1"
-            }
-        };
-
-        protected override async Task OnInitializedAsync()
-        {
-            var (res, question) = await ExamServices.GetQuestion(ExamId, QuestionNum);
-
-            if (res != ErrorCodes.Success && res != ErrorCodes.QuestionNotExist)
-            {
-                await Modal.ErrorAsync(new ConfirmOptions()
-                {
-                    Title = "Cannot load question " + QuestionNum,
-                    Content = ErrorCodes.MessageMap[res]
-                });
-                
-                return;
-            }
-            else if (res == ErrorCodes.QuestionNotExist)
-            {
-                _newQuestion = true;
-                return;
-            }
-
-            _question = question;
-            await _questionTextEditor.LoadHtmlString(_question.Question);
-            StateHasChanged();
-        }
 
         public async Task SaveQuestion()
         {
-            _question.Question = await _questionTextEditor.GetHtmlString();
-
-            var task = Msg.Loading(new MessageConfig()
-            {
-                Content = $"Saving question {QuestionNum}, please wait",
-                Duration = 0
-            });
-            var res = await ExamServices.UpdateQuestion(ExamId, QuestionNum, _question);
-
-            if (res != ErrorCodes.Success)
-            {
-                await Modal.ErrorAsync(new ConfirmOptions()
-                {
-                    Title = "Cannot save question " + QuestionNum,
-                    Content = ErrorCodes.MessageMap[res]
-                });
-            }
-            else
-            {
-                await Msg.Success($"Question {QuestionNum} saved");
-            }
-            task.Start();
+            Question.Question = await _questionTextEditor.GetHtmlString();
         }
 
         private async Task OnAddChoice()
@@ -133,7 +81,7 @@ namespace SmartProctor.Client.Pages.Exam
 
         private void OnRemoveChoice(string choice)
         {
-            if (_question is ChoiceQuestion q)
+            if (Question is ChoiceQuestion q)
             {
                 q.Choices.Remove(choice);
             }
@@ -144,26 +92,35 @@ namespace SmartProctor.Client.Pages.Exam
         private void OnQuestionTypeChange()
         {
             // Added to prevent a bug, the bind event sometimes will be called again and again
-            if (_question.QuestionType == _lastQuestionType)
+            if (Question.QuestionType == _lastQuestionType)
                 return;
 
-            var questionText = _question.Question;
-            var questionType = _question.QuestionType;
+            if (_parameterSetState)
+            {
+                _parameterSetState = false;
+                return;
+            }
+            
+            Console.WriteLine("OnQuestionTypeChange");
+
+            var questionText = Question.Question;
+            var questionType = Question.QuestionType;
             
             if (questionType == "choice")
             {
-                _question = new ChoiceQuestion();
-                ((ChoiceQuestion) _question).Choices = new List<string>();
+                Question = new ChoiceQuestion();
+                ((ChoiceQuestion) Question).Choices = new List<string>();
             }
             else if (questionType == "short_answer")
             {
-                _question = new ShortAnswerQuestion();
+                Question = new ShortAnswerQuestion();
             }
 
-            _question.Question = questionText;
-            _question.QuestionType = questionType;
+            Question.Question = questionText;
+            Question.QuestionType = questionType;
             _lastQuestionType = questionType;
-            
+
+            QuestionUpdated.InvokeAsync(Question);
             StateHasChanged();
         }
 
@@ -171,7 +128,7 @@ namespace SmartProctor.Client.Pages.Exam
         private async Task OnChoiceConfirmed()
         {
             var content = _choiceEditor;
-            if (_question is ChoiceQuestion q)
+            if (Question is ChoiceQuestion q)
             {
                 if (q.Choices.Contains(content) && _currentEditChoice != content)
                 {
@@ -200,6 +157,11 @@ namespace SmartProctor.Client.Pages.Exam
         {
             _editChoice = false;
             _currentEditChoice = null;
+        }
+
+        protected override void OnParametersSet()
+        {
+            _parameterSetState = true;
         }
     }
 }

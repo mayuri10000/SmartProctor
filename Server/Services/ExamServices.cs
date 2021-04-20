@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.Extensions.Logging;
+using OneOf.Types;
 using SmartProctor.Server.Data;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
@@ -55,9 +57,9 @@ namespace SmartProctor.Server.Services
         /// <returns></returns>
         IList<ExamDetails> GetExamsForUser(string uid, int role);
 
-        int GetQuestion(string uid, int eid, int num, out Question question);
+        int GetPaper(string uid, int eid, out IList<string> questions);
 
-        int EditQuestion(string uid, int eid, int num, string json);
+        int EditPaper(string uid, int eid, IList<string> questions);
 
         int SubmitAnswer(string uid, int eid, int num, string json);
 
@@ -74,82 +76,107 @@ namespace SmartProctor.Server.Services
         private IExamUserRepository _examUserRepo;
         private IQuestionRepository _questionRepo;
         private IAnswerRepository _answerRepo;
+
+        private ILogger<ExamServices> _logger;
         
         public ExamServices(IExamRepository repo, IExamUserRepository examUserRepo, 
-            IQuestionRepository questionRepo, IAnswerRepository answerRepo) : base(repo)
+            IQuestionRepository questionRepo, IAnswerRepository answerRepo, ILogger<ExamServices> logger) : base(repo)
         {
             _examUserRepo = examUserRepo;
             _questionRepo = questionRepo;
             _answerRepo = answerRepo;
+
+            _logger = logger;
         }
 
         public int Attempt(int eid, string uid, out string banReason)
         {
+            _logger.LogInformation($"Attempt eid = {eid}, uid = {uid}");
             banReason = null;
-            if (GetObject(eid) == null)
+            try
             {
-                return ErrorCodes.ExamNotExist;
-            }
-            
-            var q = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid && x.UserRole == 1);
-            if (q == null)
-            {
-                return ErrorCodes.ExamNotPermitToTake;
-            }
+                if (GetObject(eid) == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
 
-            if (q.BanReason != null)
-            {
-                banReason = q.BanReason;
-                return ErrorCodes.ExamTakerBanned;
-            }
+                var q = _examUserRepo.GetFirstOrDefaultObject(
+                    x => x.ExamId == eid && x.UserId == uid && x.UserRole == 1);
+                if (q == null)
+                {
+                    return ErrorCodes.ExamNotPermitToTake;
+                }
 
-            var e = GetObject(eid);
-            
-            // Exam takers can enter the exam 5 minutes before the exam begin (but cannot view or answer questions)
-            if (e.StartTime > DateTime.Now.AddMinutes(5)) 
-            {
-                return ErrorCodes.ExamNotBegin;
-            }
+                if (q.BanReason != null)
+                {
+                    banReason = q.BanReason;
+                    return ErrorCodes.ExamTakerBanned;
+                }
 
-            if (e.StartTime.AddSeconds(e.Duration) < DateTime.Now)
-            {
-                return ErrorCodes.ExamExpired;
-            }
+                var e = GetObject(eid);
 
-            return ErrorCodes.Success;
+                // Exam takers can enter the exam 5 minutes before the exam begin (but cannot view or answer questions)
+                if (e.StartTime > DateTime.Now.AddMinutes(5))
+                {
+                    return ErrorCodes.ExamNotBegin;
+                }
+
+                if (e.StartTime.AddSeconds(e.Duration) < DateTime.Now)
+                {
+                    return ErrorCodes.ExamExpired;
+                }
+
+                return ErrorCodes.Success;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
+            }
         }
 
         public int EnterProctor(int eid, string uid)
         {
-            if (GetObject(eid) == null)
+            _logger.LogInformation($"EnterProctor eid = {eid}, uid = {uid}");
+            try
             {
-                return ErrorCodes.ExamNotExist;
-            }
-            
-            var q = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid && x.UserRole == 2);
-            if (q == null)
-            {
-                return ErrorCodes.ExamNotPermitToProctor;
-            }
+                if (GetObject(eid) == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
 
-            var e = GetObject(eid);
-            
-            // Proctors can enter the exam 15 minutes before the exam begin 
-            if (e.StartTime > DateTime.Now.AddMinutes(15)) 
-            {
-                return ErrorCodes.ExamNotBegin;
-            }
+                var q = _examUserRepo.GetFirstOrDefaultObject(
+                    x => x.ExamId == eid && x.UserId == uid && x.UserRole == 2);
+                if (q == null)
+                {
+                    return ErrorCodes.ExamNotPermitToProctor;
+                }
 
-            if (e.StartTime.AddSeconds(e.Duration) < DateTime.Now)
-            {
-                return ErrorCodes.ExamExpired;
-            }
+                var e = GetObject(eid);
 
-            return ErrorCodes.Success;
+                // Proctors can enter the exam 15 minutes before the exam begin 
+                if (e.StartTime > DateTime.Now.AddMinutes(15))
+                {
+                    return ErrorCodes.ExamNotBegin;
+                }
+
+                if (e.StartTime.AddSeconds(e.Duration) < DateTime.Now)
+                {
+                    return ErrorCodes.ExamExpired;
+                }
+
+                return ErrorCodes.Success;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
+            }
         }
 
         public IList<(string, string)> GetExamTakers(int eid)
         {
+            _logger.LogInformation($"GetExamTaker eid = {eid}");
             if (GetObject(eid) == null)
             {
                 return null;
@@ -247,17 +274,23 @@ namespace SmartProctor.Server.Services
                         BanReason = ex.Item2?.BanReason
                     }).ToList();
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return null;
             }
         }
-
-        public int GetQuestion(string uid, int eid, int num, out Question question)
+        public int GetPaper(string uid, int eid, out IList<string> questions)
         {
-            question = null;
+            _logger.LogInformation($"GetPaper, uid = {uid}, eid = {eid}");
+            questions = null;
             try
             {
+                if (GetObject(eid) == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
+                
                 var role = GetUserRoleInExam(uid, eid);
                 if (role == 1)
                 {
@@ -277,24 +310,20 @@ namespace SmartProctor.Server.Services
                     return ErrorCodes.ExamNotPermitToTake;
                 }
 
-                var q = _questionRepo.GetFirstOrDefaultObject(x => x.Number == num && x.ExamId == eid);
+                var q = _questionRepo.GetObjectList(x => x.ExamId == eid, x => x.Number, OrderingType.Ascending);
 
-                if (q == null)
-                {
-                    return ErrorCodes.QuestionNotExist;
-                }
-
-                question = q;
+                questions = q.Select(x => x.QuestionJson).ToList();
                 return ErrorCodes.Success;
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return ErrorCodes.UnknownError;
             }
         }
 
 
-        public int EditQuestion(string uid, int eid, int num, string json)
+        public int EditPaper(string uid, int eid, IList<string> questions)
         {
             try
             {
@@ -303,21 +332,16 @@ namespace SmartProctor.Server.Services
                     return ErrorCodes.ExamNotPermitToEdit;
                 }
                 
-                var q = _questionRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.Number == num);
+                _questionRepo.Delete(x => x.ExamId == eid);
 
-                if (q == null)
+                for (var i = 0; i < questions.Count; i++)
                 {
-                    q = new Question()
+                    _questionRepo.Add(new Question()
                     {
                         ExamId = eid,
-                        Number = num,
-                        QuestionJson = json
-                    };
-                    _questionRepo.Add(q);
-                }
-                else
-                {
-                    q.QuestionJson = json;
+                        Number = i + 1,
+                        QuestionJson = questions[i]
+                    });
                 }
 
                 _questionRepo.SaveChanges();

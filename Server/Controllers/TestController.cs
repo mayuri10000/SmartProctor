@@ -13,17 +13,25 @@ namespace SmartProctor.Server.Controllers
     [Route("api/[controller]")]
     public class TestController : ControllerBase
     {
-        private ILogger _logger;
+        private ILogger<TestController> _logger;
 
-        public TestController(ILogger logger)
+        public TestController(ILogger<TestController> logger)
         {
-            logger = _logger;
+            _logger = logger;
         }
         
         [HttpGet]
         public ActionResult Get()
         {
-            _logger.LogError("Fuck you");
+            try
+            {
+                int a = 1, b = 0;
+                int c = a / b;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+            }
             return Ok("Hello world");
         }
     }

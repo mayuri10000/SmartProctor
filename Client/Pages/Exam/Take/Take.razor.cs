@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using SmartProctor.Client.Services;
 using SmartProctor.Client.Utils;
@@ -21,6 +22,9 @@ namespace SmartProctor.Client.Pages.Exam
         public string ExamId { get; set; }
 
         private int _examId;
+        private IList<BaseQuestion> _questions;
+
+        private bool _examNotBegin = false;
 
         private ExamDetailsResponseModel _examDetails;
         protected override async Task OnInitializedAsync()
@@ -30,6 +34,16 @@ namespace SmartProctor.Client.Pages.Exam
             if (res == ErrorCodes.Success)
             {
                 _examDetails = details;
+            }
+
+            var (res2, questions) = await ExamServices.GetPaper(_examId);
+            if (res2 == ErrorCodes.ExamNotBegin)
+            {
+                _examNotBegin = true;
+            }
+            else if (res2 == ErrorCodes.Success)
+            {
+                _questions = questions;
             }
         }
     }

@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using OneOf.Types;
 using SmartProctor.Client.Utils;
 using SmartProctor.Shared.Answers;
@@ -27,9 +28,9 @@ namespace SmartProctor.Client.Services
         Task<(int, ExamDetailsResponseModel)> GetExamDetails(int examId);
         Task<(int, IList<UserBasicInfo>)> GetTestTakers(int examId);
         Task<(int, IList<UserBasicInfo>)> GetProctors(int examId);
-        Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum);
+        Task<(int, IList<BaseQuestion>)> GetPaper(int examId);
         Task<int> CreateExam(CreateExamRequestModel model);
-        Task<int> UpdateQuestion(int examId, int questionNum, BaseQuestion baseQuestion);
+        Task<int> UpdatePaper(int examId, IList<BaseQuestion> baseQuestion);
         Task<int> SubmitAnswer(int examId, int questionNum, BaseAnswer answer);
         Task<(int, BaseAnswer, DateTime)> GetAnswer(string uid, int examId, int questionNum);
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
@@ -40,55 +41,65 @@ namespace SmartProctor.Client.Services
     {
         private HttpClient _http;
 
-        public ExamServices(HttpClient http)
+        private ILogger<ExamServices> _logger;
+
+        public ExamServices(HttpClient http, ILogger<ExamServices> logger)
         {
-            this._http = http;
+            _http = http;
+            _logger = logger;
         }
 
         public async Task<(int, string)> JoinExam(int examId)
         {
+            _logger.LogInformation($"JoinExam examId = {examId}");
             try
             {
                 var res = await _http.GetFromJsonAsync<AttemptExamResponseModel>("/api/exam/JoinExam/" + examId);
 
                 return (res?.Code ?? ErrorCodes.UnknownError, res?.BanReason);
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return (ErrorCodes.UnknownError, null);
             }
         }
         
         public async Task<(int, string)> Attempt(int examId)
         {
+            _logger.LogInformation($"Attempt examId = {examId}");
             try
             {
                 var res = await _http.GetFromJsonAsync<AttemptExamResponseModel>("/api/exam/Attempt/" + examId);
 
                 return (res?.Code ?? ErrorCodes.UnknownError, res?.BanReason);
             }
-            catch 
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return (ErrorCodes.UnknownError, null);
             }
         }
 
         public async Task<int> AttemptProctor(int examId)
         {
+            _logger.LogInformation($"AttemptProctor examId = {examId}");
             try
             {
                 var res = await _http.GetFromJsonAsync<BaseResponseModel>("/api/exam/EnterProctor/" + examId);
 
                 return res?.Code ?? ErrorCodes.UnknownError;
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return ErrorCodes.UnknownError;
             }
         }
 
         public async Task<(int, IList<ExamDetails>)> GetExams(int role)
         {
+            _logger.LogInformation($"GetExams role = {role}");
             try
             {
                 var res = await _http.GetFromJsonAsync<GetUserExamsResponseModel>("api/exam/GetExams/" + role);
@@ -100,14 +111,16 @@ namespace SmartProctor.Client.Services
                 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return (ErrorCodes.UnknownError, null);
             }
         }
 
         public async Task<(int, ExamDetailsResponseModel)> GetExamDetails(int examId)
         {
+            _logger.LogInformation($"GetExamDetails examId = {examId}");
             try
             {
                 var res = await _http.GetFromJsonAsync<ExamDetailsResponseModel>("api/exam/ExamDetails/" + examId);
@@ -119,8 +132,9 @@ namespace SmartProctor.Client.Services
 
                 return (res?.Code ?? ErrorCodes.UnknownError, null);
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return (ErrorCodes.UnknownError, null);
             }
         }
@@ -163,26 +177,24 @@ namespace SmartProctor.Client.Services
             }
         }
 
-        public async Task<(int, BaseQuestion)> GetQuestion(int examId, int questionNum)
+        public async Task<(int, IList<BaseQuestion>)> GetPaper(int examId)
         {
+            _logger.LogInformation($"GetPaper examId = {examId}");
             try
             {
-                var res = await _http.PostAsAndGetFromJsonAsync<GetQuestionRequestModel, GetQuestionResponseModel>(
-                    "/api/exam/GetQuestion", new GetQuestionRequestModel()
-                    {
-                        ExamId = examId,
-                        QuestionNumber = questionNum
-                    });
+                var res = await _http.GetFromJsonAsync<GetPaperResponseModel>(
+                    "/api/exam/GetPaper/" + examId);
 
-                if (res == null || res.Code != ErrorCodes.Success || res.QuestionJson == null)
+                if (res == null || res.Code != ErrorCodes.Success || res.QuestionJsons == null)
                 {
                     return (res?.Code ?? ErrorCodes.UnknownError, null);
                 }
 
-                return (res.Code, DeserializeQuestionFromJson(res.QuestionJson));
+                return (res.Code, res.QuestionJsons.Select(q => DeserializeQuestionFromJson(q)).ToList());
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return (ErrorCodes.UnknownError, null);
             }
         }
@@ -202,19 +214,20 @@ namespace SmartProctor.Client.Services
             }
         }
 
-        public async Task<int> UpdateQuestion(int examId, int questionNum, BaseQuestion question)
+        public async Task<int> UpdatePaper(int examId, IList<BaseQuestion> question)
         {
             try
             {
-                var model = new UpdateQuestionRequestModel()
+                var questions = question.Select(q => SerializeQuestionToJson(q)).ToList();
+                
+                var model = new UpdatePaperRequestModel()
                 {
                     ExamId = examId,
-                    QuestionJson = SerializeQuestionToJson(question),
-                    QuestionNumber = questionNum
+                    QuestionJsons = questions
                 };
 
-                var res = await _http.PostAsAndGetFromJsonAsync<UpdateQuestionRequestModel, BaseResponseModel>(
-                    "/api/exam/UpdateQuestion", model);
+                var res = await _http.PostAsAndGetFromJsonAsync<UpdatePaperRequestModel, BaseResponseModel>(
+                    "/api/exam/UpdatePaper", model);
 
                 return res?.Code ?? ErrorCodes.UnknownError;
             }

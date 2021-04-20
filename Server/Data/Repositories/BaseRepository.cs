@@ -32,7 +32,7 @@ namespace SmartProctor.Server.Data.Repositories
 
         void Delete(T obj);
 
-        //void DeleteAll(IEnumerable<T> objs);
+        void Delete(Expression<Func<T, bool>> where);
         void SaveChanges();
     }
 
@@ -161,18 +161,11 @@ namespace SmartProctor.Server.Data.Repositories
             SaveChanges();
         }
 
-        /*public virtual void DeleteAll(IEnumerable<T> objs)
+        public void Delete(Expression<Func<T, bool>> where)
         {
-            //foreach (var obj in objs)
-            //{
-            //    _db.DataContext.DeleteObject(obj);
-            //}
-            //this.SaveChanges();
-            var list = objs.ToList();
-            for (int i = 0; i < list.Count; i++)
-            {
-                this.Delete(list[i]);
-            }
-        }*/
+            var q = DbContext.Set<T>().Where(where);
+            DbContext.Set<T>().RemoveRange(q);
+            SaveChanges();
+        }
     }
 }

@@ -22,10 +22,17 @@
             </Content>
             <ChildContent>
                 <div class="standardList">
-                    <Alert Type="@AlertType.Warning">Answers of questions with "Save" button cannot be automacially saved.</Alert>
-                    @for (var i = 0; i < _examDetails.QuestionCount; i++)
+                    @if (!_examNotBegin)
                     {
-                        <QuestionCard ExamId="_examId" QuestionNum="@(i + 1)"/>
+                        <Alert Type="@AlertType.Warning">Answers of questions with "Save" button cannot be automacially saved.</Alert>
+                        if (_questions != null)
+                        {
+                            for (var i = 0; i < _questions.Count; i++)
+                            {
+                                var index = i;
+                                <QuestionCard ExamId="_examId" QuestionNum="@(index + 1)" Question="@_questions[index]"/>
+                            }
+                        }
                     }
                 </div>
             </ChildContent>
