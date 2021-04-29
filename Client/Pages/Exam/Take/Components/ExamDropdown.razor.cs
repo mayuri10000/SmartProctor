@@ -129,30 +129,24 @@ namespace SmartProctor.Client.Pages.Exam
         {
             _webRtcClient = new WebRTCClientTaker(JsRuntime, _proctors.ToArray());
             
-            _webRtcClient.OnProctorSdp += (_, e) =>
+            _webRtcClient.OnDesktopSdp += (_, e) =>
             {
                 _hubConnection.SendAsync("DesktopOffer", e.Item1, e.Item2);
             };
 
-            _webRtcClient.OnProctorIceCandidate += (_, e) =>
+            _webRtcClient.OnDesktopIceCandidate += (_, e) =>
             {
-                _hubConnection.SendAsync("SendDesktopIceCandidate", e.Item1, e.Item2);
+                _hubConnection.SendAsync("DesktopIceCandidate", e.Item1, e.Item2);
             };
 
-            _webRtcClient.OnCameraSdp += (_, sdp) =>
+            _webRtcClient.OnCameraSdp += (_, e) =>
             {
-                _hubConnection.SendAsync("CameraAnswerFromTaker", sdp);
+                _hubConnection.SendAsync("CameraOffer", e.Item1, e.Item2);
             };
 
-            _webRtcClient.OnCameraIceCandidate += (_, candidate) =>
+            _webRtcClient.OnCameraIceCandidate += (_, e) =>
             {
-                _hubConnection.SendAsync("CameraIceCandidateFromTaker", candidate);
-            };
-            
-            _webRtcClient.OnCameraConnectionStateChange += (_, state) =>
-            {
-                Console.WriteLine("Camera connection state changed to " + state);
-                _cameraVideoLoading = state != "connected";
+                _hubConnection.SendAsync("CameraIceCandidate", e.Item1, e.Item2);
             };
 
             _webRtcClient.OnDesktopInactivated += async (_, __) =>
@@ -176,23 +170,24 @@ namespace SmartProctor.Client.Pages.Exam
             _hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedDesktopAnswer",
                 async (proctor, sdp) =>
                 {
-                    await _webRtcClient.ReceivedProctorAnswerSDP(proctor, sdp);
+                    await _webRtcClient.ReceivedDesktopAnswerSDP(proctor, sdp);
                 });
 
             _hubConnection.On<string, RTCIceCandidate>("ReceivedDesktopIceCandidate",
                 async (proctor, candidate) =>
                 {
-                    await _webRtcClient.ReceivedProctorIceCandidate(proctor, candidate);
+                    await _webRtcClient.ReceivedDesktopIceCandidate(proctor, candidate);
                 });
-            _hubConnection.On<RTCIceCandidate>("CameraIceCandidateToTaker",
-                async candidate =>
+            _hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedCameraAnswer",
+                async (proctor, sdp) =>
                 {
-                    await _webRtcClient.ReceivedCameraIceCandidate(candidate);
+                    await _webRtcClient.ReceivedCameraAnswerSDP(proctor, sdp);
                 });
-            _hubConnection.On<RTCSessionDescriptionInit>("CameraOfferToTaker",
-                async sdp =>
+
+            _hubConnection.On<string, RTCIceCandidate>("ReceivedCameraIceCandidate",
+                async (proctor, candidate) =>
                 {
-                    await _webRtcClient.ReceivedCameraOfferSDP(sdp);
+                    await _webRtcClient.ReceivedCameraIceCandidate(proctor, candidate);
                 });
             _hubConnection.On<string>("ProctorConnected",
                 async proctor =>
@@ -237,8 +232,13 @@ namespace SmartProctor.Client.Pages.Exam
             await _webRtcClient.SetDesktopVideoElement("desktop-video-dialog");
             if (_testPrepareModal.ShareScreenComplete(streamId))
             {
-                await _webRtcClient.StartStreamingDesktop();
+                await _webRtcClient.StartStreaming();
             }
+        }
+
+        private async Task OnGetCameraStream(string mjpegUrl)
+        {
+            await _webRtcClient.ObtainCameraStream(mjpegUrl);
         }
         
         private async Task OnReshareScreen()
@@ -255,11 +255,11 @@ namespace SmartProctor.Client.Pages.Exam
             while (_inReshare)
             {
                 var streamId = await _webRtcClient.ObtainDesktopStream();
-                if (streamId == "screen:0:0" || streamId == "Screen 1")
+                if (streamId is "screen:0:0" or "Screen 1")
                 {
                     if (_localDesktopVideoLoaded)
                         await _webRtcClient.SetDesktopVideoElement("local-desktop");
-                    await _webRtcClient.StartStreamingDesktop();
+                    await _webRtcClient.StartStreaming();
                     _inReshare = false;
                 }
                 else

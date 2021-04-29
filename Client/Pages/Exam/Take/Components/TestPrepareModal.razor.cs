@@ -32,6 +32,8 @@ namespace SmartProctor.Client.Pages.Exam
         private const string DEEPLENS_SETTING_URL = "https://camera-amdc.net:8080";
 
         [Parameter] public EventCallback OnShareScreen { get; set; }
+        
+        [Parameter] public EventCallback<string> OnGetCameraStream { get; set; }
 
         [Parameter] public EventCallback OnFinish { get; set; }
 

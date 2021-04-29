@@ -1,50 +1,59 @@
 ﻿namespace SmartProctor {
+    class ProctorConnection {
+        public desktopConnection: RTCPeerConnection;
+        public cameraConnection: RTCPeerConnection;
+    }
+
     /**
      * Typescript implementation of the WebRTC related functions in the test-taker side
      */
     export class WebRTCClientTaker {
-        private proctorConnections: { [userName: string]: RTCPeerConnection } = {};
-        private cameraConnection: RTCPeerConnection;
+        private proctorConnections: { [userName: string]: ProctorConnection } = {};
         private desktopStream: MediaStream;
         private cameraStream: MediaStream;
         private desktopVideoElem: Element;
         private cameraVideoElem: Element;
+        private rtcConfig: RTCConfiguration;
+        private cameraCanvas: HTMLCanvasElement;
+        private cameraImage: HTMLImageElement;
         public helper;
 
-        public async init(helper, proctors: string[]) {
+        public async init(helper, iceServers: string[], proctors: string[]) {
             this.helper = helper;
-            this.cameraConnection = new RTCPeerConnection(null);
-
-            this.cameraConnection.onicecandidate = async (e) => {
-                await helper.invokeMethodAsync("_onCameraIceCandidate", e.candidate);
-            };
-
-            this.cameraConnection.onconnectionstatechange = async (e) => {
-                console.log("connection state of camera changed to '" + this.cameraConnection.connectionState + "'");
-                await helper.invokeMethodAsync("_onCameraConnectionStateChange", this.cameraConnection.connectionState);
-            };
-            
-            this.cameraConnection.ontrack = async (e) => {
-                this.cameraStream = e.streams[0];
+            if (iceServers != null) {
+                this.rtcConfig = {iceServers: [{urls: iceServers}]};
+            } else {
+                this.rtcConfig = null;
             }
 
             proctors.forEach((proctor) => {
-                let conn = new RTCPeerConnection(null);
+                let desktopConn = new RTCPeerConnection(this.rtcConfig);
+                let cameraConn = new RTCPeerConnection(this.rtcConfig); 
 
-                conn.onicecandidate = async (e) => {
-                    console.log("Sending ICE candidate to " + proctor + ".");
-                    await helper.invokeMethodAsync("_onProctorIceCandidate", proctor, e.candidate);
+                desktopConn.onicecandidate = async (e) => {
+                    await helper.invokeMethodAsync("_onDesktopIceCandidate", proctor, e.candidate);
                 };
 
-                conn.onconnectionstatechange = async (e) => {
-                    console.log("connection state of " + proctors + " changed to '" + conn.connectionState + "'");
-                    await helper.invokeMethodAsync("_onProctorConnectionStateChange", proctor, conn.connectionState);
+                desktopConn.onconnectionstatechange = async (e) => {
+                    await helper.invokeMethodAsync("_onDesktopConnectionStateChange", proctor, desktopConn.connectionState);
                 };
-                this.proctorConnections[proctor] = conn;
+                
+                cameraConn.onicecandidate = async (e) => {
+                    await helper.invokeMethodAsync("_onCameraIceCandidate", proctor, e.candidate);
+                };
+                
+                cameraConn.onconnectionstatechange= async (e) => {
+                    await helper.invokeMethodAsync("_onCameraConnectionStateChange", proctor, cameraConn.connectionState);
+                };
+                
+                this.proctorConnections[proctor] = {
+                    desktopConnection: desktopConn,
+                    cameraConnection: cameraConn
+                };
             });
         }
-        
-        public async obtainDesktopStream() : Promise<string> {
+
+        public async obtainDesktopStream(): Promise<string> {
             // @ts-ignore
             this.desktopStream = await navigator.mediaDevices.getDisplayMedia();
             // @ts-ignore
@@ -54,33 +63,64 @@
             return this.desktopStream.getTracks()[0].label;
         }
 
-        public async startStreamingDesktop() {
+        public async obtainCameraStream(mjpegUrl: string): Promise<void> {
+            if (this.cameraCanvas == null)
+                this.cameraCanvas = document.createElement<HTMLCanvasElement>("canvas");
+            
+            if (this.cameraImage == null)
+                this.cameraImage = document.createElement<HTMLImageElement>("img");
+            
+            this.cameraImage.src = mjpegUrl;
+            // @ts-ignore
+            this.cameraStream = this.cameraCanvas.captureStream();
+            // @ts-ignore
+            this.cameraStream.oninactive = async (_) => {
+                await this.helper.invokeMethodAsync("_onCameraInactivated");
+            };
+            window.setInterval("updateCameraFrame()", 5);
+        }
+        
+        private updateCameraFrame() : void {
+            this.cameraCanvas.getContext("2d").drawImage(this.cameraImage, 0, 0);
+        }
+
+        public async startStreaming() {
             for (let proctor in this.proctorConnections) {
                 let conn = this.proctorConnections[proctor];
                 this.desktopStream.getTracks().forEach((track) => {
-                    conn.addTrack(track, this.desktopStream);
+                    conn.desktopConnection.addTrack(track, this.desktopStream);
                 });
+
+                this.cameraStream.getTracks().forEach((track) => {
+                    conn.cameraConnection.addTrack(track, this.cameraStream);
+                });
+
+                let desktopOffer = await conn.desktopConnection.createOffer();
+                await conn.desktopConnection.setLocalDescription(desktopOffer);
                 
-                let offer = await conn.createOffer();
-                await conn.setLocalDescription(offer);
+                let cameraOffer = await conn.cameraConnection.createOffer();
+                await conn.cameraConnection.setLocalDescription(cameraOffer)
 
                 // Send the local SDP through SignalR in .NET
-                await this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer);
-                console.log("Sending offer to " + proctor + ".");
+                await this.helper.invokeMethodAsync("_onCameraSdp", proctor, cameraOffer);
+                await this.helper.invokeMethodAsync("_onDesktopSdp", proctor, desktopOffer);
             }
         }
-        
+
         public async reconnectToProctor(proctor: string) {
             let conn = this.proctorConnections[proctor];
 
-            let offer = await conn.createOffer();
-            await conn.setLocalDescription(offer);
+            let desktopOffer = await conn.desktopConnection.createOffer();
+            await conn.desktopConnection.setLocalDescription(desktopOffer);
+            
+            let cameraOffer = await conn.cameraConnection.createOffer();
+            await conn.cameraConnection.setLocalDescription(cameraOffer);
 
             // Send the local SDP through SignalR in .NET
-            await this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer);
-            console.log("Sending offer to " + proctor + ".");
+            await this.helper.invokeMethodAsync("_onDesktopSdp", proctor, desktopOffer);
+            await this.helper.invokeMethodAsync("_onCameraSdp", proctor, cameraOffer);
         }
-        
+
         public setDesktopVideoElement(elementId: string) {
             if (this.desktopVideoElem != null)
                 // @ts-ignore
@@ -89,7 +129,7 @@
             // @ts-ignore
             this.desktopVideoElem.srcObject = this.desktopStream;
         }
-        
+
         public setCameraVideoElement(elementId: string) {
             if (this.cameraVideoElem != null)
                 // @ts-ignore
@@ -99,40 +139,34 @@
             this.cameraVideoElem.srcObject = this.cameraStream;
         }
 
-        public async receivedProctorAnswerSDP(proctor: string, sdp: RTCSessionDescriptionInit) {
-            await this.proctorConnections[proctor].setRemoteDescription(sdp);
-            console.log("received answer from " + proctor + " and sending answer.");
+        public async receivedDesktopAnswerSDP(proctor: string, sdp: RTCSessionDescriptionInit) {
+            await this.proctorConnections[proctor].desktopConnection.setRemoteDescription(sdp);
         }
 
-        public async receivedProctorIceCandidate(proctor: string, candidate: RTCIceCandidate) {
-            await this.proctorConnections[proctor].addIceCandidate(candidate);
-            console.log("received ICE candidate from " + proctor + ".");
+        public async receivedDesktopIceCandidate(proctor: string, candidate: RTCIceCandidate) {
+            await this.proctorConnections[proctor].desktopConnection.addIceCandidate(candidate);
         }
 
-        public async receivedCameraOfferSDP(sdp: RTCSessionDescriptionInit) {
-            await this.cameraConnection.setRemoteDescription(sdp);
-            let answer = await this.cameraConnection.createAnswer();
-            await this.cameraConnection.setLocalDescription(answer);
-            await this.helper.invokeMethodAsync("_onCameraSdp", answer);
+        public async receivedCameraAnswerSDP(proctor: string, sdp: RTCSessionDescriptionInit) {
+            await this.proctorConnections[proctor].cameraConnection.setRemoteDescription(sdp);
         }
 
-        public async receivedCameraIceCandidate(candidate: RTCIceCandidate) {
-            await this.cameraConnection.addIceCandidate(candidate);
+        public async receivedCameraIceCandidate(proctor: string, candidate: RTCIceCandidate) {
+            await this.proctorConnections[proctor].cameraConnection.addIceCandidate(candidate);
         }
-        
+
         public async onProctorReconnected(proctor: string) {
-            console.log("Proctor " + proctor + " reconnected, resending SDP...");
             let conn = this.proctorConnections[proctor];
-            this.desktopStream.getTracks().forEach((track) => {
-                conn.addTrack(track, this.desktopStream);
-            });
 
-            let offer = await conn.createOffer();
-            await conn.setLocalDescription(offer);
+            let desktopOffer = await conn.desktopConnection.createOffer();
+            await conn.desktopConnection.setLocalDescription(desktopOffer);
+
+            let cameraOffer = await conn.cameraConnection.createOffer();
+            await conn.cameraConnection.setLocalDescription(cameraOffer);
 
             // Send the local SDP through SignalR in .NET
-            await this.helper.invokeMethodAsync("_onProctorSdp", proctor, offer);
-            console.log("Sending offer to " + proctor + ".");
+            await this.helper.invokeMethodAsync("_onDesktopSdp", proctor, desktopOffer);
+            await this.helper.invokeMethodAsync("_onCameraSdp", proctor, cameraOffer);
         }
     }
 
@@ -140,10 +174,10 @@
 
 let webRTCClientTaker: SmartProctor.WebRTCClientTaker;
 
-export function create(helper, proctors: string[]) {
+export function create(helper, iceServers: string[], proctors: string[]) {
     if (webRTCClientTaker == null) {
         webRTCClientTaker = new SmartProctor.WebRTCClientTaker();
-        webRTCClientTaker.init(helper, proctors);
+        webRTCClientTaker.init(helper, iceServers, proctors);
     }
 
     return webRTCClientTaker;

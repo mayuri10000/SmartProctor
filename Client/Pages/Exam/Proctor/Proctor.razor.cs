@@ -137,16 +137,16 @@ namespace SmartProctor.Client.Pages.Exam
             _webRtcClient = new WebRTCClientProctor(JsRuntime, _testTakers.Select(x => x.Id).ToArray());
             
             _webRtcClient.OnCameraSdp += (_, e) =>
-                _hubConnection.SendAsync("CameraAnswerFromProctor", e.Item1, e.Item2);
+                _hubConnection.SendAsync("CameraAnswer", e.Item1, e.Item2);
             
             _webRtcClient.OnDesktopSdp += (_, e) =>
                 _hubConnection.SendAsync("DesktopAnswer", e.Item1, e.Item2);
             
             _webRtcClient.OnDesktopIceCandidate += (_, e) =>
-                _hubConnection.SendAsync("SendDesktopIceCandidate", e.Item1, e.Item2);
+                _hubConnection.SendAsync("DesktopIceCandidate", e.Item1, e.Item2);
             
             _webRtcClient.OnCameraIceCandidate += (_, e) =>
-                _hubConnection.SendAsync("CameraIceCandidateFromProctor", e.Item1, e.Item2);
+                _hubConnection.SendAsync("CameraIceCandidate", e.Item1, e.Item2);
 
             _webRtcClient.OnCameraMuted += (_, e) =>
                 getExamTakerVideoCard(e).CameraLoading = true;
@@ -187,11 +187,11 @@ namespace SmartProctor.Client.Pages.Exam
                 async (taker, candidate) =>
                     await _webRtcClient.OnReceivedDesktopIceCandidate(taker, candidate));
             
-            _hubConnection.On<string, RTCSessionDescriptionInit>("CameraOfferToProctor",
+            _hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedCameraOffer",
                 async (taker, sdp) =>
                     await _webRtcClient.OnReceivedCameraSdp(taker, sdp));
             
-            _hubConnection.On<string, RTCIceCandidate>("CameraIceCandidateToProctor",
+            _hubConnection.On<string, RTCIceCandidate>("ReceivedCameraIceCandidate",
                 async (taker, candidate) =>
                     await _webRtcClient.OnReceivedCameraIceCandidate(taker, candidate));
             

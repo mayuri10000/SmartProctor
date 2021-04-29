@@ -14,13 +14,14 @@ namespace SmartProctor.Client.Interops
         private DotNetObjectReference<WebRTCClientTaker> _dotRef;
         private string[] _proctors;
         
-        public event EventHandler<RTCIceCandidate> OnCameraIceCandidate;
-        public event EventHandler<(string, RTCIceCandidate)> OnProctorIceCandidate;
-        public event EventHandler<RTCSessionDescriptionInit> OnCameraSdp;
-        public event EventHandler<(string, RTCSessionDescriptionInit)> OnProctorSdp;
-        public event EventHandler<string> OnCameraConnectionStateChange;
-        public event EventHandler<(string, string)> OnProctorConnectionStateChange;
+        public event EventHandler<(string, RTCIceCandidate)> OnCameraIceCandidate;
+        public event EventHandler<(string, RTCSessionDescriptionInit)> OnCameraSdp;
+        public event EventHandler<(string, RTCIceCandidate)> OnDesktopIceCandidate;
+        public event EventHandler<(string, RTCSessionDescriptionInit)> OnDesktopSdp;
+        public event EventHandler<(string, string)> OnCameraConnectionStateChange;
+        public event EventHandler<(string, string)> OnDesktopConnectionStateChange;
         public event EventHandler OnDesktopInactivated;
+        public event EventHandler OnCameraInactivated;
 
         public WebRTCClientTaker(IJSRuntime jsRuntime, string[] proctors)
         {
@@ -35,20 +36,8 @@ namespace SmartProctor.Client.Interops
                 _dotRef = DotNetObjectReference.Create<WebRTCClientTaker>(this);
                 var module = await _jsRuntime.InvokeAsync<IJSObjectReference>(
                     "import", "./js/WebRTCClientTaker.js");
-                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef, _proctors);
+                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef, null, _proctors);
             }
-        }
-
-        public async ValueTask SetDesktopVideoElement(string elementId)
-        {
-            await Init();
-            await _jsObj.InvokeVoidAsync("setDesktopVideoElement", elementId);
-        }
-        
-        public async ValueTask SetCameraVideoElement(string elementId)
-        {
-            await Init();
-            await _jsObj.InvokeVoidAsync("setCameraVideoElement", elementId);
         }
 
         public async ValueTask<string> ObtainDesktopStream()
@@ -56,88 +45,100 @@ namespace SmartProctor.Client.Interops
             await Init();
             return await _jsObj.InvokeAsync<string>("obtainDesktopStream");
         }
-        
-        public async ValueTask StartStreamingDesktop()
+
+        public async ValueTask ObtainCameraStream(string mjpegUrl)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("startStreamingDesktop");
+            await _jsObj.InvokeVoidAsync("obtainCameraStream", mjpegUrl);
+        }
+
+        public async ValueTask StartStreaming()
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("startStreaming");
         }
 
         public async ValueTask ReconnectToProctor(string proctor)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("reconnectToProctor", proctor);
+            await _jsObj.InvokeVoidAsync("reconnectToProctor");
         }
 
-        public async ValueTask ReceivedCameraOfferSDP(RTCSessionDescriptionInit sdp)
+        public async ValueTask SetDesktopVideoElement(string elementId)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedCameraOfferSDP", sdp);
+            await _jsObj.InvokeVoidAsync("setDesktopVideoElement", elementId);
         }
 
-        public async ValueTask ReceivedCameraIceCandidate(RTCIceCandidate candidate)
+        public async ValueTask SetCameraVideoElement(string elementId)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedCameraIceCandidate", candidate);
+            await _jsObj.InvokeVoidAsync("setCameraVideoElement", elementId);
+        }
+
+        public async ValueTask ReceivedDesktopAnswerSDP(string proctor, RTCSessionDescriptionInit sdp)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("receivedDesktopAnswerSDP", proctor, sdp);
+        }
+
+        public async ValueTask ReceivedDesktopIceCandidate(string proctor, RTCIceCandidate candidate)
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("receivedDesktopIceCandidate", proctor, candidate);
         }
         
-        public async ValueTask ReceivedProctorAnswerSDP(string proctor, RTCSessionDescriptionInit sdp)
+        public async ValueTask ReceivedCameraAnswerSDP(string proctor, RTCSessionDescriptionInit sdp)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedProctorAnswerSDP", proctor, sdp);
+            await _jsObj.InvokeVoidAsync("receivedCameraAnswerSDP", proctor, sdp);
         }
 
-        public async ValueTask ReceivedProctorIceCandidate(string proctor, RTCIceCandidate candidate)
+        public async ValueTask ReceivedCameraIceCandidate(string proctor, RTCIceCandidate candidate)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("receivedProctorIceCandidate", proctor, candidate);
-        }
-
-        public async ValueTask OnProctorReconnected(string proctor)
-        {
-            await Init();
-            await _jsObj.InvokeVoidAsync("onProctorReconnected", proctor); 
+            await _jsObj.InvokeVoidAsync("receivedCameraIceCandidate", proctor, candidate);
         }
         
         [JSInvokable]
-        public ValueTask _onCameraIceCandidate(RTCIceCandidate candidate)
+        public ValueTask _onCameraIceCandidate(string proctor, RTCIceCandidate candidate)
         {
-            OnCameraIceCandidate?.Invoke(this, candidate);
+            OnCameraIceCandidate?.Invoke(this, (proctor, candidate));
             return ValueTask.CompletedTask;
         }
         
         [JSInvokable]
-        public ValueTask _onProctorIceCandidate(string proctor, RTCIceCandidate candidate)
+        public ValueTask _onDesktopIceCandidate(string proctor, RTCIceCandidate candidate)
         {
-            OnProctorIceCandidate?.Invoke(this, (proctor, candidate));
+            OnDesktopIceCandidate?.Invoke(this, (proctor, candidate));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        public ValueTask _onCameraSdp(RTCSessionDescriptionInit sdp)
+        public ValueTask _onCameraSdp(string proctor, RTCSessionDescriptionInit sdp)
         {
-            OnCameraSdp?.Invoke(this, sdp);
+            OnCameraSdp?.Invoke(this, (proctor, sdp));
             return ValueTask.CompletedTask;
         }
         
         [JSInvokable]
-        public ValueTask _onProctorSdp(string proctor, RTCSessionDescriptionInit sdp)
+        public ValueTask _onDesktopSdp(string proctor, RTCSessionDescriptionInit sdp)
         {
-            OnProctorSdp?.Invoke(this, (proctor, sdp));
+            OnDesktopSdp?.Invoke(this, (proctor, sdp));
             return ValueTask.CompletedTask;
         }
 
         [JSInvokable]
-        public ValueTask _onCameraConnectionStateChange(string connectionState)
+        public ValueTask _onCameraConnectionStateChange(string proctor, string connectionState)
         {
-            OnCameraConnectionStateChange?.Invoke(this, connectionState);
+            OnCameraConnectionStateChange?.Invoke(this, (proctor, connectionState));
             return ValueTask.CompletedTask;
         }
         
         [JSInvokable]
-        public ValueTask _onProctorConnectionStateChange(string proctor, string connectionState)
+        public ValueTask _onDesktopConnectionStateChange(string proctor, string connectionState)
         {
-            OnProctorConnectionStateChange?.Invoke(this, (proctor, connectionState));
+            OnDesktopConnectionStateChange?.Invoke(this, (proctor, connectionState));
             return ValueTask.CompletedTask;
         }
 
@@ -145,6 +146,13 @@ namespace SmartProctor.Client.Interops
         public ValueTask _onDesktopInactivated()
         {
             OnDesktopInactivated?.Invoke(this, EventArgs.Empty);
+            return ValueTask.CompletedTask;
+        }
+
+        [JSInvokable]
+        public ValueTask _onCameraInactivated()
+        {
+            OnCameraInactivated?.Invoke(this, EventArgs.Empty);
             return ValueTask.CompletedTask;
         }
     }
