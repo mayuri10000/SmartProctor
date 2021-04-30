@@ -3,7 +3,7 @@
 @** This component should be placed in one Row **@
 <Col Span="@(24 / CardsEachRow)" Class="@(_haveNewMessage ? "proctor-video-card-with-notification" : "proctor-video-card")">
     <div @onmouseover="OnMouseOver" @onmouseout="OnMouseOut"
-          class="@(_fullscreen ? "proctor-video-container-fullscreen" : "proctor-video-container")">
+         class="@(_fullscreen ? "proctor-video-container-fullscreen" : "proctor-video-container")">
         <div class="proctor-video-bar proctor-video-bar-top" style="@("display:" + (_showToolBar ? "flex" : "none"))">
             @ExamTakerName
         </div>
@@ -82,22 +82,23 @@
         <AntList DataSource="_messages">
             <ChildContent Context="item">
                 <ListItem>
-                    <ListItemMeta Description="@item.Time.ToString()">
-                        <TitleTemplate>
-                            @if (item.Type == 1)
-                            {
-                                <b>@item.Message</b>
-                            }
-                            else
-                            {
-                                @item.Message
-                            }
-                        </TitleTemplate>
-                        <AvatarTemplate>
-                            <Icon Type="@(item.Type == 1 ? "warning" : "message")" Theme="outline"/>
-                        </AvatarTemplate>
-                    </ListItemMeta>
-                    
+                    <ChildContent>
+                        <ListItemMeta Description="@item.Time.ToString()">
+                            <TitleTemplate>
+                                @if (item.Type == 1)
+                                {
+                                    <b>@item.Message</b>
+                                }
+                                else
+                                {
+                                    @item.Message
+                                }
+                            </TitleTemplate>
+                            <AvatarTemplate>
+                                <Icon Type="@(item.Type == 1 ? "warning" : "message")" Theme="outline"/>
+                            </AvatarTemplate>
+                        </ListItemMeta>
+                    </ChildContent>
                     <Extra>
                         @if (item.Attachment != null)
                         {

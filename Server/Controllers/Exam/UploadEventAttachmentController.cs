@@ -47,13 +47,12 @@ namespace SmartProctor.Server.Controllers.Exam
             var fs = new FileStream(path, FileMode.Create);
             file.CopyTo(fs);
             fs.Close();
-
-            var u = _userServices.GetObject(uid);
-
-            u.Avatar = fileName;
-            _userServices.SaveObject(u);
-
-            return ErrorCodes.CreateSimpleResponse(ErrorCodes.Success);
+            
+            return new UploadEventAttachmentResponseModel
+            {
+                Code = ErrorCodes.Success,
+                FileName = fileName
+            };
         }
     }
 }

@@ -49,8 +49,7 @@
                             <AntList TItem="UserBasicInfo"
                                      DataSource="_takers">
                                 <ListItem>
-                                    <ListItemMeta Avatar="@(context.Avatar ?? "")"
-                                                  Description="@("@" + context.Id)">
+                                    <ListItemMeta Description="@("@" + context.Id)">
                                         <TitleTemplate>
                                             @if (context.BanReason != null)
                                             {
@@ -62,6 +61,9 @@
                                                 <b>@context.Nickname</b>
                                             }
                                         </TitleTemplate>
+                                        <AvatarTemplate>
+                                            <Avatar Src="context.Avatar" Icon="user"></Avatar>
+                                        </AvatarTemplate>
                                     </ListItemMeta>
 
                                 </ListItem>
