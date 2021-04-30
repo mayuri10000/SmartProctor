@@ -82,10 +82,28 @@
         <AntList DataSource="_messages">
             <ChildContent Context="item">
                 <ListItem>
-                    <span>
-                        <Icon Type="@item.Item1" Theme="outline"/>
-                    </span>
-                    @item.Item2
+                    <ListItemMeta Description="@item.Time.ToString()">
+                        <TitleTemplate>
+                            @if (item.Type == 1)
+                            {
+                                <b>@item.Message</b>
+                            }
+                            else
+                            {
+                                @item.Message
+                            }
+                        </TitleTemplate>
+                        <AvatarTemplate>
+                            <Icon Type="@(item.Type == 1 ? "warning" : "message")" Theme="outline"/>
+                        </AvatarTemplate>
+                    </ListItemMeta>
+                    
+                    <Extra>
+                        @if (item.Attachment != null)
+                        {
+                            <Image Src="@item.Attachment"/>
+                        }
+                    </Extra>
                 </ListItem>
             </ChildContent>
         </AntList>

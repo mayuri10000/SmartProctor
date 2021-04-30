@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
 {
@@ -34,12 +35,12 @@ namespace SmartProctor.Client.Pages.Exam
         
         private bool _haveNewMessage = false;
         
-        private List<(string, string)> _messages = new List<(string, string)>();
+        private List<EventItem> _messages = new List<EventItem>();
         private bool _messageVisible = false;
 
-        public void AddMessage(string messageType, string message)
+        public void AddMessage(EventItem eventItem)
         {
-            _messages.Add((messageType, message));
+            _messages.Add(eventItem);
             _haveNewMessage = true;
         }
         

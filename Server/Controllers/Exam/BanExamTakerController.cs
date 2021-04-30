@@ -36,7 +36,7 @@ namespace SmartProctor.Server.Controllers.Exam
 
             if (res == ErrorCodes.Success)
             {
-                _hubContext.Clients.User(model.UserId).SendAsync("ExamTakerBanned", model.Reason);
+                await _hubContext.Clients.User(model.UserId).SendAsync("ExamTakerBanned", model.Reason);
             }
 
             return ErrorCodes.CreateSimpleResponse(res);

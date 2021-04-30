@@ -35,6 +35,8 @@ namespace SmartProctor.Client.Services
         Task<(int, BaseAnswer, DateTime)> GetAnswer(string uid, int examId, int questionNum);
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
         Task<int> BanExamTaker(int examId, string userId, string reason);
+        Task<int> SendEvent(int eid, int type, string message, string receipt);
+        Task<(int, IList<EventItem>)> GetEvents(int eid, string sender, string receipt);
     }
 
     public class ExamServices : IExamServices
@@ -315,6 +317,50 @@ namespace SmartProctor.Client.Services
             catch
             {
                 return ErrorCodes.UnknownError;
+            }
+        }
+
+        public async Task<int> SendEvent(int eid, int type, string message, string receipt)
+        {
+            _logger.LogInformation($"SendEvent eid = {eid}, type = {type}, message = {message}, receipt = {receipt}");
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<SendEventRequestModel, BaseResponseModel>(
+                    "/api/exam/SendEvent", new SendEventRequestModel
+                    {
+                        ExamId = eid,
+                        Attachment = null,
+                        Message = message,
+                        Type = type,
+                        Receipt = receipt
+                    });
+
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
+            }
+        }
+
+        public async Task<(int, IList<EventItem>)> GetEvents(int eid, string sender, string receipt)
+        {
+            _logger.LogInformation($"GetEvents eid = {eid}, sender = {sender}, receipt = {receipt}");
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<GetEventsRequestModel, GetEventsResponseModel>(
+                    "/api/exam/GetEvents", new GetEventsRequestModel
+                    {
+                        ExamId = eid, Receipt = receipt, Sender = sender
+                    });
+
+                return (res.Code, res.Events);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return (ErrorCodes.UnknownError, null);
             }
         }
         

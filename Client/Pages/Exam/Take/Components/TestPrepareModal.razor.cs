@@ -28,8 +28,9 @@ namespace SmartProctor.Client.Pages.Exam
         private bool isWifiConnecting = false;
 
         private bool cameraVideoLoading = true;
+        private string cameraIp;
 
-        private const string DEEPLENS_SETTING_URL = "https://camera-amdc.net:8080";
+        private const string DEEPLENS_SETTING_URL = "http://camera-amdc.net:8080";
 
         [Parameter] public EventCallback OnShareScreen { get; set; }
         
@@ -109,6 +110,7 @@ namespace SmartProctor.Client.Pages.Exam
 
                 wirelessSSID = res.Wifi;
                 ethernetConnected = res.Ethernet;
+                cameraIp = res.Ip;
             }
             catch
             {
@@ -206,6 +208,8 @@ namespace SmartProctor.Client.Pages.Exam
                     tipType = -1;
                     tipText = "Failed to login your account on the DeepLens device";
                 }
+
+                await OnGetCameraStream.InvokeAsync($"http://{cameraIp}:8080/stream_live.mjpeg");
             }
             catch
             {
@@ -223,6 +227,7 @@ namespace SmartProctor.Client.Pages.Exam
         {
             public bool Ethernet { get; set; }
             public string Wifi { get; set; }
+            public string Ip { get; set; }
         }
 
         private class DeepLensWifiListItem

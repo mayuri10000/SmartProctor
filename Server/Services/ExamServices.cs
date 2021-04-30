@@ -69,6 +69,8 @@ namespace SmartProctor.Server.Services
         IList<ExamDetails> GetCreatedExams(string uid);
         
         int BanExamTaker(int eid, string uid, string takerUid, string reason);
+        int AddEvent(int eid, string senderUid, string receiptUid, int type, string message, string attachment = null);
+        IList<EventItem> GetEvents(int eid, string receiptUid, string senderUid);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -76,22 +78,24 @@ namespace SmartProctor.Server.Services
         private IExamUserRepository _examUserRepo;
         private IQuestionRepository _questionRepo;
         private IAnswerRepository _answerRepo;
+        private IEventRepository _eventRepo;
 
         private ILogger<ExamServices> _logger;
         
         public ExamServices(IExamRepository repo, IExamUserRepository examUserRepo, 
-            IQuestionRepository questionRepo, IAnswerRepository answerRepo, ILogger<ExamServices> logger) : base(repo)
+            IQuestionRepository questionRepo, IAnswerRepository answerRepo, IEventRepository eventRepo, ILogger<ExamServices> logger) : base(repo)
         {
             _examUserRepo = examUserRepo;
             _questionRepo = questionRepo;
             _answerRepo = answerRepo;
+            _eventRepo = eventRepo;
 
             _logger = logger;
         }
 
         public int Attempt(int eid, string uid, out string banReason)
         {
-            _logger.LogInformation($"Attempt eid = {eid}, uid = {uid}");
+            _logger.LogDebug($"Attempt eid = {eid}, uid = {uid}");
             banReason = null;
             try
             {
@@ -511,6 +515,83 @@ namespace SmartProctor.Server.Services
             catch
             {
                 return ErrorCodes.UnknownError;
+            }
+        }
+        
+        public int AddEvent(int eid, string senderUid, string receiptUid, int type, string message, string attachment = null)
+        {
+            _logger.LogDebug($"AddEvent eid = {eid}, senderUid = {senderUid}, receiptUid = {receiptUid}," +
+                             $" type = {type}, message = {message}, attachment = {attachment}");
+            try
+            {
+                var e = GetObject(eid);
+                if (e == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
+
+                var ev = new Event()
+                {
+                    ExamId = eid,
+                    Sender = senderUid,
+                    Receipt = receiptUid,
+                    Message = message,
+                    Attachment = attachment,
+                    Time = DateTime.Now
+                };
+
+                _eventRepo.Save(ev);
+
+                return ErrorCodes.Success;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
+            }
+        }
+
+        public IList<EventItem> GetEvents(int eid, string receiptUid, string senderUid)
+        {
+            _logger.LogDebug($"GetEvents eid = {eid}, receiptUid = {receiptUid}, senderUid = {senderUid}");
+            try
+            {
+                IList<Event> q;
+                if (receiptUid == null && senderUid != null)
+                {
+                    q = _eventRepo.GetObjectList(x => x.ExamId == eid && x.Sender == senderUid,
+                        x => x.Time, OrderingType.Ascending);
+                }
+                else if (receiptUid != null && senderUid == null)
+                {
+                    q = _eventRepo.GetObjectList(x => x.ExamId == eid && (x.Receipt == receiptUid || x.Receipt == null),
+                        x => x.Time, OrderingType.Ascending);
+                }
+                else if (receiptUid == null && senderUid == null)
+                {
+                    q = _eventRepo.GetObjectList(x => x.ExamId == eid, x => x.Time, OrderingType.Ascending);
+                }
+                else
+                {
+                    q = _eventRepo.GetObjectList(
+                        x => x.ExamId == eid && x.Sender == senderUid && (x.Receipt == receiptUid || x.Receipt == null),
+                        x => x.Time, OrderingType.Ascending);
+                }
+
+                return q.Select(x => new EventItem()
+                {
+                    Time = x.Time,
+                    Message = x.Message,
+                    Receipt = x.Receipt,
+                    Sender = x.Sender,
+                    Attachment = x.Attachment,
+                    Type = x.Type
+                }).ToList();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return null;
             }
         }
 

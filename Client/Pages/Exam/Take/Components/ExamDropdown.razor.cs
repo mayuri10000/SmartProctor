@@ -77,9 +77,7 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 _pageLeft = true;
                 await _window.Focus();
-                await _hubConnection.SendAsync("TestTakerMessage", ExamId, "warning",
-                        "The exam taker left the exam page")
-                    .ConfigureAwait(false);
+                await ExamServices.SendEvent(_examId, 1, "The exam taker left the exam page", null).ConfigureAwait(false);
                 await Modal.ErrorAsync(new ConfirmOptions()
                 {
                     Title = "DO NOT LEAVE THE EXAM PAGE!",
@@ -243,8 +241,7 @@ namespace SmartProctor.Client.Pages.Exam
         
         private async Task OnReshareScreen()
         {
-            await _hubConnection.SendAsync("TestTakerMessage", ExamId,"warning",
-                "The test taker's desktop capture was cancelled");
+            await ExamServices.SendEvent(_examId, 1, "The test taker's desktop capture was cancelled", null);
             _inReshare = true;
             await Modal.ErrorAsync(new ConfirmOptions()
             {

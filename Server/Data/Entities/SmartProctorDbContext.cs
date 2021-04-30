@@ -94,6 +94,11 @@ namespace SmartProctor.Server.Data.Entities
                     .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.Property(e => e.Type).HasColumnName("type");
+                
+                entity.Property(e => e.Time)
+                    .IsRequired()
+                    .HasMaxLength(6)
+                    .HasColumnName("answer_time");
             });
 
             modelBuilder.Entity<Exam>(entity =>

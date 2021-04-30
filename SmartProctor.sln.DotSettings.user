@@ -13,4 +13,5 @@
   &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\microsoft.aspnetcore.signalr.client.core\5.0.2\lib\netstandard2.1\Microsoft.AspNetCore.SignalR.Client.Core.dll" /&gt;&#xD;
   &lt;Assembly Path="\home\liu\.nuget\packages\antdesign.pro.layout\0.1.0-nightly-210311054507\lib\net5.0\AntDesign.Pro.Layout.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\oneof\2.1.155\lib\netstandard1.3\OneOf.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Administrator\.nuget\packages\antdesign\0.8.0\lib\net5.0\AntDesign.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

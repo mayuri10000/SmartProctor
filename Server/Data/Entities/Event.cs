@@ -12,6 +12,7 @@ namespace SmartProctor.Server.Data.Entities
         public string Sender { get; set; }
         public string Receipt { get; set; }
         public int Type { get; set; }
+        public DateTime Time { get; set; }
         public string Message { get; set; }
         public string Attachment { get; set; }
     }

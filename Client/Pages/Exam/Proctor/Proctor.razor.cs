@@ -167,15 +167,15 @@ namespace SmartProctor.Client.Pages.Exam
                 .WithUrl(NavManager.ToAbsoluteUri("/hub"))
                 .Build();
 
-            _hubConnection.On<string, string, string>("ReceiveMessage",
-                async (testTaker, messageType, message) =>
+            _hubConnection.On<EventItem>("ReceivedMessage",
+                async (eventItem) =>
                 {
-                    getExamTakerVideoCard(testTaker)?.AddMessage(messageType, message);
+                    getExamTakerVideoCard(eventItem.Sender)?.AddMessage(eventItem);
                     await Notification.Open(new NotificationConfig()
                     {
-                        Message = (messageType == "warning" ? "Warning from " : "Message from ") + testTaker,
-                        NotificationType = messageType == "warning" ? NotificationType.Warning : NotificationType.Info,
-                        Description = message
+                        Message = (eventItem.Type == 1 ? "Warning from " : "Message from ") + eventItem.Sender,
+                        NotificationType = eventItem.Type == 1 ? NotificationType.Warning : NotificationType.Info,
+                        Description = eventItem.Message
                     });
                 });
 
