@@ -198,5 +198,10 @@ namespace SmartProctor.Client.Pages.Exam
             _questions.RemoveAt(index);
             StateHasChanged();
         }
+
+        private void UpdateQuestion(int index, BaseQuestion question)
+        {
+            _questions[index] = question;
+        }
     }
 }

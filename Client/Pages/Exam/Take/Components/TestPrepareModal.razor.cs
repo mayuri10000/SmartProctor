@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using SmartProctor.Client.Utils;
 using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -201,21 +202,31 @@ namespace SmartProctor.Client.Pages.Exam
                     await Http.GetFromJsonAsync<DeepLensTokenResponseModel>("/api/user/GenerateDeepLensToken");
                 var token = tokenRes.Token;
 
-                var res = await Http.GetFromJsonAsync<DeepLensActionResponse>(DEEPLENS_SETTING_URL + "/login" +
-                                                                              "?token=" + token + "&eid=" + ExamId);
+                var res = await Http.PostAsAndGetFromJsonAsync<DeepLensLoginRequest ,DeepLensActionResponse>(
+                    DEEPLENS_SETTING_URL + "/login_and_start_exam", new DeepLensLoginRequest()
+                    {
+                        Token = token,
+                        ExamId = int.Parse(ExamId)
+                    });
                 if (!res.Success)
                 {
                     tipType = -1;
                     tipText = "Failed to login your account on the DeepLens device";
                 }
 
-                await OnGetCameraStream.InvokeAsync($"http://{cameraIp}:8080/stream_live.mjpeg");
+                await OnGetCameraStream.InvokeAsync($"http://{cameraIp}:8080/video_stream");
             }
             catch
             {
                 tipType = -1;
                 tipText = "An error occured when getting your DeepLens device connected";
             }
+        }
+
+        private class DeepLensLoginRequest
+        {
+            public string Token { get; set; }
+            public int ExamId { get; set; }
         }
 
         private class DeepLensSerialNumberResponse

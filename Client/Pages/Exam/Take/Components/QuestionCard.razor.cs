@@ -43,6 +43,7 @@ namespace SmartProctor.Client.Pages.Exam
         protected override async Task OnInitializedAsync()
         {
             var (res2, answer, _) = await ExamServices.GetAnswer("", ExamId, QuestionNum);
+            Console.WriteLine(res2);
             if (res2 == ErrorCodes.Success)
             {
                 _answer = answer;
@@ -79,6 +80,20 @@ namespace SmartProctor.Client.Pages.Exam
 
                     _answer.Type = Question.QuestionType;
                 }
+            }
+            else
+            {
+                if (Question is ChoiceQuestion)
+                {
+                    _answer = new ChoiceAnswer();
+                    _choiceChecked = new bool[((ChoiceQuestion)Question).Choices.Count];
+                }
+                else if (Question is ShortAnswerQuestion)
+                {
+                    _answer = new ShortAnswer();
+                }
+
+                _answer.Type = Question.QuestionType;
             }
 
             _initialized = true;

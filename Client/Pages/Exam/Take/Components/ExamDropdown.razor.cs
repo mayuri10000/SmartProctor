@@ -41,7 +41,6 @@ namespace SmartProctor.Client.Pages.Exam
         
         private bool _localDesktopVideoLoaded = false;
         private bool _localCameraVideoLoaded = false;
-        private bool _cameraVideoLoading = true;
         private bool _inPrepare = false;
         private bool _pageLeft = false;
 
@@ -237,6 +236,7 @@ namespace SmartProctor.Client.Pages.Exam
         private async Task OnGetCameraStream(string mjpegUrl)
         {
             await _webRtcClient.ObtainCameraStream(mjpegUrl);
+            await _webRtcClient.SetCameraVideoElement("camera-video-dialog");
         }
         
         private async Task OnReshareScreen()

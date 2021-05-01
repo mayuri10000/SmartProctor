@@ -2,11 +2,9 @@
 
 <Space>
     <SpaceItem>
-        <Popover Placement="PlacementType.BottomRight" OnVisibleChange="OnCameraVideoVisibleChange">
+        <Popover Placement="PlacementType.BottomRight" Title="Camera capture" OnVisibleChange="OnCameraVideoVisibleChange">
             <ContentTemplate>
-                <Spin Spinning="_cameraVideoLoading">
                     <video id="local-camera" autoplay class="taker-video"></video>
-                </Spin>
             </ContentTemplate>
             <ChildContent>
                 <span class="action account">
@@ -16,7 +14,7 @@
         </Popover>
     </SpaceItem>
     <SpaceItem>
-        <Popover Placement="PlacementType.BottomRight" OnVisibleChange="OnDesktopVideoVisibleChange">
+        <Popover Placement="PlacementType.BottomRight" Title="Desktop capture" OnVisibleChange="OnDesktopVideoVisibleChange">
             <ContentTemplate>
                 <video id="local-desktop" autoplay class="taker-video"></video>
             </ContentTemplate>

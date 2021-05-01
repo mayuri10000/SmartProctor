@@ -19,7 +19,7 @@ namespace SmartProctor.Client.Utils
         public const int ExamNotPermitToProctor = 2002;
         public const int ExamNotBegin = 2003;
         public const int ExamExpired = 2004;
-        public const int QuestionNotExist = 2005;
+        public const int QuestionNotAnswered = 2005;
         public const int ExamNotPermitToEdit = 2006;
         public const int ExamAlreadyJoined = 2007;
         public const int ExamAlreadyProctored = 2008;
@@ -43,7 +43,7 @@ namespace SmartProctor.Client.Utils
             { ExamNotPermitToProctor,  "You have no permission to proctor this exam"},
             { ExamNotBegin,            "This exam have not begin yet."},
             { ExamExpired,             "This exam has expired"},
-            { QuestionNotExist,        "Question not exists"},
+            { QuestionNotAnswered,     "Question not answered"},
             { ExamNotPermitToEdit,     "You have no permission to edit this exam"},
             { ExamAlreadyJoined,       "You have already joined the exam"},
             { ExamAlreadyProctored,    "The selected user is already a proctor of the exam"},

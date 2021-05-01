@@ -19,7 +19,7 @@ namespace SmartProctor.Server.Utils
         public const int ExamNotPermitToProctor = 2002;
         public const int ExamNotBegin = 2003;
         public const int ExamExpired = 2004;
-        public const int QuestionNotExist = 2005;
+        public const int QuestionNotAnswered = 2005;
         public const int ExamNotPermitToEdit = 2006;
         public const int ExamAlreadyJoined = 2007;
         public const int ExamAlreadyProctored = 2008;

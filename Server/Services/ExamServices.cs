@@ -408,6 +408,7 @@ namespace SmartProctor.Server.Services
         {
             json = null;
             time = DateTime.MinValue;
+            _logger.LogDebug($"GetAnswer currentUid = {currentUid}, uid = {uid}, eid = {eid}, num = {num}");
             try
             {
                 var exam = GetObject(eid);
@@ -425,6 +426,10 @@ namespace SmartProctor.Server.Services
                     {
                         var answer =
                             _answerRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == currentUid && x.QuestionNum == num);
+                        if (answer == null)
+                        {
+                            return ErrorCodes.QuestionNotAnswered;
+                        }
                         json = answer.AnswerJson;
                         time = answer.AnswerTime ?? DateTime.MinValue;
                     }
@@ -435,6 +440,10 @@ namespace SmartProctor.Server.Services
                 {
                     var answer =
                         _answerRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid && x.QuestionNum == num);
+                    if (answer == null)
+                    {
+                        return ErrorCodes.QuestionNotAnswered;
+                    }
                     json = answer.AnswerJson;
                     time = answer.AnswerTime ?? DateTime.MinValue;
 
@@ -448,6 +457,7 @@ namespace SmartProctor.Server.Services
             }
             catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return ErrorCodes.UnknownError;
             }
         }

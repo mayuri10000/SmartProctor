@@ -15,7 +15,7 @@
         private cameraVideoElem: Element;
         private rtcConfig: RTCConfiguration;
         private cameraCanvas: HTMLCanvasElement;
-        private cameraImage: HTMLImageElement;
+        private cameraImage;
         public helper;
 
         public async init(helper, iceServers: string[], proctors: string[]) {
@@ -64,11 +64,17 @@
         }
 
         public async obtainCameraStream(mjpegUrl: string): Promise<void> {
-            if (this.cameraCanvas == null)
+            if (this.cameraCanvas == null) {
+                // @ts-ignore
                 this.cameraCanvas = document.createElement<HTMLCanvasElement>("canvas");
+                this.cameraCanvas.width = 858;
+                this.cameraCanvas.height = 480;
+            }
             
-            if (this.cameraImage == null)
-                this.cameraImage = document.createElement<HTMLImageElement>("img");
+            if (this.cameraImage == null) {
+                this.cameraImage = new Image();
+                this.cameraImage.crossOrigin = "anonymous";
+            }
             
             this.cameraImage.src = mjpegUrl;
             // @ts-ignore
@@ -77,12 +83,11 @@
             this.cameraStream.oninactive = async (_) => {
                 await this.helper.invokeMethodAsync("_onCameraInactivated");
             };
-            window.setInterval("updateCameraFrame()", 5);
+            window.setInterval(() => {
+                this.cameraCanvas.getContext("2d").drawImage(this.cameraImage, 0, 0);
+            }, 15);
         }
         
-        private updateCameraFrame() : void {
-            this.cameraCanvas.getContext("2d").drawImage(this.cameraImage, 0, 0);
-        }
 
         public async startStreaming() {
             for (let proctor in this.proctorConnections) {

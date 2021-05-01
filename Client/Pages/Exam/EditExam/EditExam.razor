@@ -1,6 +1,7 @@
 ﻿@namespace SmartProctor.Client.Pages.Exam
 
 @page "/Exam/Edit/{ExamId}"
+@using SmartProctor.Shared.Requests
 
 <PageContainer Title="Edit exam">
     <Breadcrumb>
@@ -65,7 +66,8 @@
                     // https://stackoverflow.com/questions/58205090/using-ref-inside-for-loop-to-get-element-reference
                     var index = i;
                     <QuestionEditor @ref="@_questionEditors[index]" Question="@_questions[index]"
-                                     QuestionNum="@(i + 1)" OnRemoveQuestion="() => RemoveQuestion(index)"/>
+                                    QuestionNum="@(i + 1)" OnRemoveQuestion="() => RemoveQuestion(index)"
+                                    QuestionUpdated="q => UpdateQuestion(index, q)"/>
                 }
             }
 

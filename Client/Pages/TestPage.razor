@@ -2,11 +2,13 @@
 @using SmartProctor.Client.Pages.Exam
 @using BrowserInterop
 @using System.Collections.Concurrent
+@using System.IO.Pipelines
 @using System.Text
 @using BrowserInterop.Extensions
 @using _Imports = SmartProctor.Client._Imports
 @inject MessageService msg
 @inject IJSRuntime JsRuntime
+@inject HttpClient HttpClient
 @layout StandardLayout
 
 <div>
@@ -22,8 +24,11 @@
                 <Card>
                     @* In development, new components will be tested here, this page
                     will be removed when the project is finished *@
-                    <TestComponent StringBuilder="@sb" StringBuilderUpdated="StringBuilderUpdated"/>
-                    <Paragraph>@sb.ToString()</Paragraph>
+                    <Paragraph>
+                        <img src="http://10.28.168.165:8080/video_stream" id="image1" crossorigin="anonymous"/>
+                        <canvas id="canvas1"></canvas>
+                        <video id="video1" autoplay crossorigin="anonymous"></video>
+                    </Paragraph>
                 </Card>
             </div>
         </ChildContent>
@@ -32,10 +37,4 @@
 
 @code
 {
-    private StringBuilder sb = new StringBuilder();
-
-    private void StringBuilderUpdated(StringBuilder sb)
-    {
-        this.sb = sb;
-    }
 }
