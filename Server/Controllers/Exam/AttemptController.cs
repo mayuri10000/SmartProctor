@@ -19,7 +19,7 @@ namespace SmartProctor.Server.Controllers.Exam
             _services = services;
         }
 
-        [HttpGet("{eid}")]
+        [HttpGet("{eid:int}")]
         public BaseResponseModel Get(int eid)
         {
             if (User.Identity?.Name == null)

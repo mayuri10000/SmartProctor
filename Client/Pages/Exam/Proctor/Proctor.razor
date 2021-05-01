@@ -25,7 +25,7 @@
                                              OnBanExamTaker="() => BanTestTaker(_testTakers[index].Id)"
                                              OnToggleCamera="() => OnToggleCamera(_testTakers[index].Id)"
                                              OnToggleDesktop="() => OnToggleDesktop(_testTakers[index].Id)"
-                                             CardsEachRow="@(NUM_COLS)"/>
+                                             CardsEachRow="@(NUM_COLS)" Banned="@(_testTakers[index].BanReason != null)"/>
                     }
                 }
             </Row>

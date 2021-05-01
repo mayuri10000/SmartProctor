@@ -70,7 +70,7 @@ namespace SmartProctor.Server.Services
         
         int BanExamTaker(int eid, string uid, string takerUid, string reason);
         int AddEvent(int eid, string senderUid, string receiptUid, int type, string message, string attachment = null);
-        IList<EventItem> GetEvents(int eid, string receiptUid, string senderUid);
+        IList<EventItem> GetEvents(string uid, int eid);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -95,7 +95,7 @@ namespace SmartProctor.Server.Services
 
         public int Attempt(int eid, string uid, out string banReason)
         {
-            _logger.LogDebug($"Attempt eid = {eid}, uid = {uid}");
+            _logger.LogDebug($"Attempt(eid: {eid}, uid: \"{uid}\")");
             banReason = null;
             try
             {
@@ -141,7 +141,7 @@ namespace SmartProctor.Server.Services
 
         public int EnterProctor(int eid, string uid)
         {
-            _logger.LogInformation($"EnterProctor eid = {eid}, uid = {uid}");
+            _logger.LogInformation($"EnterProctor(eid: {eid}, uid: \"{uid}\")");
             try
             {
                 if (GetObject(eid) == null)
@@ -180,7 +180,7 @@ namespace SmartProctor.Server.Services
 
         public IList<(string, string)> GetExamTakers(int eid)
         {
-            _logger.LogInformation($"GetExamTaker eid = {eid}");
+            _logger.LogInformation($"GetExamTaker(eid: {eid})");
             if (GetObject(eid) == null)
             {
                 return null;
@@ -200,41 +200,57 @@ namespace SmartProctor.Server.Services
 
         public int JoinExam(string uid, int eid, out string banReason)
         {
+            _logger.LogInformation($"JoinExam(uid: \"{uid}\", eid: {eid}, out banReason)");
             banReason = null;
-            var exam = GetObject(eid);
-
-            if (exam == null)
+            try
             {
-                return ErrorCodes.ExamNotExist;
+                var exam = GetObject(eid);
+
+                if (exam == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
+
+                if (exam.StartTime.AddSeconds(exam.Duration) < DateTime.Now)
+                {
+                    return ErrorCodes.ExamExpired;
+                }
+
+                var count = _examUserRepo.ObjectCount(x => x.ExamId == eid && x.UserRole == 1 && x.BanReason == null);
+
+                if (count >= exam.MaximumTakersNum)
+                {
+                    return ErrorCodes.ExamMaxTakerReached;
+                }
+
+                var eu = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid);
+
+                if (eu != null)
+                {
+                    if (eu.UserRole != 1)
+                        return ErrorCodes.ExamAlreadyProctored;
+
+                    banReason = eu.BanReason;
+                    return eu.BanReason == null ? ErrorCodes.ExamAlreadyJoined : ErrorCodes.ExamTakerBanned;
+                }
+
+                eu = new ExamUser()
+                {
+                    ExamId = eid,
+                    UserId = uid,
+                    UserRole = 1,
+                    BanReason = null
+                };
+
+                _examUserRepo.Add(eu);
+
+                return ErrorCodes.Success;
             }
-
-            if (exam.StartTime.AddSeconds(exam.Duration) < DateTime.Now)
+            catch (Exception e)
             {
-                return ErrorCodes.ExamExpired;
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
             }
-
-            var eu = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid);
-
-            if (eu != null)
-            {
-                if (eu.UserRole != 1) 
-                    return ErrorCodes.ExamAlreadyProctored;
-                
-                banReason = eu.BanReason;
-                return eu.BanReason == null ? ErrorCodes.ExamAlreadyJoined : ErrorCodes.ExamTakerBanned;
-            }
-
-            eu = new ExamUser()
-            {
-                ExamId = eid,
-                UserId = uid,
-                UserRole = 1,
-                BanReason = null
-            };
-            
-            _examUserRepo.Add(eu);
-                
-            return ErrorCodes.Success;
         }
 
         public IList<string> GetProctors(int eid)
@@ -258,6 +274,7 @@ namespace SmartProctor.Server.Services
 
         public IList<ExamDetails> GetExamsForUser(string uid, int role)
         {
+            _logger.LogInformation($"GetExamsForUser(uid: \"{uid}\", role: {role})");
             try
             {
                 var q = _examUserRepo.GetObjectList(x => x.UserId == uid && x.UserRole == role,
@@ -286,11 +303,12 @@ namespace SmartProctor.Server.Services
         }
         public int GetPaper(string uid, int eid, out IList<string> questions)
         {
-            _logger.LogInformation($"GetPaper, uid = {uid}, eid = {eid}");
+            _logger.LogInformation($"GetPaper(uid: \"{uid}\", eid: {eid})");
             questions = null;
             try
             {
-                if (GetObject(eid) == null)
+                var exam = GetObject(eid);
+                if (exam == null)
                 {
                     return ErrorCodes.ExamNotExist;
                 }
@@ -309,7 +327,7 @@ namespace SmartProctor.Server.Services
                 {
                     return ErrorCodes.ExamTakerBanned;
                 }
-                else if (role != 3)
+                else if (exam.Creator != uid)
                 {
                     return ErrorCodes.ExamNotPermitToTake;
                 }
@@ -329,6 +347,7 @@ namespace SmartProctor.Server.Services
 
         public int EditPaper(string uid, int eid, IList<string> questions)
         {
+            _logger.LogInformation($"EditPaper(uid: \"{uid}\", eid: {eid}, questions: [...])");
             try
             {
                 if (GetUserRoleInExam(uid, eid) != 3)
@@ -352,14 +371,16 @@ namespace SmartProctor.Server.Services
 
                 return ErrorCodes.Success;
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return ErrorCodes.UnknownError;
             }
         }
 
         public int SubmitAnswer(string uid, int eid, int num, string json)
         {
+            _logger.LogInformation($"SubmitAnswer(uid: \"{uid}\", eid: {eid}, num: {num}, json: \"{json}\")");
             try
             {
                 if (GetUserRoleInExam(uid, eid) != 1)
@@ -398,8 +419,9 @@ namespace SmartProctor.Server.Services
 
                 return ErrorCodes.Success;
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return ErrorCodes.UnknownError;
             }
         }
@@ -408,7 +430,7 @@ namespace SmartProctor.Server.Services
         {
             json = null;
             time = DateTime.MinValue;
-            _logger.LogDebug($"GetAnswer currentUid = {currentUid}, uid = {uid}, eid = {eid}, num = {num}");
+            _logger.LogInformation($"GetAnswer(currentUid: \"{currentUid}\", uid: \"{uid}\", eid: {eid}, num: {num})");
             try
             {
                 var exam = GetObject(eid);
@@ -436,7 +458,7 @@ namespace SmartProctor.Server.Services
 
                     return ret;
                 }
-                else if (role == 3)
+                else if (exam.Creator == currentUid)
                 {
                     var answer =
                         _answerRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid && x.QuestionNum == num);
@@ -469,6 +491,7 @@ namespace SmartProctor.Server.Services
 
         public IList<ExamDetails> GetCreatedExams(string uid)
         {
+            _logger.LogInformation($"GetCreatedExams(uid: \"{uid}\")");
             try
             {
                 var q = GetObjectList(x => x.Creator == uid, x => x.Id, OrderingType.Ascending);
@@ -487,14 +510,16 @@ namespace SmartProctor.Server.Services
                         OpenBook = x.OpenBook,
                     }).ToList();
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e.ToString());
                 return null;
             }
         }
 
         public int BanExamTaker(int eid, string uid, string takerUid, string reason)
         {
+            _logger.LogInformation($"BanExamTaker(eid: {eid}, uid: \"{uid}\", takerUid: \"{takerUid}\", reason: \"{reason}\"");
             try
             {
                 var e = GetObject(eid);
@@ -506,7 +531,7 @@ namespace SmartProctor.Server.Services
 
                 var q1 = _examUserRepo.GetFirstOrDefaultObject(x =>
                     x.ExamId == eid && x.UserId == uid && x.UserRole == 2);
-                if (q1 == null)
+                if (q1 == null && e.Creator != uid)
                 {
                     return ErrorCodes.ExamNotPermitToProctor;
                 }
@@ -524,14 +549,15 @@ namespace SmartProctor.Server.Services
             }
             catch
             {
+                _logger.LogError(eid.ToString());
                 return ErrorCodes.UnknownError;
             }
         }
         
         public int AddEvent(int eid, string senderUid, string receiptUid, int type, string message, string attachment = null)
         {
-            _logger.LogDebug($"AddEvent eid = {eid}, senderUid = {senderUid}, receiptUid = {receiptUid}," +
-                             $" type = {type}, message = {message}, attachment = {attachment}");
+            _logger.LogInformation($"AddEvent(eid: {eid}, senderUid: \"{senderUid}\", receiptUid: \"{receiptUid}\"," +
+                             $" type: {type}, message: \"{message}\", attachment: {attachment}");
             try
             {
                 var e = GetObject(eid);
@@ -561,32 +587,15 @@ namespace SmartProctor.Server.Services
             }
         }
 
-        public IList<EventItem> GetEvents(int eid, string receiptUid, string senderUid)
+        public IList<EventItem> GetEvents(string uid, int eid)
         {
-            _logger.LogDebug($"GetEvents eid = {eid}, receiptUid = {receiptUid}, senderUid = {senderUid}");
+            _logger.LogInformation($"GetEvents(uid: \"{uid}\", eid: {eid})");
             try
             {
-                IList<Event> q;
-                if (receiptUid == null && senderUid != null)
-                {
-                    q = _eventRepo.GetObjectList(x => x.ExamId == eid && x.Sender == senderUid,
+                IList<Event> q = _eventRepo.GetObjectList(x => x.ExamId == eid &&
+                                                               (x.Sender == uid || x.Receipt == uid || x.Receipt == null),
                         x => x.Time, OrderingType.Ascending);
-                }
-                else if (receiptUid != null && senderUid == null)
-                {
-                    q = _eventRepo.GetObjectList(x => x.ExamId == eid && (x.Receipt == receiptUid || x.Receipt == null),
-                        x => x.Time, OrderingType.Ascending);
-                }
-                else if (receiptUid == null && senderUid == null)
-                {
-                    q = _eventRepo.GetObjectList(x => x.ExamId == eid, x => x.Time, OrderingType.Ascending);
-                }
-                else
-                {
-                    q = _eventRepo.GetObjectList(
-                        x => x.ExamId == eid && x.Sender == senderUid && (x.Receipt == receiptUid || x.Receipt == null),
-                        x => x.Time, OrderingType.Ascending);
-                }
+                
 
                 return q.Select(x => new EventItem()
                 {
@@ -626,15 +635,10 @@ namespace SmartProctor.Server.Services
 
             return ErrorCodes.Success;
         }
-
+        
         private int GetUserRoleInExam(string uid, int eid)
         {
             var e = GetObject(eid);
-
-            if (e.Creator == uid)
-            {
-                return 3;
-            }
 
             var q = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid);
 

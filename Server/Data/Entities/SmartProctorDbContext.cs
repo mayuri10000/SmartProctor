@@ -98,7 +98,7 @@ namespace SmartProctor.Server.Data.Entities
                 entity.Property(e => e.Time)
                     .IsRequired()
                     .HasMaxLength(6)
-                    .HasColumnName("answer_time");
+                    .HasColumnName("time");
             });
 
             modelBuilder.Entity<Exam>(entity =>

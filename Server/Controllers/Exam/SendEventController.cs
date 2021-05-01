@@ -34,6 +34,12 @@ namespace SmartProctor.Server.Controllers.Exam
             
             var uid = User.Identity.Name;
 
+            // Removes the "_cam" prefix for the DeepLens users
+            if (User.IsInRole("DeepLens"))
+            {
+                uid = uid[..^4];
+            }
+
             var res = _examServices.AddEvent(model.ExamId, uid, model.Receipt, model.Type, model.Message,
                 model.Attachment);
 

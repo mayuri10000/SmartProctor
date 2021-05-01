@@ -15,6 +15,6 @@ namespace SmartProctor.Shared.Responses
     
     public class GetEventsResponseModel : BaseResponseModel
     {
-        public IList<EventItem> Events;
+        public IList<EventItem> Events { get; set; }
     }
 }

@@ -24,6 +24,7 @@ namespace SmartProctor.Server.Utils
         public const int ExamAlreadyJoined = 2007;
         public const int ExamAlreadyProctored = 2008;
         public const int ExamTakerBanned = 2009;
+        public const int ExamMaxTakerReached = 2010;
 
         public static BaseResponseModel CreateSimpleResponse(int errorCode)
         {

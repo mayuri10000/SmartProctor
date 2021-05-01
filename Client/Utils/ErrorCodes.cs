@@ -24,6 +24,7 @@ namespace SmartProctor.Client.Utils
         public const int ExamAlreadyJoined = 2007;
         public const int ExamAlreadyProctored = 2008;
         public const int ExamTakerBanned = 2009;
+        public const int ExamMaxTakerReached = 2010;
 
         public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
         {
@@ -47,7 +48,8 @@ namespace SmartProctor.Client.Utils
             { ExamNotPermitToEdit,     "You have no permission to edit this exam"},
             { ExamAlreadyJoined,       "You have already joined the exam"},
             { ExamAlreadyProctored,    "The selected user is already a proctor of the exam"},
-            { ExamTakerBanned,         "You have been banned from the exam"}
+            { ExamTakerBanned,         "You have been banned from the exam"},
+            { ExamMaxTakerReached,     "This exam's taker count have already reached the limit."}
         };
     }
 }

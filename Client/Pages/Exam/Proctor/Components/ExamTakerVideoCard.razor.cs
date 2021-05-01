@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using SmartProctor.Client.Services;
 using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -42,6 +43,11 @@ namespace SmartProctor.Client.Pages.Exam
         {
             _messages.Add(eventItem);
             _haveNewMessage = true;
+        }
+
+        public void AddOldMessage(EventItem eventItem)
+        {
+            _messages.Add(eventItem);
         }
         
         private void OnMouseOver()

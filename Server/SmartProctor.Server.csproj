@@ -24,6 +24,7 @@
   <ItemGroup>
     <Folder Include="Data\Entities" />
     <Folder Include="wwwroot\img\avatars" />
+    <Folder Include="wwwroot\img\event" />
   </ItemGroup>
 
 

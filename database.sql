@@ -15,6 +15,7 @@ create table event
     exam_id    int         not null,
     sender     varchar(20) null,
     receipt    varchar(20) null,
+    time       datetime(6) not null,
     type       int         not null,
     message    text        not null,
     attachment text        null

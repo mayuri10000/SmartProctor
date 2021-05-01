@@ -10,11 +10,15 @@
 
         @if (Banned)
         {
-            <Icon Type="stop" Theme="outline" Class="proctor-video-icon"/>
+            <div class="proctor-video-overlay">
+                <Icon Type="stop" Theme="outline" Class="proctor-video-icon"/>
+            </div>
         }
         else if ((_showingDesktop && DesktopLoading) || (!_showingDesktop && CameraLoading))
         {
-            <Icon Type="loading" Theme="outline" Class="proctor-video-icon"/>
+            <div class="proctor-video-overlay">
+                <Icon Type="loading" Theme="outline" Class="proctor-video-icon"/>
+            </div>
         }
         <video id="@(ExamTakerName + "-video")" class="proctor-video" autoplay/>
         <div class="proctor-video-bar proctor-video-bar-bottom" style="@("display:" + (_showToolBar ? "flex" : "none"))">
@@ -102,7 +106,7 @@
                     <Extra>
                         @if (item.Attachment != null)
                         {
-                            <Image Src="@item.Attachment"/>
+                            <Image Src="@item.Attachment" Class="proctor-img-preview"/>
                         }
                     </Extra>
                 </ListItem>

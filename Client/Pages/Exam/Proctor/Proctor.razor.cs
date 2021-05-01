@@ -71,16 +71,13 @@ namespace SmartProctor.Client.Pages.Exam
             if (await Attempt())
             {
                 await GetExamDetails();
-                Console.WriteLine("GetExamDetails()");
                 await GetExamTakers();
-                Console.WriteLine("GetExamTakers()");
                 await SetupSignalRClient();
-                Console.WriteLine("SetupSignalRClient()");
                 SetupWebRTC();
-                Console.WriteLine("SetupWebRTC()");
                 await _hubConnection.SendAsync("ProctorJoin", ExamId);
                 StateHasChanged();
-                Console.WriteLine("_hubConnection.SendAsync(\"ProctorJoin\", ExamId);");
+                await Task.Delay(500);
+                await GetEvents();
             }
         }
 
@@ -122,6 +119,19 @@ namespace SmartProctor.Client.Pages.Exam
             }
         }
 
+        private async Task GetEvents()
+        {
+            var (ret, events) = await ExamServices.GetEvents(_examId);
+
+            if (ret == ErrorCodes.Success)
+            {
+                foreach (var ev in events)
+                {
+                    getExamTakerVideoCard(ev.Sender).AddOldMessage(ev);
+                }
+            }
+        }
+
         private async Task GetExamTakers()
         {
             var (err, takers) = await ExamServices.GetTestTakers(_examId);
@@ -148,17 +158,11 @@ namespace SmartProctor.Client.Pages.Exam
             _webRtcClient.OnCameraIceCandidate += (_, e) =>
                 _hubConnection.SendAsync("CameraIceCandidate", e.Item1, e.Item2);
 
-            _webRtcClient.OnCameraMuted += (_, e) =>
-                getExamTakerVideoCard(e).CameraLoading = true;
-
-            _webRtcClient.OnCameraUnmuted += (_, e) =>
-                getExamTakerVideoCard(e).CameraLoading = false;
-
-            _webRtcClient.OnDesktopMuted += (_, e) =>
-                getExamTakerVideoCard(e).DesktopLoading = true;
-
-            _webRtcClient.OnDesktopUnmuted += (_, e) =>
-                getExamTakerVideoCard(e).DesktopLoading = false;
+            _webRtcClient.OnDesktopConnectionStateChange += (_, e) =>
+                getExamTakerVideoCard(e.Item1).DesktopLoading = e.Item2 != "connected";
+            
+            _webRtcClient.OnCameraConnectionStateChange += (_, e) =>
+                getExamTakerVideoCard(e.Item1).CameraLoading = e.Item2 != "connected";
         }
         
         private async Task SetupSignalRClient()

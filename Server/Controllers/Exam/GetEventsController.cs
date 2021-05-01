@@ -17,10 +17,17 @@ namespace SmartProctor.Server.Controllers.Exam
             _examServices = examServices;
         }
 
-        [HttpPost]
-        public BaseResponseModel Post(GetEventsRequestModel model)
+        [HttpGet("{eid:int}")]
+        public BaseResponseModel Get(int eid)
         {
-            var res = _examServices.GetEvents(model.ExamId, model.Receipt, model.Sender);
+            if (User.Identity?.Name == null)
+            {
+                return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
+            }
+                        
+            var uid = User.Identity.Name;
+            
+            var res = _examServices.GetEvents(uid, eid);
 
             if (res == null)
             {

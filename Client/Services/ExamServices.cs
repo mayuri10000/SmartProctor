@@ -36,7 +36,7 @@ namespace SmartProctor.Client.Services
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
         Task<int> BanExamTaker(int examId, string userId, string reason);
         Task<int> SendEvent(int eid, int type, string message, string receipt);
-        Task<(int, IList<EventItem>)> GetEvents(int eid, string sender, string receipt);
+        Task<(int, IList<EventItem>)> GetEvents(int eid);
     }
 
     public class ExamServices : IExamServices
@@ -53,7 +53,7 @@ namespace SmartProctor.Client.Services
 
         public async Task<(int, string)> JoinExam(int examId)
         {
-            _logger.LogInformation($"JoinExam examId = {examId}");
+            _logger.LogInformation($"JoinExam(examId: {examId})");
             try
             {
                 var res = await _http.GetFromJsonAsync<AttemptExamResponseModel>("/api/exam/JoinExam/" + examId);
@@ -69,7 +69,7 @@ namespace SmartProctor.Client.Services
         
         public async Task<(int, string)> Attempt(int examId)
         {
-            _logger.LogInformation($"Attempt examId = {examId}");
+            _logger.LogInformation($"Attempt(examId: {examId})");
             try
             {
                 var res = await _http.GetFromJsonAsync<AttemptExamResponseModel>("/api/exam/Attempt/" + examId);
@@ -85,7 +85,7 @@ namespace SmartProctor.Client.Services
 
         public async Task<int> AttemptProctor(int examId)
         {
-            _logger.LogInformation($"AttemptProctor examId = {examId}");
+            _logger.LogInformation($"AttemptProctor(examId: {examId})");
             try
             {
                 var res = await _http.GetFromJsonAsync<BaseResponseModel>("/api/exam/EnterProctor/" + examId);
@@ -101,7 +101,7 @@ namespace SmartProctor.Client.Services
 
         public async Task<(int, IList<ExamDetails>)> GetExams(int role)
         {
-            _logger.LogInformation($"GetExams role = {role}");
+            _logger.LogInformation($"GetExams(role: {role})");
             try
             {
                 var res = await _http.GetFromJsonAsync<GetUserExamsResponseModel>("api/exam/GetExams/" + role);
@@ -122,7 +122,7 @@ namespace SmartProctor.Client.Services
 
         public async Task<(int, ExamDetailsResponseModel)> GetExamDetails(int examId)
         {
-            _logger.LogInformation($"GetExamDetails examId = {examId}");
+            _logger.LogInformation($"GetExamDetails(examId: {examId})");
             try
             {
                 var res = await _http.GetFromJsonAsync<ExamDetailsResponseModel>("api/exam/ExamDetails/" + examId);
@@ -322,7 +322,7 @@ namespace SmartProctor.Client.Services
 
         public async Task<int> SendEvent(int eid, int type, string message, string receipt)
         {
-            _logger.LogInformation($"SendEvent eid = {eid}, type = {type}, message = {message}, receipt = {receipt}");
+            _logger.LogInformation($"SendEvent(eid: {eid}, type: {type}, message: \"{message}\", receipt: \"{receipt}\")");
             try
             {
                 var res = await _http.PostAsAndGetFromJsonAsync<SendEventRequestModel, BaseResponseModel>(
@@ -344,16 +344,13 @@ namespace SmartProctor.Client.Services
             }
         }
 
-        public async Task<(int, IList<EventItem>)> GetEvents(int eid, string sender, string receipt)
+        public async Task<(int, IList<EventItem>)> GetEvents(int eid)
         {
-            _logger.LogInformation($"GetEvents eid = {eid}, sender = {sender}, receipt = {receipt}");
+            _logger.LogInformation($"GetEvents(eid: {eid})");
             try
             {
-                var res = await _http.PostAsAndGetFromJsonAsync<GetEventsRequestModel, GetEventsResponseModel>(
-                    "/api/exam/GetEvents", new GetEventsRequestModel
-                    {
-                        ExamId = eid, Receipt = receipt, Sender = sender
-                    });
+                var res = await _http.GetFromJsonAsync<GetEventsResponseModel>(
+                    "/api/exam/GetEvents/" + eid);
 
                 return (res.Code, res.Events);
             }
