@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AntDesign;
+using BrowserInterop;
+using BrowserInterop.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
@@ -228,6 +230,7 @@ namespace SmartProctor.Client.Pages.Exam
                 }
                 
                 _takerMessages[message.Sender].Add(message);
+                getExamTakerVideoCard(message.Sender)?.SetNewMessage();
             }
             await Notification.Open(new NotificationConfig()
             {

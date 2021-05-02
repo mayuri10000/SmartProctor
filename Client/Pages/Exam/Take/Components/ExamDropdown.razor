@@ -26,6 +26,13 @@
         </Popover>
     </SpaceItem>
 </Space>
-<TestPrepareModal @ref="@_testPrepareModal" ExamId="@ExamId"
-                   OnShareScreen="OnShareScreen" OnFinish="OnPrepareFinish"
-                   Visible="@_inPrepare" OnGetCameraStream="OnGetCameraStream"/>
+
+@code {
+
+    [Parameter]
+    public EventCallback<bool> OnCameraVideoVisibleChange { get; set; }
+    
+    [Parameter]
+    public EventCallback<bool> OnDesktopVideoVisibleChange { get; set; }
+
+}

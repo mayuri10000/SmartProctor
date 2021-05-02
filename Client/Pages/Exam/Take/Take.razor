@@ -9,7 +9,10 @@
         Title="SmartProctor"
         MenuRender="false">
         <RightContentRender>
-            <RightContentExam ExamId="@ExamId" Deadline="@_examDetails.StartTime.AddSeconds(_examDetails.Duration)"/>
+            <RightContentExam Deadline="@_examDetails.StartTime.AddSeconds(_examDetails.Duration)" 
+                              OnEnded="ExitExam"
+                              OnCameraVideoVisibleChange="OnCameraVideoVisibleChange" 
+                              OnDesktopVideoVisibleChange="OnDesktopVideoVisibleChange"/>
         </RightContentRender>
         <ChildContent>
             <PageContainer Title="@_examDetails.Name">
@@ -34,6 +37,16 @@
                                 }
                             }
                         }
+                        else
+                        {
+                            <Card>
+                                <Empty Description="@("The exam is not started yet, please wait...")">
+                                    <ChildContent>
+                                        <NewCountDown Deadline="_examDetails.StartTime" Style="font-size: 40px;" OnEnded="GetQuestions"/>
+                                    </ChildContent>
+                                </Empty>
+                            </Card>
+                        }
                     </div>
                 </ChildContent>
             </PageContainer>
@@ -42,3 +55,7 @@
         </FooterRender>
     </BasicLayout>
 }
+<TestPrepareModal @ref="@_testPrepareModal" ExamId="@ExamId"
+                   OnShareScreen="OnShareScreen" OnFinish="OnPrepareFinish"
+                   Visible="@_inPrepare" OnGetCameraStream="OnGetCameraStream"/>
+<ChatDrawer @ref="_chatDrawer" ForProctoring="false" ChatWith="@null" Messages="@_messages" OnSendMessage="SendMessage"/> 

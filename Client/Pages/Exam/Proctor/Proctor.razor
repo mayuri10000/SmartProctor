@@ -3,48 +3,75 @@
 @layout EmptyLayout
 
 <BasicLayout
-    Title="@(_examDetails?.Name ?? "")"
+    Title="SmartProctor"
     MenuRender="false"
     Logo="_logo">
     <RightContentRender>
-        <RightContentProctor ExamId="_examId"/>
+        @if (_examDetails != null)
+        {
+            <RightContentProctor Deadline="@_examDetails.StartTime.AddSeconds(_examDetails.Duration)"/>
+        }
     </RightContentRender>
     <ChildContent>
-        @for (var r = 0; r < (_testTakers.Count / NUM_COLS) + 1; r++)
-        {
-            var row = r;
-            <Row>
-                @for (var c = 0; c < NUM_COLS; c++)
+        <PageContainer Title="@("Proctoring: " + _examDetails?.Name)">
+            <Content>
+                @if (_examDetails != null)
                 {
-                    var col = c;
-                    var index = row * NUM_COLS + col;
-                    if (_examTakerVideoCards.Length > index)
-                    {
-                        <ExamTakerVideoCard @ref="@_examTakerVideoCards[index]"
-                                            ExamTakerName="@_testTakers[index].Id"
-                                            OnBanExamTaker="() => BanTestTaker(_testTakers[index].Id)"
-                                            OnToggleCamera="() => OnToggleCamera(_testTakers[index].Id)"
-                                            OnToggleDesktop="() => OnToggleDesktop(_testTakers[index].Id)"
-                                            CardsEachRow="@(NUM_COLS)" Banned="@(_testTakers[index].BanReason != null)"
-                                            OnOpenMessage="() => OnOpenMessage(_testTakers[index].Id)"/>
-                    }
+                    <Descriptions Class="headerList" Size="small" Column="2">
+                        <DescriptionsItem Title="Desciption">@_examDetails.Description</DescriptionsItem>
+                        <DescriptionsItem Title="Duration">@_examDetails.Duration</DescriptionsItem>
+                        <DescriptionsItem Title="Open book">@(_examDetails.OpenBook ? "Yes" : "No")</DescriptionsItem>
+                        <DescriptionsItem Title="Start Time">@_examDetails.StartTime.ToString()</DescriptionsItem>
+                    </Descriptions>
                 }
-            </Row>
-        }
+            </Content>
+            <Extra>
+                <Button Type="primary" OnClick="() => OnOpenMessage(null)">
+                    <Icon Type="message" Theme="outline"/>
+                    Broadcast message
+                </Button>
+            </Extra>
+            <ChildContent>
+                <div class="standardList">
+                    @for (var r = 0; r < (_testTakers.Count / NUM_COLS) + 1; r++)
+                    {
+                        var row = r;
+                        <Row>
+                            @for (var c = 0; c < NUM_COLS; c++)
+                            {
+                                var col = c;
+                                var index = row * NUM_COLS + col;
+                                if (_examTakerVideoCards.Length > index)
+                                {
+                                    <ExamTakerVideoCard @ref="@_examTakerVideoCards[index]"
+                                                        ExamTakerName="@_testTakers[index].Id"
+                                                        OnBanExamTaker="() => BanTestTaker(_testTakers[index].Id)"
+                                                        OnToggleCamera="() => OnToggleCamera(_testTakers[index].Id)"
+                                                        OnToggleDesktop="() => OnToggleDesktop(_testTakers[index].Id)"
+                                                        CardsEachRow="@(NUM_COLS)" Banned="@(_testTakers[index].BanReason != null)"
+                                                        OnOpenMessage="() => OnOpenMessage(_testTakers[index].Id)"/>
+                                }
+                            }
+
+                        </Row>
+                    }
+                </div>
+            </ChildContent >
+        </PageContainer>
     </ChildContent>
     <FooterRender>
     </FooterRender>
 </BasicLayout>
-<ChatDrawer Visible="@_chatVisible" 
-            Messages="@_currentMessages" 
-            ForProctoring="true" 
+<ChatDrawer Visible="@_chatVisible"
+            Messages="@_currentMessages"
+            ForProctoring="true"
             ChatWith="@_currentChatTaker"
             OnSendMessage="OnSendMessage"/>
 <Modal Visible="_banModalVisible" Title="@("Ban exam taker: " + _banTakerName)" OnOk="BanTestTakerConfirm" OnCancel="BanTestTakerCancel">
     <ChildContent>
         <Paragraph>
-            If you found the test taker is cheating, you can ban the test taker. Bannning will make exam takers 
-            leave the exam immediatly. 
+            If you found the test taker is cheating, you can ban the test taker. Bannning will make exam takers
+            leave the exam immediatly.
         </Paragraph>
         <Paragraph>
             <AutoComplete @bind-Value="_banReason" Placeholder="Specify the reason of banning" Options="@_banReasonOptions"/>

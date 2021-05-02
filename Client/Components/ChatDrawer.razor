@@ -6,7 +6,7 @@
         Style="z-index: 999;"
         Visible="Visible"
         Closable="false"
-        Title="@(ForProctoring ? (ChatWith == null ? "Broadcast message" : "Chat with " + ChatWith) : "Chat with proctor")">
+        Title="@(ForProctoring ? (ChatWith == null ? "Broadcast message" : "Chat with @" + ChatWith) : "Chat with proctor")">
     <Handler>
         @if (!ForProctoring || Visible)
         {

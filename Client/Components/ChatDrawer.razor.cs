@@ -31,6 +31,10 @@ namespace SmartProctor.Client.Components
         private void SetVisible()
         {
            Visible = !Visible;
+           if (Visible)
+           {
+               _newMessageCount = 0;
+           }
         }
 
         private async Task SendMessage()
@@ -42,6 +46,7 @@ namespace SmartProctor.Client.Components
         public void IncrementMessage()
         {
             _newMessageCount++;
+            StateHasChanged();
         }
     }
 }

@@ -26,6 +26,7 @@ namespace SmartProctor.Client.Components
         private string _displayString;
         private Timer _timer;
         private bool _isAlert = false;
+        private bool _isEnded = false;
         
         protected override void OnParametersSet()
         {
@@ -37,23 +38,27 @@ namespace SmartProctor.Client.Components
 
         private void OnTimer(object source, ElapsedEventArgs e)
         {
-            if (_currentTime > TimeSpan.Zero)
+            if (!_isEnded)
             {
-                _currentTime = Deadline - DateTime.Now;
-                _displayString = _currentTime.ToString();
-                _displayString = _displayString.Substring(0, _displayString.LastIndexOf("."));
-                InvokeAsync(StateHasChanged);
-            }
-            else
-            {
-                _timer.Enabled = false;
-                InvokeAsync(OnEnded.InvokeAsync);
-            }
-            
-            if (!_isAlert && SecondsBeforeAlert != null &&
-                _currentTime.Subtract(TimeSpan.FromSeconds(SecondsBeforeAlert.Value)) <= TimeSpan.Zero)
-            {
-                _isAlert = true;
+                if (_currentTime > TimeSpan.Zero)
+                {
+                    _currentTime = Deadline - DateTime.Now;
+                    _displayString = _currentTime.ToString();
+                    _displayString = _displayString.Substring(0, _displayString.LastIndexOf("."));
+                    InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    _timer.Enabled = false;
+                    _isEnded = true;
+                    InvokeAsync(OnEnded.InvokeAsync);
+                }
+
+                if (!_isAlert && SecondsBeforeAlert != null &&
+                    _currentTime.Subtract(TimeSpan.FromSeconds(SecondsBeforeAlert.Value)) <= TimeSpan.Zero)
+                {
+                    _isAlert = true;
+                }
             }
         }
 
