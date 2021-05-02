@@ -1,0 +1,53 @@
+﻿@using SmartProctor.Shared
+@inherits AntComponentBase
+
+<Drawer Width="300"
+        Placement="right"
+        Style="z-index: 999;"
+        Visible="Visible"
+        Closable="false"
+        Title="@(ForProctoring ? (ChatWith == null ? "Broadcast message" : "Chat with " + ChatWith) : "Chat with proctor")">
+    <Handler>
+        @if (!ForProctoring || Visible)
+        {
+            <div class="proctor-chat-drawer-handle" @onclick="SetVisible">
+                @if (Visible)
+                {
+                    <Icon Type="close" Theme="outline" Style="color: #fff; font-size: 20px;"/>
+                }
+                else
+                {
+                    <Badge Count="_newMessageCount" Offset="(-20, 0)" Size="small">
+                        <Icon Type="message" Theme="outline" Style="color: #fff; font-size: 20px;"/>
+                    </Badge>
+                }
+            </div>
+        }
+    </Handler>
+    <ChildContent>
+        <div class="proctor-chat-message-list">
+            @if (Messages != null)
+            {
+                @foreach (var msg in Messages)
+                {
+                    <Paragraph Class="proctor-chat-message-item">
+                        @{
+                            var color = ((ForProctoring && msg.Type == Consts.MessageTypeTaker) ||
+                                         (!ForProctoring && msg.Type == Consts.MessageTypeProctor) ? "blue" : "green");
+                            var header = $"{msg.Time.ToString()} {msg.Sender} {(msg.Receipt == null ? "(Broadcast)" : "")}";
+                        }
+                        <div style="color: @color">
+                            <b>@header</b>
+                        </div>
+                        @msg.Message
+                    </Paragraph>
+                }
+            }
+        </div>
+        
+        <div class="proctor-chat-input-container">
+            <TextArea MaxRows="2" @bind-Value="_message"/>
+            <Button Type="primary" Style="margin-top: 5px;" OnClick="SendMessage">Send</Button>
+        </div>
+    </ChildContent>
+</Drawer>

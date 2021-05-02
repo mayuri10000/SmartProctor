@@ -9,6 +9,7 @@ using SmartProctor.Server.Data;
 using SmartProctor.Server.Data.Entities;
 using SmartProctor.Server.Data.Repositories;
 using SmartProctor.Server.Utils;
+using SmartProctor.Shared;
 using SmartProctor.Shared.Questions;
 using SmartProctor.Shared.Responses;
 
@@ -70,7 +71,7 @@ namespace SmartProctor.Server.Services
         
         int BanExamTaker(int eid, string uid, string takerUid, string reason);
         int AddEvent(int eid, string senderUid, string receiptUid, int type, string message, string attachment = null);
-        IList<EventItem> GetEvents(string uid, int eid);
+        IList<EventItem> GetEvents(string uid, int eid, int type);
     }
     
     public class ExamServices : BaseServices<Exam>, IExamServices
@@ -105,7 +106,7 @@ namespace SmartProctor.Server.Services
                 }
 
                 var q = _examUserRepo.GetFirstOrDefaultObject(
-                    x => x.ExamId == eid && x.UserId == uid && x.UserRole == 1);
+                    x => x.ExamId == eid && x.UserId == uid && x.UserRole == Consts.UserTypeTaker);
                 if (q == null)
                 {
                     return ErrorCodes.ExamNotPermitToTake;
@@ -150,7 +151,7 @@ namespace SmartProctor.Server.Services
                 }
 
                 var q = _examUserRepo.GetFirstOrDefaultObject(
-                    x => x.ExamId == eid && x.UserId == uid && x.UserRole == 2);
+                    x => x.ExamId == eid && x.UserId == uid && x.UserRole == Consts.UserTypeProctor);
                 if (q == null)
                 {
                     return ErrorCodes.ExamNotPermitToProctor;
@@ -186,7 +187,7 @@ namespace SmartProctor.Server.Services
                 return null;
             }
 
-            var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 1, x => x.UserId,
+            var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == Consts.UserTypeTaker, x => x.UserId,
                 OrderingType.Ascending);
 
             var ret = new List<(string, string)>();
@@ -216,7 +217,7 @@ namespace SmartProctor.Server.Services
                     return ErrorCodes.ExamExpired;
                 }
 
-                var count = _examUserRepo.ObjectCount(x => x.ExamId == eid && x.UserRole == 1 && x.BanReason == null);
+                var count = _examUserRepo.ObjectCount(x => x.ExamId == eid && x.UserRole == Consts.UserTypeTaker && x.BanReason == null);
 
                 if (count >= exam.MaximumTakersNum)
                 {
@@ -227,7 +228,7 @@ namespace SmartProctor.Server.Services
 
                 if (eu != null)
                 {
-                    if (eu.UserRole != 1)
+                    if (eu.UserRole != Consts.UserTypeTaker)
                         return ErrorCodes.ExamAlreadyProctored;
 
                     banReason = eu.BanReason;
@@ -260,7 +261,7 @@ namespace SmartProctor.Server.Services
                 return null;
             }
 
-            var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == 2, x => x.UserId,
+            var q = _examUserRepo.GetObjectList(x => x.ExamId == eid && x.UserRole == Consts.UserTypeProctor, x => x.UserId,
                 OrderingType.Ascending);
 
             var ret = new List<string>();
@@ -314,7 +315,7 @@ namespace SmartProctor.Server.Services
                 }
                 
                 var role = GetUserRoleInExam(uid, eid);
-                if (role == 1)
+                if (role == Consts.UserTypeTaker)
                 {
                     var err = CheckEarlyOrLate(eid, true);
 
@@ -323,7 +324,7 @@ namespace SmartProctor.Server.Services
                         return err;
                     }
                 }
-                else if (role == -1)
+                else if (role == Consts.UserTypeBanned)
                 {
                     return ErrorCodes.ExamTakerBanned;
                 }
@@ -350,7 +351,8 @@ namespace SmartProctor.Server.Services
             _logger.LogInformation($"EditPaper(uid: \"{uid}\", eid: {eid}, questions: [...])");
             try
             {
-                if (GetUserRoleInExam(uid, eid) != 3)
+                var exam = GetObject(eid);
+                if (exam.Creator != uid)
                 {
                     return ErrorCodes.ExamNotPermitToEdit;
                 }
@@ -383,7 +385,7 @@ namespace SmartProctor.Server.Services
             _logger.LogInformation($"SubmitAnswer(uid: \"{uid}\", eid: {eid}, num: {num}, json: \"{json}\")");
             try
             {
-                if (GetUserRoleInExam(uid, eid) != 1)
+                if (GetUserRoleInExam(uid, eid) != Consts.UserTypeTaker)
                 {
                     return ErrorCodes.ExamNotPermitToTake;
                 }
@@ -441,7 +443,7 @@ namespace SmartProctor.Server.Services
                 }
 
                 var role = GetUserRoleInExam(currentUid, eid);
-                if (role == 1)
+                if (role == Consts.UserTypeTaker)
                 {
                     var ret = CheckEarlyOrLate(eid, true);
                     if (ret == ErrorCodes.Success)
@@ -573,7 +575,8 @@ namespace SmartProctor.Server.Services
                     Receipt = receiptUid,
                     Message = message,
                     Attachment = attachment,
-                    Time = DateTime.Now
+                    Time = DateTime.Now,
+                    Type = type
                 };
 
                 _eventRepo.Save(ev);
@@ -587,13 +590,15 @@ namespace SmartProctor.Server.Services
             }
         }
 
-        public IList<EventItem> GetEvents(string uid, int eid)
+        public IList<EventItem> GetEvents(string uid, int eid, int type)
         {
-            _logger.LogInformation($"GetEvents(uid: \"{uid}\", eid: {eid})");
+            _logger.LogInformation($"GetEvents(uid: \"{uid}\", eid: {eid}, type: {type})");
             try
             {
-                IList<Event> q = _eventRepo.GetObjectList(x => x.ExamId == eid &&
-                                                               (x.Sender == uid || x.Receipt == uid || x.Receipt == null),
+                IList<Event> q;
+                
+                q = _eventRepo.GetObjectList(x => x.ExamId == eid && x.Type == type &&
+                                                  (x.Sender == uid || x.Receipt == uid || x.Receipt == null),
                         x => x.Time, OrderingType.Ascending);
                 
 
@@ -644,12 +649,12 @@ namespace SmartProctor.Server.Services
 
             if (q == null)
             {
-                return 0;
+                return Consts.UserTypeNoPermission;
             }
 
             if (q.BanReason != null)
             {
-                return -1;
+                return Consts.UserTypeBanned;
             }
 
             return q.UserRole ?? 0;

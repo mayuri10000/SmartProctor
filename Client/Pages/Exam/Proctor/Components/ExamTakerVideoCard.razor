@@ -1,7 +1,7 @@
 ﻿@namespace SmartProctor.Client.Pages.Exam
 
 @** This component should be placed in one Row **@
-<Col Span="@(24 / CardsEachRow)" Class="@(_haveNewMessage ? "proctor-video-card-with-notification" : "proctor-video-card")">
+<Col Span="@(24 / CardsEachRow)" Class="@(_haveNewWarning ? "proctor-video-card-with-notification" : "proctor-video-card")">
     <div @onmouseover="OnMouseOver" @onmouseout="OnMouseOut"
          class="@(_fullscreen ? "proctor-video-container-fullscreen" : "proctor-video-container")">
         <div class="proctor-video-bar proctor-video-bar-top" style="@("display:" + (_showToolBar ? "flex" : "none"))">
@@ -63,6 +63,15 @@
                     </Tooltip>
                 </SpaceItem>
                 <SpaceItem>
+                    <Tooltip Title="@("Warnings")">
+                        <Badge Dot Count="@(_haveNewWarning ? 1 : 0)">
+                            <Button Type="default" Size="small" OnClick="OpenWarning">
+                                <Icon Type="warning" Theme="outline"/>
+                            </Button>
+                        </Badge>
+                    </Tooltip>
+                </SpaceItem>
+                <SpaceItem>
                     <Tooltip Title="@("Ban the test taker")">
                         <Button Danger Type="primary" Size="small" OnClick="BanUser">
                             <Icon Type="stop" Theme="outline"/>
@@ -76,12 +85,12 @@
 
 @{
     RenderFragment _modalFooter = @<div>
-                                      <Button OnClick="CloseMessage">Close</Button>
+                                      <Button OnClick="CloseWarning">Close</Button>
                                   </div>;
 }
 
 
-<Modal Title="Messages from test taker" Visible="_messageVisible" Closable="false" Footer="_modalFooter">
+<Modal Title="Warnings from test taker" Visible="_warningVisible" Closable="false" Footer="_modalFooter">
     <ChildContent>
         <AntList DataSource="_messages">
             <ChildContent Context="item">
@@ -89,17 +98,10 @@
                     <ChildContent>
                         <ListItemMeta Description="@item.Time.ToString()">
                             <TitleTemplate>
-                                @if (item.Type == 1)
-                                {
-                                    <b>@item.Message</b>
-                                }
-                                else
-                                {
-                                    @item.Message
-                                }
+                                <b>@item.Message</b>
                             </TitleTemplate>
                             <AvatarTemplate>
-                                <Icon Type="@(item.Type == 1 ? "warning" : "message")" Theme="outline"/>
+                                <Icon Type="warning" Theme="outline"/>
                             </AvatarTemplate>
                         </ListItemMeta>
                     </ChildContent>

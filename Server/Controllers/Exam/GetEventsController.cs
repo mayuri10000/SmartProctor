@@ -17,8 +17,8 @@ namespace SmartProctor.Server.Controllers.Exam
             _examServices = examServices;
         }
 
-        [HttpGet("{eid:int}")]
-        public BaseResponseModel Get(int eid)
+        [HttpPost]
+        public BaseResponseModel Post(GetEventsRequestModel model)
         {
             if (User.Identity?.Name == null)
             {
@@ -27,7 +27,7 @@ namespace SmartProctor.Server.Controllers.Exam
                         
             var uid = User.Identity.Name;
             
-            var res = _examServices.GetEvents(uid, eid);
+            var res = _examServices.GetEvents(uid, model.ExamId, model.Type);
 
             if (res == null)
             {

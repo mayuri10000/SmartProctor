@@ -21,11 +21,12 @@
                     if (_examTakerVideoCards.Length > index)
                     {
                         <ExamTakerVideoCard @ref="@_examTakerVideoCards[index]"
-                                             ExamTakerName="@_testTakers[index].Id"
-                                             OnBanExamTaker="() => BanTestTaker(_testTakers[index].Id)"
-                                             OnToggleCamera="() => OnToggleCamera(_testTakers[index].Id)"
-                                             OnToggleDesktop="() => OnToggleDesktop(_testTakers[index].Id)"
-                                             CardsEachRow="@(NUM_COLS)" Banned="@(_testTakers[index].BanReason != null)"/>
+                                            ExamTakerName="@_testTakers[index].Id"
+                                            OnBanExamTaker="() => BanTestTaker(_testTakers[index].Id)"
+                                            OnToggleCamera="() => OnToggleCamera(_testTakers[index].Id)"
+                                            OnToggleDesktop="() => OnToggleDesktop(_testTakers[index].Id)"
+                                            CardsEachRow="@(NUM_COLS)" Banned="@(_testTakers[index].BanReason != null)"
+                                            OnOpenMessage="() => OnOpenMessage(_testTakers[index].Id)"/>
                     }
                 }
             </Row>
@@ -34,6 +35,11 @@
     <FooterRender>
     </FooterRender>
 </BasicLayout>
+<ChatDrawer Visible="@_chatVisible" 
+            Messages="@_currentMessages" 
+            ForProctoring="true" 
+            ChatWith="@_currentChatTaker"
+            OnSendMessage="OnSendMessage"/>
 <Modal Visible="_banModalVisible" Title="@("Ban exam taker: " + _banTakerName)" OnOk="BanTestTakerConfirm" OnCancel="BanTestTakerCancel">
     <ChildContent>
         <Paragraph>

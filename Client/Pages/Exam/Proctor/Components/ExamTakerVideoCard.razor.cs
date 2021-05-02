@@ -19,6 +19,9 @@ namespace SmartProctor.Client.Pages.Exam
         
         [Parameter]
         public EventCallback OnToggleCamera { get; set; }
+        
+        [Parameter]
+        public EventCallback OnOpenMessage { get; set; }
 
         [Parameter] public bool DesktopLoading { get; set; } = true;
 
@@ -34,20 +37,26 @@ namespace SmartProctor.Client.Pages.Exam
         private bool _showingDesktop = false;
         private bool _fullscreen = false;
         
+        private bool _haveNewWarning = false;
         private bool _haveNewMessage = false;
         
         private List<EventItem> _messages = new List<EventItem>();
-        private bool _messageVisible = false;
+        private bool _warningVisible = false;
 
-        public void AddMessage(EventItem eventItem)
+        public void AddWarningMessage(EventItem eventItem)
         {
             _messages.Add(eventItem);
-            _haveNewMessage = true;
+            _haveNewWarning = true;
         }
 
         public void AddOldMessage(EventItem eventItem)
         {
             _messages.Add(eventItem);
+        }
+
+        public void SetNewMessage()
+        {
+            _haveNewMessage = true;
         }
         
         private void OnMouseOver()
@@ -82,15 +91,21 @@ namespace SmartProctor.Client.Pages.Exam
             }
         }
 
-        private void OpenMessage()
+        private void OpenWarning()
         {
-            _haveNewMessage = false;
-            _messageVisible = true;
+            _haveNewWarning = false;
+            _warningVisible = true;
         }
 
-        private void CloseMessage()
+        private void CloseWarning()
         {
-            _messageVisible = false;
+            _warningVisible = false;
+        }
+
+        private async Task OpenMessage()
+        {
+            _haveNewMessage = false;
+            await OnOpenMessage.InvokeAsync();
         }
     }
 }

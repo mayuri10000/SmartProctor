@@ -9,6 +9,7 @@ using Microsoft.JSInterop;
 using SmartProctor.Client.Interops;
 using SmartProctor.Client.Services;
 using SmartProctor.Client.Utils;
+using SmartProctor.Shared;
 using SmartProctor.Shared.Responses;
 using SmartProctor.Shared.WebRTC;
 
@@ -64,6 +65,12 @@ namespace SmartProctor.Client.Pages.Exam
 
         private IList<UserBasicInfo> _testTakers = new List<UserBasicInfo>();
         private ExamTakerVideoCard[] _examTakerVideoCards = new ExamTakerVideoCard[0];
+
+        private IDictionary<string, List<EventItem>> _takerMessages = new Dictionary<string, List<EventItem>>();
+        private List<EventItem> _broadcastMessages = new List<EventItem>();
+        private IList<EventItem> _currentMessages;
+        private string _currentChatTaker = null;
+        private bool _chatVisible = false;
         
         protected override async Task OnInitializedAsync()
         {
@@ -121,16 +128,60 @@ namespace SmartProctor.Client.Pages.Exam
 
         private async Task GetEvents()
         {
-            var (ret, events) = await ExamServices.GetEvents(_examId);
+            var (ret, warnings) = await ExamServices.GetEvents(_examId, Consts.MessageTypeWarning);
 
             if (ret == ErrorCodes.Success)
             {
-                foreach (var ev in events)
+                foreach (var ev in warnings)
                 {
                     getExamTakerVideoCard(ev.Sender).AddOldMessage(ev);
                 }
             }
-        }
+
+            var (ret2, takerMessage) = await ExamServices.GetEvents(_examId, Consts.MessageTypeTaker);
+
+            if (ret2 == ErrorCodes.Success)
+            {
+                foreach (var ev in takerMessage)
+                {
+                    if (!_takerMessages.ContainsKey(ev.Sender))
+                    {
+                        _takerMessages[ev.Sender] = new List<EventItem>();
+                    }
+                    
+                    _takerMessages[ev.Sender].Add(ev);
+                }
+            }
+
+            var (ret3, proctorMessage) = await ExamServices.GetEvents(_examId, Consts.MessageTypeProctor);
+
+            if (ret3 == ErrorCodes.Success)
+            {
+                foreach (var ev in proctorMessage)
+                {
+                    if (ev.Receipt == null)
+                    {
+                        _broadcastMessages.Add(ev);
+                    }
+                    else
+                    {
+                        if (!_takerMessages.ContainsKey(ev.Receipt))
+                        {
+                            _takerMessages[ev.Receipt] = new List<EventItem>();
+                        }
+                        
+                        _takerMessages[ev.Receipt].Add(ev);
+                    }
+                }
+            }
+
+            foreach (var key in _takerMessages.Keys)
+            {
+                _takerMessages[key].Sort((x, y) => DateTime.Compare(x.Time, y.Time));
+            }
+            
+            _broadcastMessages.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
+        } 
 
         private async Task GetExamTakers()
         {
@@ -164,6 +215,27 @@ namespace SmartProctor.Client.Pages.Exam
             _webRtcClient.OnCameraConnectionStateChange += (_, e) =>
                 getExamTakerVideoCard(e.Item1).CameraLoading = e.Item2 != "connected";
         }
+
+        private async Task NewMessage(EventItem message)
+        {
+            if (message.Type == Consts.MessageTypeWarning)
+                getExamTakerVideoCard(message.Sender)?.AddWarningMessage(message);
+            else
+            {
+                if (!_takerMessages.ContainsKey(message.Sender))
+                {
+                    _takerMessages[message.Sender] = new List<EventItem>();
+                }
+                
+                _takerMessages[message.Sender].Add(message);
+            }
+            await Notification.Open(new NotificationConfig()
+            {
+                Message = (message.Type == Consts.MessageTypeWarning ? "Warning from " : "Message from ") + message.Sender,
+                NotificationType = message.Type == Consts.MessageTypeWarning ? NotificationType.Warning : NotificationType.Info,
+                Description = message.Message
+            });
+        }
         
         private async Task SetupSignalRClient()
         {
@@ -173,15 +245,7 @@ namespace SmartProctor.Client.Pages.Exam
 
             _hubConnection.On<EventItem>("ReceivedMessage",
                 async (eventItem) =>
-                {
-                    getExamTakerVideoCard(eventItem.Sender)?.AddMessage(eventItem);
-                    await Notification.Open(new NotificationConfig()
-                    {
-                        Message = (eventItem.Type == 1 ? "Warning from " : "Message from ") + eventItem.Sender,
-                        NotificationType = eventItem.Type == 1 ? NotificationType.Warning : NotificationType.Info,
-                        Description = eventItem.Message
-                    });
-                });
+                    await NewMessage(eventItem));
 
             _hubConnection.On<string, RTCSessionDescriptionInit>("ReceivedDesktopOffer",
                 async (taker, sdp) =>
@@ -249,6 +313,70 @@ namespace SmartProctor.Client.Pages.Exam
         {
             _banTakerName = null;
             _banModalVisible = false;
+        }
+
+        private void OnOpenMessage(string taker)
+        {
+            _currentChatTaker = taker;
+            if (taker == null)
+            {
+                _currentMessages = _broadcastMessages;
+            }
+            else
+            {
+                if (!_takerMessages.ContainsKey(taker))
+                {
+                    _takerMessages[taker] = new List<EventItem>();
+                }
+
+                _currentMessages = _takerMessages[taker];
+            }
+
+            _chatVisible = true;
+        }
+
+        private async Task OnSendMessage(string message)
+        {
+            var ret = await ExamServices.SendEvent(_examId, Consts.MessageTypeProctor, message, _currentChatTaker);
+
+            if (ret != ErrorCodes.Success)
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Failed to send message",
+                    Content = ErrorCodes.MessageMap[ret]
+                });
+            }
+            else
+            {
+                if (_currentChatTaker == null)
+                {
+                    _broadcastMessages.Add(new EventItem()
+                    {
+                        Message = message,
+                        Receipt = _currentChatTaker,
+                        Sender = "Me",
+                        Time = DateTime.Now,
+                        Type = Consts.MessageTypeProctor
+                    });
+                }
+                else
+                {
+                    if (!_takerMessages.ContainsKey(_currentChatTaker))
+                    {
+                        _takerMessages[_currentChatTaker] = new List<EventItem>();
+                    }
+
+                    _takerMessages[_currentChatTaker].Add(new EventItem()
+                    {
+                        Message = message,
+                        Receipt = _currentChatTaker,
+                        Sender = "Me",
+                        Time = DateTime.Now,
+                        Type = Consts.MessageTypeProctor
+                    });
+                }
+            }
         }
 
         private ExamTakerVideoCard getExamTakerVideoCard(string testTaker)

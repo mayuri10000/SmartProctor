@@ -36,7 +36,7 @@ namespace SmartProctor.Client.Services
         Task<int> UpdateExamDetails(UpdateExamDetailsRequestModel model);
         Task<int> BanExamTaker(int examId, string userId, string reason);
         Task<int> SendEvent(int eid, int type, string message, string receipt);
-        Task<(int, IList<EventItem>)> GetEvents(int eid);
+        Task<(int, IList<EventItem>)> GetEvents(int eid, int type);
     }
 
     public class ExamServices : IExamServices
@@ -344,13 +344,17 @@ namespace SmartProctor.Client.Services
             }
         }
 
-        public async Task<(int, IList<EventItem>)> GetEvents(int eid)
+        public async Task<(int, IList<EventItem>)> GetEvents(int eid, int type)
         {
-            _logger.LogInformation($"GetEvents(eid: {eid})");
+            _logger.LogInformation($"GetEvents(eid: {eid}, type: {type})");
             try
             {
-                var res = await _http.GetFromJsonAsync<GetEventsResponseModel>(
-                    "/api/exam/GetEvents/" + eid);
+                var res = await _http.PostAsAndGetFromJsonAsync<GetEventsRequestModel, GetEventsResponseModel>(
+                    "/api/exam/GetEvents/", new GetEventsRequestModel()
+                    {
+                        ExamId = eid,
+                        Type = type
+                    });
 
                 return (res.Code, res.Events);
             }
