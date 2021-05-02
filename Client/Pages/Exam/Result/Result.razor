@@ -1,0 +1,39 @@
+﻿@namespace SmartProctor.Client.Pages.Exam
+@page "/Exam/Result/{ExamId}/{UserId}"
+
+<PageContainer Title="@("Result: " + _examDetails?.Name)"
+               Class="pageHeader">
+    <Breadcrumb>
+        <Breadcrumb>
+            <BreadcrumbItem>Exam</BreadcrumbItem>
+            <BreadcrumbItem>Mine</BreadcrumbItem>
+            <BreadcrumbItem>Result</BreadcrumbItem>
+        </Breadcrumb>
+    </Breadcrumb>
+    <ExtraContent>
+        <div class="moreInfo">
+            <Statistic Title="@("Exam ID")" Value="_examId"/>
+        </div>
+    </ExtraContent>
+    <Content>
+        <Descriptions Class="headerList" Size="small" Column="2">
+            <DescriptionsItem Title="@("Exam Taker")">@UserId</DescriptionsItem>
+            @if (_examDetails != null)
+            {
+                <DescriptionsItem Title="@("Description")">@_examDetails.Description</DescriptionsItem>
+                <DescriptionsItem Title="@("Start Time")">@_examDetails.StartTime.ToString()</DescriptionsItem>
+                <DescriptionsItem Title="@("Duration")">@ConvertExamDuration(_examDetails.Duration)</DescriptionsItem>
+                <DescriptionsItem Title="@("Open book")">@(_examDetails.OpenBook ? "Yes" : "No")</DescriptionsItem>
+            }
+        </Descriptions>
+    </Content>
+    <ChildContent>
+        <div class="standardList">
+            @for (var i = 0; i < _questions.Count; i++)
+            {
+                var index = i;
+                <ResultCard ExamId="@_examId" QuestionNum="@(index + 1)" UserId="@UserId" Question="@_questions[index]"/>
+            }
+        </div>
+    </ChildContent>
+</PageContainer>

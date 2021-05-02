@@ -13,6 +13,7 @@ namespace SmartProctor.Client.Utils
         public const int EmailExists = 1003;
         public const int PhoneExists = 1004;
         public const int OldPasswordMismatch = 1005;
+        public const int UserNotExists = 1006;
 
         public const int ExamNotExist = 2000;
         public const int ExamNotPermitToTake = 2001;
@@ -25,6 +26,7 @@ namespace SmartProctor.Client.Utils
         public const int ExamAlreadyProctored = 2008;
         public const int ExamTakerBanned = 2009;
         public const int ExamMaxTakerReached = 2010;
+        public const int ExamAlreadyAnswered = 2011;
 
         public static Dictionary<int, string> MessageMap = new Dictionary<int, string>()
         {
@@ -38,6 +40,7 @@ namespace SmartProctor.Client.Utils
             { EmailExists,             "Email already exists" },
             { PhoneExists,             "Phone already exists" },
             { OldPasswordMismatch,     "Old Password Wrong"},
+            { UserNotExists,           "The selected user not exists"},
             
             { ExamNotExist,            "This exam does not exist"},
             { ExamNotPermitToTake,     "You have no permission to take this exam"},
@@ -49,7 +52,8 @@ namespace SmartProctor.Client.Utils
             { ExamAlreadyJoined,       "You have already joined the exam"},
             { ExamAlreadyProctored,    "The selected user is already a proctor of the exam"},
             { ExamTakerBanned,         "You have been banned from the exam"},
-            { ExamMaxTakerReached,     "This exam's taker count have already reached the limit."}
+            { ExamMaxTakerReached,     "This exam's taker count have already reached the limit."},
+            { ExamAlreadyAnswered,     "This exam paper cannot be edited because it have been answered by exam takers."}
         };
     }
 }

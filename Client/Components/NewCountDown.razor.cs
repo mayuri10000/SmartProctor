@@ -13,12 +13,22 @@ namespace SmartProctor.Client.Components
     /// </summary>
     public partial class NewCountDown
     {
+        /// <summary>
+        /// Time to count to 
+        /// </summary>
         [Parameter]
         public DateTime Deadline { get; set; }
         
+        /// <summary>
+        /// Seconds before the deadline when the component should show a alert,
+        /// null if no alert needed.
+        /// </summary>
         [Parameter]
         public int? SecondsBeforeAlert { get; set; }
         
+        /// <summary>
+        /// Callback when the time's up
+        /// </summary>
         [Parameter]
         public EventCallback OnEnded { get; set; }
         
@@ -36,29 +46,35 @@ namespace SmartProctor.Client.Components
             _timer.Enabled = true;
         }
 
+        /// <summary>
+        /// Timer callback
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
         private void OnTimer(object source, ElapsedEventArgs e)
         {
-            if (!_isEnded)
+            if (_isEnded) 
+                return;
+            
+            if (_currentTime > TimeSpan.Zero)
             {
-                if (_currentTime > TimeSpan.Zero)
-                {
-                    _currentTime = Deadline - DateTime.Now;
-                    _displayString = _currentTime.ToString();
-                    _displayString = _displayString.Substring(0, _displayString.LastIndexOf("."));
-                    InvokeAsync(StateHasChanged);
-                }
-                else
-                {
-                    _timer.Enabled = false;
-                    _isEnded = true;
-                    InvokeAsync(OnEnded.InvokeAsync);
-                }
+                _currentTime = Deadline - DateTime.Now;
+                _displayString = _currentTime.ToString();
+                // Remove the part after second of the remaining time.
+                _displayString = _displayString.Substring(0, _displayString.LastIndexOf("."));
+                InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                _timer.Enabled = false;
+                _isEnded = true;
+                InvokeAsync(OnEnded.InvokeAsync);
+            }
 
-                if (!_isAlert && SecondsBeforeAlert != null &&
-                    _currentTime.Subtract(TimeSpan.FromSeconds(SecondsBeforeAlert.Value)) <= TimeSpan.Zero)
-                {
-                    _isAlert = true;
-                }
+            if (!_isAlert && SecondsBeforeAlert != null &&
+                _currentTime.Subtract(TimeSpan.FromSeconds(SecondsBeforeAlert.Value)) <= TimeSpan.Zero)
+            {
+                _isAlert = true;
             }
         }
 

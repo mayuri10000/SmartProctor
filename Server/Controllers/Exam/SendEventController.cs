@@ -12,10 +12,15 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for sending message in a exam session, This controller will
+    /// send SignalR event.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class SendEventController : ControllerBase
     {
+        // The signalR hub context used for sending SignalR message outside the hub
         private IHubContext<MessageHub> _hubContext;
         private IExamServices _examServices;
 
@@ -57,6 +62,7 @@ namespace SmartProctor.Server.Controllers.Exam
 
                 if (model.Type is Consts.MessageTypeTaker or Consts.MessageTypeWarning)
                 {
+                    // Send the message to all the proctors
                     foreach (var proctor in proctors)
                     {
                         await _hubContext.Clients.User(proctor).SendAsync("ReceivedMessage", new EventItem()
@@ -74,6 +80,7 @@ namespace SmartProctor.Server.Controllers.Exam
                 {
                     if (model.Receipt != null)
                     {
+                        // Send individual message to one test taker
                         await _hubContext.Clients.User(model.Receipt).SendAsync("ReceivedMessage", new EventItem()
                         {
                             Type = model.Type,
@@ -88,6 +95,7 @@ namespace SmartProctor.Server.Controllers.Exam
                     {
                         foreach (var taker in takers)
                         {
+                            // Broadcast message to all exam takers
                             await _hubContext.Clients.User(taker).SendAsync("ReceivedMessage", new EventItem()
                             {
                                 Type = model.Type,

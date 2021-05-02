@@ -24,11 +24,15 @@
                 <Card>
                     @* In development, new components will be tested here, this page
                     will be removed when the project is finished *@
-                    <Paragraph>
-                    </Paragraph>
+                    <DatePicker @bind-Value="_dateTime" ShowTime="true"/>
+                    @_dateTime.ToString()
                 </Card>
             </div>
         </ChildContent>
     </PageContainer>
 </div>
 <ChatDrawer/>
+
+@code{
+    private DateTime _dateTime = DateTime.Now;
+}

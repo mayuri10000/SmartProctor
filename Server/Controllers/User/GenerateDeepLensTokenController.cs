@@ -5,6 +5,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used by the web client to generate the token used for the DeepLens client to log in to the server,
+    /// the token will be invalidated once used for logging in on the DeepLens client.
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class GenerateDeepLensTokenController : ControllerBase

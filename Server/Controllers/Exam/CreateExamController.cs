@@ -6,6 +6,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for creating a new exam. The new exam will not include any question at first.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class CreateExamController : ControllerBase
@@ -27,6 +30,7 @@ namespace SmartProctor.Server.Controllers.Exam
 
             try
             {
+                // convert the duration
                 var duration = model.Duration.Hour * 3600 + model.Duration.Minute * 60 + model.Duration.Second;
 
                 var a = new Data.Entities.Exam()

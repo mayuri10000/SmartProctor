@@ -6,6 +6,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used for registering a new user in the system
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class RegisterController : ControllerBase

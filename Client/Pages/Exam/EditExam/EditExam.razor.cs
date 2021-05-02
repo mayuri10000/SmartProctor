@@ -54,7 +54,14 @@ namespace SmartProctor.Client.Pages.Exam
         };
         #endregion
         
-        private UpdateExamDetailsRequestModel _updateExamDetailsModel = new UpdateExamDetailsRequestModel();
+        private UpdateExamDetailsRequestModel _updateExamDetailsModel = new UpdateExamDetailsRequestModel()
+        {
+            // Added to solve a bug of Ant Design Blazor's DatePicker component.
+            // The component will run into a problem if the initial value is invalid
+            // even if a valid value was given later
+            Duration = new DateTime(1999, 4, 27, 2, 0, 0),
+            StartTime = DateTime.Now
+        };
 
         private int _examId;
         private int _questionCount;
@@ -100,7 +107,7 @@ namespace SmartProctor.Client.Pages.Exam
             _updateExamDetailsModel.Name = details.Name;
             _updateExamDetailsModel.Description = details.Description;
             _updateExamDetailsModel.StartTime = details.StartTime;
-            _updateExamDetailsModel.Duration = new DateTime(1999, 04, 27, 10, minutes, seconds);
+            _updateExamDetailsModel.Duration = new DateTime(1999, 04, 27, hours, minutes, seconds);
             _updateExamDetailsModel.OpenBook = details.OpenBook;
             _updateExamDetailsModel.MaximumTakersNum = details.MaxTakers;
 

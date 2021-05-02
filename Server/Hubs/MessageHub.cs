@@ -10,17 +10,25 @@ using SmartProctor.Shared.WebRTC;
 
 namespace SmartProctor.Server.Hubs
 {
+    /// <summary>
+    /// SignalR hub used for messaging and WebRTC signaling.
+    /// Note that this hub is also used in <see cref="SmartProctor.Server.Controllers.Exam.BanExamTakerController"/>
+    /// and <see cref="SmartProctor.Server.Controllers.Exam.SendEventController"/>
+    /// </summary>
     public class MessageHub : Hub
     {
         private IExamServices _examServices;
 
-        public MessageHub(IExamServices examServices, IUserServices userServices)
+        public MessageHub(IExamServices examServices)
         {
             _examServices = examServices;
         }
-
         
-
+        /// <summary>
+        /// (Used by proctors) 
+        /// Called when a proctor joins an exam, send message to exam takers
+        /// </summary>
+        /// <param name="examId"></param>
         public async Task ProctorJoin(string examId)
         {
             var examTakers = _examServices.GetExamTakers(int.Parse(examId)).Select(x => x.Item1);
@@ -33,78 +41,66 @@ namespace SmartProctor.Server.Hubs
             }
         }
         
-
-        public async Task ProctorMessageIndividual(string user, string message)
-        {
-            await Clients.User(user).SendAsync("ReceiveMessage", Context.UserIdentifier, message);
-        }
-
-        public async Task TestTakerMessage(string examId, string messageType, string message)
-        {
-            var uid = Context.UserIdentifier;
-            if (uid.EndsWith("_cam"))
-            {
-                uid = uid.Substring(0, Context.UserIdentifier.Length - 4);
-            }
-            
-            var proctors = _examServices.GetProctors(int.Parse(examId));
-            if (proctors != null)
-            {
-                foreach (var proctor in proctors)
-                {
-                    await Clients.User(proctor)
-                        .SendAsync("ReceiveMessage", uid, messageType, message);
-                }
-            }
-        }
-        
-        public async Task ProctorMessageGroup(string examId, string messageType, string message)
-        {
-            var examTakers = _examServices.GetExamTakers(int.Parse(examId)).Select(x => x.Item1);
-            if (examTakers != null)
-            {
-                foreach (var taker in examTakers)
-                {
-                    await Clients.User(taker).SendAsync("ReceiveMessage", Context.UserIdentifier, message);
-                }
-            }
-        }
-
+        /// <summary>
+        /// (Used by exam takers) 
+        /// Send the WebRTC SDP offer of the desktop stream to the proctor
+        /// </summary>
+        /// <param name="proctor">The user ID of the proctor to send the SDP</param>
+        /// <param name="sdp">The SDP offer</param>
         public async Task DesktopOffer(string proctor, RTCSessionDescriptionInit sdp)
         {
             await Clients.User(proctor).SendAsync("ReceivedDesktopOffer", Context.User.Identity.Name, sdp);
         }
 
+        /// <summary>
+        /// (Used by proctors) Send the WebRTC SDP answer of the desktop stream back to the exam takers
+        /// </summary>
+        /// <param name="testTaker">The user ID of the exam taker to send the SDP</param>
+        /// <param name="sdp">The SDP answer</param>
         public async Task DesktopAnswer(string testTaker, RTCSessionDescriptionInit sdp)
         {
             await Clients.User(testTaker).SendAsync("ReceivedDesktopAnswer", Context.User.Identity.Name, sdp);
         }
 
-        public async Task DesktopIceCandidate(string testTaker, RTCIceCandidate candidate)
+        /// <summary>
+        /// (Used by both takers and proctors) Send the WebRTC ICE candidate information of the desktop stream
+        /// </summary>
+        /// <param name="user">The user ID of the user to send the ICE candidate</param>
+        /// <param name="candidate">The ICE candidate to be sent</param>
+        public async Task DesktopIceCandidate(string user, RTCIceCandidate candidate)
         {
-            await Clients.User(testTaker).SendAsync("ReceivedDesktopIceCandidate", Context.User.Identity.Name, candidate);
+            await Clients.User(user).SendAsync("ReceivedDesktopIceCandidate", Context.User.Identity.Name, candidate);
         }
 
-
+        /// <summary>
+        /// (Used by exam takers) 
+        /// Send the WebRTC SDP offer of the camera stream to the proctor
+        /// </summary>
+        /// <param name="proctor">The user ID of the proctor to send the SDP</param>
+        /// <param name="sdp">The SDP offer</param>
         public async Task CameraOffer(string proctor, RTCSessionDescriptionInit sdp)
         {
             await Clients.User(proctor).SendAsync("ReceivedCameraOffer", Context.User.Identity.Name, sdp);
         }
         
+        /// <summary>
+        /// (Used by proctors) Send the WebRTC SDP answer of the camera stream back to the exam takers
+        /// </summary>
+        /// <param name="testTaker">The user ID of the exam taker to send the SDP</param>
+        /// <param name="sdp">The SDP answer</param>
         public async Task CameraAnswer(string testTaker, RTCSessionDescriptionInit sdp)
         {
             await Clients.User(testTaker).SendAsync("ReceivedCameraAnswer", Context.User.Identity.Name, sdp);
         }
         
-        public async Task CameraIceCandidate(string proctor, RTCIceCandidate candidate)
+        /// <summary>
+        /// (Used by both takers and proctors) Send the WebRTC ICE candidate information of the camera stream
+        /// </summary>
+        /// <param name="user">The user ID of the user to send the ICE candidate</param>
+        /// <param name="candidate">The ICE candidate to be sent</param>
+        public async Task CameraIceCandidate(string user, RTCIceCandidate candidate)
         {
-            await Clients.User(proctor).SendAsync("ReceivedCameraIceCandidate", Context.User.Identity.Name, candidate);
-        }
-
-        public async Task ExamEnded()
-        {
-            var user = Context.User.Identity.Name + "_cam";
-            await Clients.User(user).SendAsync("ExamEnded");
+            await Clients.User(user).SendAsync("ReceivedCameraIceCandidate", Context.User.Identity.Name, candidate);
         }
     }
 }

@@ -1,0 +1,52 @@
+﻿@using SmartProctor.Shared.Answers
+@using SmartProctor.Shared.Questions
+@namespace SmartProctor.Client.Pages.Exam
+
+<Card Class="listCard"
+      Title="@("Question " + QuestionNum)"
+      Style="margin-top: 24px;"
+      BodyStyle="padding: 0 32px 40px 32px">
+      <Paragraph>
+            @((MarkupString)Question.Question)
+      </Paragraph>
+      <Paragraph>
+            @if (_answer == null)
+            {
+                  <AntDesign.Text Disabled>@_displayText</AntDesign.Text>
+            }
+            else if (_answer is ChoiceAnswer choiceAnswer && Question is ChoiceQuestion choiceQuestion)
+            {
+                  <ul>
+                        @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
+                        {
+                              var index = i;
+                              <li>
+                                    @if (choiceAnswer.Choices.Contains(index))
+                                    {
+                                          <AntDesign.Text Strong>@choiceQuestion.Choices[index]</AntDesign.Text> 
+                                    }
+                                    else
+                                    {
+                                          <AntDesign.Text Disabled>@choiceQuestion.Choices[index]</AntDesign.Text>
+                                    }
+                              </li>
+                        }
+                  </ul>
+            }
+            else if (_answer is ShortAnswer shortAnswer && Question is ShortAnswerQuestion shortAnswerQuestion)
+            {
+                  if (shortAnswerQuestion.RichText)
+                  {
+                        @((MarkupString)shortAnswer.Answer)
+                  }
+                  else
+                  {
+                        @shortAnswer.Answer
+                  }
+            }
+            else
+            {
+                  <AntDesign.Text Type="danger">The answer data is invaild</AntDesign.Text> 
+            }
+      </Paragraph>
+</Card>

@@ -1,4 +1,6 @@
 ﻿/Client/node_modules/
 /Client/bin/
 /Client/obj/
-/Server/wwwroot/img/avatars/
+/Server/wwwroot/img/avatars/*
+/Server/wwwroot/img/event/*
+!.gitkeep

@@ -6,6 +6,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used for modify the password of the user. 
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class ModifyPasswordController : ControllerBase

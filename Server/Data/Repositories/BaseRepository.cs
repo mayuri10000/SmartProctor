@@ -8,40 +8,126 @@ using SmartProctor.Shared;
 
 namespace SmartProctor.Server.Data.Repositories
 {
+    /// <summary>
+    /// The base interface of all the repository tier classes, offers basic
+    /// database operations.
+    /// </summary>
+    /// <typeparam name="T">Entity type, should be one of the entities of the database context</typeparam>
     public interface IBaseRepository<T> where T : class, new()
     {
+        /// <summary>
+        /// The database context
+        /// </summary>
         SmartProctorDbContext DbContext { get; set; }
+        
+        /// <summary>
+        /// Return whether the entity object should be inserted (i.e. not currently
+        /// present in the database)
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         bool IsInsert(T obj);
+        
+        /// <summary>
+        /// Obtains the entity object from the database with a set of primary keys
+        /// </summary>
+        /// <param name="keys">The primary keys of the objects</param>
+        /// <returns></returns>
         T GetObjectByKeys(params object[] keys);
 
+        /// <summary>
+        /// Gets a list of objects from the database table that meets a specific rule. The result will be ordered
+        /// </summary>
+        /// <param name="where">The expression of the rule that the results should meet</param>
+        /// <param name="orderBy">The expression returns the field used for sorting the results</param>
+        /// <param name="orderingType">The sorting type of the result, ascending or descending</param>
+        /// <param name="includes"></param>
+        /// <typeparam name="TK">The type of the field used for sorting, not needed to manually specify</typeparam>
+        /// <returns></returns>
         IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
             OrderingType orderingType, string[] includes = null);
 
+        /// <summary>
+        /// Gets the first object in the database table that meets a specific rule, if there's no object matches,
+        /// null will be returned.
+        /// </summary>
+        /// <param name="where">The expression of the rule that the results should meet</param>
+        /// <param name="includes"></param>
+        /// <returns>The first object matches the rule or null if no object matches</returns>
         T GetFirstOrDefaultObject(Expression<Func<T, bool>> where, string[] includes = null);
 
+        /// <summary>
+        /// Gets the first object in the database table that meets a specific rule, if there's no object matches,
+        /// null will be returned. The results will be first ordered then the first object in the results will be returned.
+        /// </summary>
+        /// <param name="where">The expression of the rule that the results should meet</param>
+        /// <param name="orderBy">The expression returns the field used for sorting the results</param>
+        /// <param name="orderingType">The sorting type of the result, ascending or descending</param>
+        /// <param name="includes"></param>
+        /// <typeparam name="TK">The type of the field used for sorting, not needed to manually specify</typeparam>
+        /// <returns></returns>
         T GetFirstOrDefaultObject<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy,
             OrderingType orderingType, string[] includes = null);
 
+        /// <summary>
+        /// Gets the count of objects in the database table that meets a specific rule.
+        /// </summary>
+        /// <param name="where">The expression of the rule that the results should meet</param>
+        /// <param name="includes"></param>
+        /// <returns></returns>
         int ObjectCount(Expression<Func<T, bool>> where, string[] includes = null);
 
-        decimal GetSum(Expression<Func<T, bool>> where, Func<T, decimal> sum, string[] includes = null);
-
+        /// <summary>
+        /// Adds a new object into the database table
+        /// </summary>
+        /// <param name="obj"></param>
         void Add(T obj);
+        
+        /// <summary>
+        /// Updates a existing object in the database table
+        /// </summary>
+        /// <param name="obj"></param>
         void Update(T obj);
+        
+        /// <summary>
+        /// Saves a object into the database table, if the object not exists in the database,
+        /// it will be added, otherwise it will be updated.
+        /// </summary>
+        /// <param name="obj"></param>
         void Save(T obj);
 
+        /// <summary>
+        /// Deletes a object in the database table
+        /// </summary>
+        /// <param name="obj">The expression of the rule that the deleted objects should meet</param>
         void Delete(T obj);
 
+        /// <summary>
+        /// Delete all objects in the database table that meets a specific rule,
+        /// </summary>
+        /// <param name="where"></param>
         void Delete(Expression<Func<T, bool>> where);
+        
+        /// <summary>
+        /// Saves the changes made in the database, will be automatically called by the server tier.
+        /// </summary>
         void SaveChanges();
     }
 
+    /// <summary>
+    /// Implementation of interface <see cref="IBaseRepository{T}"/>
+    /// </summary>
+    /// <typeparam name="T"> Entity type, should be one of the entities of the database context</typeparam>
     public class BaseRepository<T> : IBaseRepository<T> where T : class, new()
     {
         // public BaseRepository() : this(null)
         // {
         // }
 
+        /// <summary>
+        /// Constructor, the database context will be passed with dependency injection
+        /// </summary>
+        /// <param name="db">The database context</param>
         public BaseRepository(SmartProctorDbContext db)
         {
             DbContext = db;
@@ -90,40 +176,16 @@ namespace SmartProctor.Server.Data.Repositories
             return obj;
         }
 
-        //public virtual T GetObjectByGuid(Guid guid, string[] includes = null)
-        //{
-        //    string sql = string.Format("SELECT VALUE c FROM {0} AS c ", _entitySetName);
-        //    T obj = BaseDB.BaseDataContext
-        //         .Set<T>()
-        //        //.CreateQuery<T>(sql)
-        //         .Includes(includes).Where("it.Guid = @guid", new ObjectParameter("guid", guid)).FirstOrDefault();
-        //    return obj;
-        //}
-
         public virtual int ObjectCount(Expression<Func<T, bool>> where, string[] includes = null)
         {
             int count = 0;
             var query = DbContext.Set<T>()
                 .Includes(includes);
-            
+
             count = query.Count(where);
-            
+
             return count;
         }
-
-        public virtual decimal GetSum(Expression<Func<T, bool>> where, Func<T, decimal> sum, string[] includes = null)
-        {
-            var result = DbContext.Set<T>()
-                .Includes(includes).Where(where).Sum(sum);
-            return result;
-        }
-
-        //public virtual object ObjectSum(Expression<Func<T, bool>> where, Func<T,object> sumBy, string[] includes)
-        //{
-        //    string sql = string.Format("SELECT VALUE c FROM {0} AS c ", _entitySetName);
-        //    object result= DbContext.CreateQuery<T>(sql).Includes(includes).Where(where).Sum(sumBy);
-        //    return result;
-        //}
 
 
         public virtual void Add(T obj)

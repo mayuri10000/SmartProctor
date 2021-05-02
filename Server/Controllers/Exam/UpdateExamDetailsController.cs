@@ -6,6 +6,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used by the exam creator to update the exam information
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class UpdateExamDetailsController : ControllerBase
@@ -22,6 +25,7 @@ namespace SmartProctor.Server.Controllers.Exam
         {
             if (User.Identity?.Name == null)
             {
+                // Not logged in
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
             }
 
@@ -29,6 +33,7 @@ namespace SmartProctor.Server.Controllers.Exam
 
             if (exam == null)
             {
+                // Exam not exists
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.ExamNotExist);
             }
 

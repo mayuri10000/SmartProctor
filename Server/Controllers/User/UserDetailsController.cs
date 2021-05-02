@@ -7,6 +7,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used for getting/setting the details of the current user. When GET, returns the
+    /// user information, while POST will update the user information.
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class UserDetailsController : ControllerBase
@@ -49,16 +53,10 @@ namespace SmartProctor.Server.Controllers.User
             }
 
             var uid = User.Identity.Name;
-            
-            var u = _services.GetObject(uid);
 
-            u.Email = model.Email;
-            u.Phone = model.Phone;
-            u.NickName = model.NickName;
+            var res = _services.ChangeUserInfo(uid, model.NickName, model.Email, model.Phone);
             
-            _services.SaveObject(u);
-            
-            return ErrorCodes.CreateSimpleResponse(ErrorCodes.Success); 
+            return ErrorCodes.CreateSimpleResponse(res); 
         }
     }
 }

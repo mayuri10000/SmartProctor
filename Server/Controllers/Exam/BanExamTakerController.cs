@@ -9,6 +9,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for banning exam taker for breaking exam rules. 
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class BanExamTakerController : ControllerBase

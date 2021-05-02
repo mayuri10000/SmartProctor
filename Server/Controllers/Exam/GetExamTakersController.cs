@@ -7,6 +7,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for getting all exam takers for the given exam.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class GetExamTakersController : ControllerBase

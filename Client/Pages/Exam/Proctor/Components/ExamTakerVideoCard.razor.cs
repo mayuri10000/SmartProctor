@@ -6,69 +6,127 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
 {
+    /// <summary>
+    /// Component shows a video panel of a exam taker's desktop capture and
+    /// camera capture. Should be placed in <see cref="Proctor"/> page.
+    /// </summary>
     public partial class ExamTakerVideoCard
     {
+        /// <summary>
+        /// The exam taker's user ID
+        /// </summary>
         [Parameter]
         public string ExamTakerName { get; set; }
         
+        /// <summary>
+        /// Callback when the "ban" button clicked
+        /// </summary>
         [Parameter]
         public EventCallback OnBanExamTaker { get; set; }
         
+        /// <summary>
+        /// Callback when the video panel is switched to desktop viewing
+        /// </summary>
         [Parameter]
         public EventCallback OnToggleDesktop { get; set; }
         
+        /// <summary>
+        /// Callback when the video panel is switched to camera viewing
+        /// </summary>
         [Parameter]
         public EventCallback OnToggleCamera { get; set; }
         
+        /// <summary>
+        /// Callback when the "message" button is clicked
+        /// </summary>
         [Parameter]
         public EventCallback OnOpenMessage { get; set; }
 
+        /// <summary>
+        /// Should display loading icon on the desktop video panel
+        /// </summary>
         [Parameter] public bool DesktopLoading { get; set; } = true;
 
+        /// <summary>
+        /// Should display loading icon on the camera video panel
+        /// </summary>
         [Parameter] public bool CameraLoading { get; set; } = true;
         
+        /// <summary>
+        /// Should display ban icon on the video panel
+        /// </summary>
         [Parameter]
         public bool Banned { get; set; }
         
+        /// <summary>
+        /// Number of this component in each rows in <see cref="Proctor"/> page.
+        /// </summary>
         [Parameter]
         public int CardsEachRow { get; set; }
-
-        private bool _showToolBar = false;
+        
+        // Shows the top and bottom bar or not, decided by whether the cursor is in the component
+        private bool _showToolBar = false;   
+        
+        // Is the video panel showing desktop capture
         private bool _showingDesktop = false;
+        
+        // Is the video panel in fullscreen mode
         private bool _fullscreen = false;
         
+        // Should display badge on warning or message button
         private bool _haveNewWarning = false;
         private bool _haveNewMessage = false;
         
+        // Warning message
         private List<EventItem> _messages = new List<EventItem>();
         private bool _warningVisible = false;
 
+        /// <summary>
+        /// Add new warning message
+        /// </summary>
+        /// <param name="eventItem"></param>
         public void AddWarningMessage(EventItem eventItem)
         {
             _messages.Add(eventItem);
             _haveNewWarning = true;
         }
 
+        /// <summary>
+        /// Add warning message without showing the badge
+        /// </summary>
+        /// <param name="eventItem"></param>
         public void AddOldMessage(EventItem eventItem)
         {
             _messages.Add(eventItem);
         }
 
+        /// <summary>
+        /// Sets the message badge to show
+        /// </summary>
         public void SetNewMessage()
         {
             _haveNewMessage = true;
         }
         
+        /// <summary>
+        /// Callback When the mouse moves in the component
+        /// </summary>
         private void OnMouseOver()
         {
             _showToolBar = true;
         }
 
+        /// <summary>
+        /// Callback when the mouse moves out of the component
+        /// </summary>
         private void OnMouseOut()
         {
             _showToolBar = false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private async Task BanUser()
         {
             await OnBanExamTaker.InvokeAsync();

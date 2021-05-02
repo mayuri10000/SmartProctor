@@ -9,6 +9,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used by the edge computing client on AWS DeepLens to send the detection frame with problems marked.
+    /// Frames will be saved at wwwroot/img/event/, and the file name will be returned.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class UploadEventAttachmentController : ControllerBase
@@ -34,16 +38,19 @@ namespace SmartProctor.Server.Controllers.Exam
 
             var extension = Path.GetExtension(file.FileName).ToLower();
 
+            // Check the file extension, prevent illegal script file that could be used for hacking the server
             if (!".bmp/.jpg/.jpeg/.png/.gif".Contains(extension))
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.UnknownError);
             }
 
+            // Generate the file name
             var fileName = "img/event/" +
                            Utils.MD5Helper.HashPassword(uid, DateTime.Now.ToString("yyyyMMddHHmmss")) 
                            + extension;
             var path = Path.Combine(_webHostEnvironment.WebRootPath, fileName);
             
+            // Save the file
             var fs = new FileStream(path, FileMode.Create);
             file.CopyTo(fs);
             fs.Close();

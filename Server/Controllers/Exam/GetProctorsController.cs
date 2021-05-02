@@ -6,6 +6,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller that returns the list of proctors 
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class GetProctorsController : ControllerBase

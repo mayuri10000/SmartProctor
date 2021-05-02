@@ -6,6 +6,11 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used by both the exam takers and the exam creator to view the exam questions.
+    /// Exam takers can only get questions during the exam session, while exam creator can get the
+    /// question at any time.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class GetPaperController : ControllerBase

@@ -6,24 +6,72 @@ using SmartProctor.Server.Utils;
 
 namespace SmartProctor.Server.Services
 {
+    /// <summary>
+    /// Interface of user related service tier (business logic) methods.
+    /// Implemented in <see cref="SmartProctor.Server.Services.UserServices"/>
+    /// </summary>
     public interface IUserServices : IBaseServices<User>
     {
+        /// <summary>
+        /// Verifies login credentials, <see cref="userName"/> can be user ID, email or phone.
+        /// <remarks>This will not sets the login cookies, should only be called by
+        /// <see cref="SmartProctor.Server.Controllers.User.LoginController"/></remarks>
+        /// </summary>
+        /// <param name="userName">User ID, email or phone</param>
+        /// <param name="password">Password</param>
+        /// <returns>User ID if success, null if fails</returns>
         string Login(string userName, string password);
+        
+        /// <summary>
+        /// Generates token that will be used for DeepLens login
+        /// </summary>
+        /// <param name="uid">current user Id</param>
+        /// <returns>The token used for logging in on the DeepLens device</returns>
         string GenerateOneTimeToken(string uid);
+        
+        /// <summary>
+        /// Validates the login token used for DeepLens login
+        /// </summary>
+        /// <param name="token">The login token</param>
+        /// <returns>User ID if success, null if fails</returns>
         string ValidateOneTimeToken(string token);
+        
+        /// <summary>
+        /// Registers a new user
+        /// </summary>
+        /// <param name="id">User ID, should be unique</param>
+        /// <param name="nickName">Nick name, not needed to be unique</param>
+        /// <param name="password">Password</param>
+        /// <param name="email">Email, should be unique</param>
+        /// <param name="phone">Phone number, should be unique</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int Register(string id, string nickName, string password, string email, string phone);
 
-        bool CheckIfIdExists(string id);
-        bool CheckIfEmailExists(string email);
-        bool CheckIfPhoneExists(string phone);
-
+        /// <summary>
+        /// Changes the password of the user
+        /// </summary>
+        /// <param name="userName">User ID</param>
+        /// <param name="oldPassword">The current password</param>
+        /// <param name="newPassword">The new password</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int ChangePassword(string userName, string oldPassword, string newPassword);
+        
+        /// <summary>
+        /// Modifies the user information
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <param name="nickName">Nick name, not needed to be unique</param>
+        /// <param name="email">Email, should be unique</param>
+        /// <param name="phone">Phone number, should be unique</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int ChangeUserInfo(string id, string nickName, string email, string phone);
     }
 
+    /// <summary>
+    /// Implementation of user related business logic defined in <see cref="IUserServices"/>
+    /// </summary>
     public class UserServices : BaseServices<User>, IUserServices
     {
-        private Dictionary<string, string> _tokens = new Dictionary<string, string>();
         
         public UserServices(IUserRepository repo) : base(repo)
         {
@@ -76,6 +124,7 @@ namespace SmartProctor.Server.Services
             {
                 Id = id,
                 NickName = nickName,
+                // The password should be hashed with the username with salt
                 Password = MD5Helper.HashPassword(id, password),
                 Email = email,
                 Phone = phone,
@@ -85,23 +134,39 @@ namespace SmartProctor.Server.Services
             return ErrorCodes.Success;
         }
 
-        public bool CheckIfIdExists(string id)
+        /// <summary>
+        /// Check whether the user ID exists
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <returns>True if exists</returns>
+        private bool CheckIfIdExists(string id)
         {
             return GetCount(u => u.Id == id) != 0;
         }
 
-        public bool CheckIfEmailExists(string email)
+        /// <summary>
+        /// Check whether the email address exists
+        /// </summary>
+        /// <param name="email">email address</param>
+        /// <returns>True if exists</returns>
+        private bool CheckIfEmailExists(string email)
         {
             return GetCount(u => u.Email == email) != 0;
         }
 
-        public bool CheckIfPhoneExists(string phone)
+        /// <summary>
+        /// Check whether the phone exists
+        /// </summary>
+        /// <param name="phone">phone number</param>
+        /// <returns>True if exists</returns>
+        private bool CheckIfPhoneExists(string phone)
         {
             return GetCount(u => u.Phone == phone) != 0;
         }
 
         public int ChangePassword(string userName, string oldPassword, string newPassword)
         {
+            // The password should be hashed with the username with salt
             var oldHash = MD5Helper.HashPassword(userName, oldPassword);
             var newHash = MD5Helper.HashPassword(userName, newPassword);
             var u = GetObject(userName);

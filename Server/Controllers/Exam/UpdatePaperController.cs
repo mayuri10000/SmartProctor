@@ -6,6 +6,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for updating the exam paper, should only used by the exam creator
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class UpdatePaperController : ControllerBase

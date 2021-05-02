@@ -22,6 +22,7 @@ namespace SmartProctor.Client.Services
     public interface IExamServices
     {
         Task<(int, string)> JoinExam(int examId);
+        Task<int> AddProctor(int examId, string uid);
         Task<(int, string)> Attempt(int examId);
         Task<int> AttemptProctor(int examId);
         Task<(int, IList<ExamDetails>)> GetExams(int role);
@@ -64,6 +65,26 @@ namespace SmartProctor.Client.Services
             {
                 _logger.LogError(e.ToString());
                 return (ErrorCodes.UnknownError, null);
+            }
+        }
+
+        public async Task<int> AddProctor(int examId, string uid)
+        {
+            _logger.LogInformation($"AddProctor(examId: {examId}, uid: \"{uid}\")");
+            try
+            {
+                var res = await _http.PostAsAndGetFromJsonAsync<AddProctorRequestModel, BaseResponseModel>(
+                    "/api/exam/AddProctor", new AddProctorRequestModel()
+                    {
+                        ExamId = examId,
+                        UserId = uid
+                    });
+                return res?.Code ?? ErrorCodes.UnknownError;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
             }
         }
         

@@ -8,6 +8,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller called before a proctor enter the proctoring session of the exam, will return success
+    /// if the current user is eligible for the current proctoring session.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class EnterProctorController : ControllerBase

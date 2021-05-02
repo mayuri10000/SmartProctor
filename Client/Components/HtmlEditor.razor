@@ -1,5 +1,6 @@
 ﻿@using Blazored.TextEditor
 
+@* Component used for a HTML editor, using Quill.js as backend *@
 <BlazoredTextEditor @ref="@_quillHtml" Placeholder="@PlaceHolder">
     <ToolbarContent>
         <select class="ql-header">
@@ -53,7 +54,8 @@
         await Task.Delay(500);
         await _quillHtml.LoadHTMLContent(InitialContent);
     }
-
+    
+    
     public async Task<string> GetHtmlString()
     {
         return await _quillHtml.GetHTML();

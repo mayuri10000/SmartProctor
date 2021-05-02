@@ -6,6 +6,7 @@ using AntDesign.Pro.Layout;
 using Microsoft.AspNetCore.Components;
 using SmartProctor.Client.Services;
 using SmartProctor.Client.Utils;
+using SmartProctor.Shared.Questions;
 using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Client.Pages.Exam
@@ -23,7 +24,10 @@ namespace SmartProctor.Client.Pages.Exam
         private ExamDetailsResponseModel _model = new ExamDetailsResponseModel();
         private IList<UserBasicInfo> _takers = new List<UserBasicInfo>();
         private IList<UserBasicInfo> _proctors = new List<UserBasicInfo>();
+        private IList<BaseQuestion> _questions = new List<BaseQuestion>();
         private int _examId;
+        private bool _addProctorModalVisible = false;
+        private string _proctorIdToAdd = "";
         
         private readonly IList<TabPaneItem> _tabList = new List<TabPaneItem>
         {
@@ -78,12 +82,26 @@ namespace SmartProctor.Client.Pages.Exam
                 await Modal.ErrorAsync(new ConfirmOptions()
                 {
                     Title = "Failed to obtain list of exam proctors",
-                    Content = ErrorCodes.MessageMap[res2]
+                    Content = ErrorCodes.MessageMap[res3]
+                });
+                return;
+            }
+            
+            _proctors = proctors;
+            
+            var (res4, questions) = await ExamServices.GetPaper(_examId);
+            if (res4 != ErrorCodes.Success)
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Failed to obtain questions",
+                    Content = ErrorCodes.MessageMap[res4]
                 });
                 return;
             }
 
-            _proctors = proctors;
+            _questions = questions;
+
         }
 
         private string ConvertExamDuration(int secs)
@@ -131,6 +149,29 @@ namespace SmartProctor.Client.Pages.Exam
                 Title = "The test taker were banned from this test",
                 Content = "Reason: " + reason
             });
+        }
+
+        private async Task OnAddProctor()
+        {
+            var res = await ExamServices.AddProctor(_examId, _proctorIdToAdd);
+
+            if (res != ErrorCodes.Success)
+            {
+                await Modal.ErrorAsync(new ConfirmOptions()
+                {
+                    Title = "Failed to add proctor to exam",
+                    Content = ErrorCodes.MessageMap[res]
+                });
+            }
+            else
+            {
+                await Modal.SuccessAsync(new ConfirmOptions()
+                {
+                    Title = "Successfully added proctor to exam"
+                });
+
+                _proctorIdToAdd = "";
+            }
         }
     }
 }

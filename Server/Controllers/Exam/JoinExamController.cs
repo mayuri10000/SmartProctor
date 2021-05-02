@@ -5,6 +5,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for the exam taker to join an exam by the exam ID.
+    /// Returns success if success and error code if fails
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class JoinExamController : ControllerBase

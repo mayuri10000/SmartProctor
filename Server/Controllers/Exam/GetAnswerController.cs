@@ -7,6 +7,11 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used by the exam takers and exam creator to get the answers.
+    /// Exam takers can only get his/her own answer during the exam session, while
+    /// exam creator can get answer from any exam taker in the exam at any time.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class GetAnswerController : ControllerBase

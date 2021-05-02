@@ -7,30 +7,31 @@ using SmartProctor.Shared.Responses;
 namespace SmartProctor.Server.Controllers.Exam
 {
     /// <summary>
-    /// Controller used for submitting the answer for a question. Should be only used by test takers
-    /// during an exam session.
+    /// Controller used to add proctor to the exam, should always called by the exam creater
     /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
-    public class SubmitAnswerController : ControllerBase
+    public class AddProctorController : ControllerBase
     {
-        private IExamServices _examServices;
+        private IExamServices _services;
 
-        public SubmitAnswerController(IExamServices examServices)
+        public AddProctorController(IExamServices services)
         {
-            _examServices = examServices;
+            _services = services;
         }
-        
+
         [HttpPost]
-        public BaseResponseModel Post(SubmitAnswerRequestModel model)
+        public BaseResponseModel Post(AddProctorRequestModel model)
         {
+            // Check if logged in
             if (User.Identity?.Name == null)
             {
                 return ErrorCodes.CreateSimpleResponse(ErrorCodes.NotLoggedIn);
             }
+            
+            var uid = User.Identity.Name;
 
-            var res = _examServices.SubmitAnswer(User.Identity?.Name, model.ExamId, model.QuestionNum,
-                model.AnswerJson);
+            var res = _services.AddProctor(uid, model.UserId, model.ExamId);
 
             return ErrorCodes.CreateSimpleResponse(res);
         }

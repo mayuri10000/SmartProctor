@@ -15,6 +15,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Services
 {
+    /// <summary>
+    /// Interface of exam related service tier (business logic) methods.
+    /// Implemented in <see cref="SmartProctor.Server.Services.ExamServices"/>
+    /// </summary>
     public interface IExamServices : IBaseServices<Exam>
     {
         /// <summary>
@@ -24,7 +28,7 @@ namespace SmartProctor.Server.Services
         /// <param name="eid">Exam Id</param>
         /// <param name="uid">User Id</param>
         /// <param name="banReason">If the user was banned, outputs the reason</param>
-        /// <returns>Error code, <code>ErrorCodes.Success</code> if no error</returns>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int Attempt(int eid, string uid, out string banReason);
         
         /// <summary>
@@ -32,7 +36,7 @@ namespace SmartProctor.Server.Services
         /// </summary>
         /// <param name="eid">Exam Id</param>
         /// <param name="uid">User Id</param>
-        /// <returns>Error code, <code>ErrorCodes.Success</code> if no error</returns>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int EnterProctor(int eid, string uid);
         
         /// <summary>
@@ -46,50 +50,150 @@ namespace SmartProctor.Server.Services
         /// Returns the proctors for the current exam
         /// </summary>
         /// <param name="eid">Exam Id</param>
-        /// <returns>List of user ids of the test proctors, <code>null</code> if error occurs</returns>
+        /// <returns>List of user ids of the test proctors, null if error occurs</returns>
         IList<string> GetProctors(int eid);
 
-        int JoinExam(string uid, int eid, out string banReason);
         /// <summary>
-        /// 
+        /// Joins a specific exam
         /// </summary>
-        /// <param name="uid"></param>
-        /// <param name="role"></param>
+        /// <param name="uid">The user ID of current user</param>
+        /// <param name="eid">The exam ID of the exam to join</param>
+        /// <param name="banReason">Returns reason of banning if the current user was banned from the exam</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
+        int JoinExam(string uid, int eid, out string banReason);
+
+        /// <summary>
+        /// Adds proctor to the exam, should be used by exam creator
+        /// </summary>
+        /// <param name="currentUid">The current user ID, used for verifying that the current user is the owner of the exam</param>
+        /// <param name="uid">The user ID to be added as proctor</param>
+        /// <param name="eid">The exam ID</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
+        int AddProctor(string currentUid, string uid, int eid);
+        
+        /// <summary>
+        /// Get a list of exams that the user should take/proctor.
+        /// </summary>
+        /// <param name="uid">Current user ID</param>
+        /// <param name="role">Role the user should be in the result exams (see <see cref="Consts"/>)</param>
         /// <returns></returns>
         IList<ExamDetails> GetExamsForUser(string uid, int role);
 
+        /// <summary>
+        /// Gets a list of question in one exam, used by both exam taker and creator.
+        /// When used by exam takers, this method will success only within the exam session.
+        /// </summary>
+        /// <param name="uid">The current user ID, for role verification.</param>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="questions">The list of questions in json format, null if failed</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int GetPaper(string uid, int eid, out IList<string> questions);
 
+        /// <summary>
+        /// Submits a new version of the exam paper (i.e. list of question)
+        /// </summary>
+        /// <param name="uid">The current user ID, for role verification</param>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="questions">The list of question in json format</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int EditPaper(string uid, int eid, IList<string> questions);
 
+        /// <summary>
+        /// Submits the answer, should be used by the exam taker during the exam session.
+        /// </summary>
+        /// <param name="uid">Current user ID</param>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="num">The question number to be answered</param>
+        /// <param name="json">The answer data in json format</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int SubmitAnswer(string uid, int eid, int num, string json);
 
+        /// <summary>
+        /// Gets the exam answer of one question, used by both exam takers and exam creator.
+        /// Exam taker can only call this method during the exam session.
+        /// </summary>
+        /// <param name="currentUid">The current user ID, for role verification</param>
+        /// <param name="uid">The user ID of the user whose answer will be returned, will be ignored when
+        /// the current user is an exam taker.</param>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="num">The question number</param>
+        /// <param name="json">Returns the answer in json format, null if failed</param>
+        /// <param name="time">Return the time when the answer was submitted, <see cref="DateTime.MinValue"/>
+        /// if failed</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int GetAnswer(string currentUid, string uid, int eid, int num, out string json, out DateTime time);
 
+        /// <summary>
+        /// Gets the question count of a exam
+        /// </summary>
+        /// <param name="examId"></param>
+        /// <returns>The question count</returns>
         int GetQuestionCount(int examId);
+        
+        /// <summary>
+        /// Gets a list of exam created by the current user.
+        /// </summary>
+        /// <param name="uid">Current user ID</param>
+        /// <returns>List of exam created by the current user.</returns>
         IList<ExamDetails> GetCreatedExams(string uid);
         
+        /// <summary>
+        /// Bans a exam taker, should be called by proctors
+        /// </summary>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="uid">The current user Id, for role verification</param>
+        /// <param name="takerUid">The user Id of the exam taker to be banned</param>
+        /// <param name="reason">Specify the reason why the exam taker should be banned.</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int BanExamTaker(int eid, string uid, string takerUid, string reason);
+        
+        /// <summary>
+        /// Adds a event message into the database.
+        /// <remarks>
+        /// This will not send the message, this method should be called by
+        /// <see cref="SmartProctor.Server.Controllers.Exam.SendEventController"/> which sends the message with SignalR.
+        /// </remarks>
+        /// </summary>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="senderUid">The user Id of the sender</param>
+        /// <param name="receiptUid">The user ID of the receipt, null for broadcast message</param>
+        /// <param name="type">Message type, see <see cref="Consts"/></param>
+        /// <param name="message">The message text</param>
+        /// <param name="attachment">The attachment image path, currently only used with <see cref="Consts.MessageTypeWarning"/></param>
+        /// <returns><see cref="ErrorCodes.Success"/> if succeed, error code if fails</returns>
         int AddEvent(int eid, string senderUid, string receiptUid, int type, string message, string attachment = null);
+        
+        /// <summary>
+        /// Gets a list of events associated with the current user in a specific exam.
+        /// </summary>
+        /// <param name="uid">The user ID</param>
+        /// <param name="eid">The exam ID</param>
+        /// <param name="type">Message type, see <see cref="Consts"/></param>
+        /// <returns>A list of event messages, null if failed</returns>
         IList<EventItem> GetEvents(string uid, int eid, int type);
     }
     
+    /// <summary>
+    /// Implementation of exam related business logic defined in <see cref="IExamServices"/>
+    /// </summary>
     public class ExamServices : BaseServices<Exam>, IExamServices
     {
         private IExamUserRepository _examUserRepo;
         private IQuestionRepository _questionRepo;
         private IAnswerRepository _answerRepo;
         private IEventRepository _eventRepo;
+        private IUserServices _userServices;
 
         private ILogger<ExamServices> _logger;
         
         public ExamServices(IExamRepository repo, IExamUserRepository examUserRepo, 
-            IQuestionRepository questionRepo, IAnswerRepository answerRepo, IEventRepository eventRepo, ILogger<ExamServices> logger) : base(repo)
+            IQuestionRepository questionRepo, IAnswerRepository answerRepo, IEventRepository eventRepo, IUserServices userServices, ILogger<ExamServices> logger) : base(repo)
         {
             _examUserRepo = examUserRepo;
             _questionRepo = questionRepo;
             _answerRepo = answerRepo;
             _eventRepo = eventRepo;
+            _userServices = userServices;
 
             _logger = logger;
         }
@@ -100,18 +204,22 @@ namespace SmartProctor.Server.Services
             banReason = null;
             try
             {
+                // Exam ID not found
                 if (GetObject(eid) == null)
                 {
                     return ErrorCodes.ExamNotExist;
                 }
 
+                // Gets the exam-user relationship
                 var q = _examUserRepo.GetFirstOrDefaultObject(
                     x => x.ExamId == eid && x.UserId == uid && x.UserRole == Consts.UserTypeTaker);
+                // The exam taker not joined the exam
                 if (q == null)
                 {
                     return ErrorCodes.ExamNotPermitToTake;
                 }
 
+                // The exam was banned
                 if (q.BanReason != null)
                 {
                     banReason = q.BanReason;
@@ -126,6 +234,7 @@ namespace SmartProctor.Server.Services
                     return ErrorCodes.ExamNotBegin;
                 }
 
+                // TODO: Add late-entry check
                 if (e.StartTime.AddSeconds(e.Duration) < DateTime.Now)
                 {
                     return ErrorCodes.ExamExpired;
@@ -273,6 +382,60 @@ namespace SmartProctor.Server.Services
             return ret;
         }
 
+        public int AddProctor(string currentUid, string uid, int eid)
+        {
+            _logger.LogInformation($"AddProctor(currentUid: \"{currentUid}\", uid: \"{uid}\", eid: {eid})");
+            try
+            {
+                var exam = GetObject(eid);
+                if (exam == null)
+                {
+                    return ErrorCodes.ExamNotExist;
+                }
+
+                var user = _userServices.GetObject(uid);
+                if (user == null)
+                {
+                    return ErrorCodes.UserNotExists;
+                }
+
+                if (exam.Creator != currentUid)
+                {
+                    return ErrorCodes.ExamNotPermitToEdit;
+                }
+
+                var q = _examUserRepo.GetFirstOrDefaultObject(x => x.ExamId == eid && x.UserId == uid);
+
+                if (q != null)
+                {
+                    if (q.UserRole == Consts.UserTypeTaker)
+                    {
+                        return ErrorCodes.ExamAlreadyJoined;
+                    }
+                    else if (q.UserRole == Consts.UserTypeProctor)
+                    {
+                        return ErrorCodes.ExamAlreadyProctored;
+                    }
+                }
+                else
+                {
+                    _examUserRepo.Save(new ExamUser()
+                    {
+                        ExamId = eid,
+                        UserId = uid,
+                        UserRole = Consts.UserTypeProctor
+                    });
+                }
+
+                return ErrorCodes.Success;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                return ErrorCodes.UnknownError;
+            }
+        }
+
         public IList<ExamDetails> GetExamsForUser(string uid, int role)
         {
             _logger.LogInformation($"GetExamsForUser(uid: \"{uid}\", role: {role})");
@@ -355,6 +518,12 @@ namespace SmartProctor.Server.Services
                 if (exam.Creator != uid)
                 {
                     return ErrorCodes.ExamNotPermitToEdit;
+                }
+
+                var answerCount = _answerRepo.ObjectCount(x => x.ExamId == eid);
+                if (answerCount > 0)
+                {
+                    return ErrorCodes.ExamAlreadyAnswered;
                 }
                 
                 _questionRepo.Delete(x => x.ExamId == eid);
@@ -619,6 +788,13 @@ namespace SmartProctor.Server.Services
             }
         }
 
+        /// <summary>
+        /// Check whether the current user is early or late for the exam
+        /// </summary>
+        /// <param name="eid">Exam ID</param>
+        /// <param name="viewQuestions">Questions should only be viewed after the exam begins, true if this method
+        /// is called for checking before getting questions</param>
+        /// <returns><see cref="ErrorCodes.Success"/> if the exam taker is neither late or early</returns>
         private int CheckEarlyOrLate(int eid, bool viewQuestions)
         {
             var e = GetObject(eid);
@@ -641,6 +817,12 @@ namespace SmartProctor.Server.Services
             return ErrorCodes.Success;
         }
         
+        /// <summary>
+        /// Gets the role of the user in the exam.
+        /// </summary>
+        /// <param name="uid">The user ID</param>
+        /// <param name="eid">The exam Id</param>
+        /// <returns></returns>
         private int GetUserRoleInExam(string uid, int eid)
         {
             var e = GetObject(eid);

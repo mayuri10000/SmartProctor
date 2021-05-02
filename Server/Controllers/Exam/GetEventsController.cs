@@ -6,6 +6,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for getting the exam messages associated with the current user.
+    /// These messages including warning messages and chat messages.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class GetEventsController : ControllerBase

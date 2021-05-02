@@ -5,6 +5,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// Controller used for obtaining the exam information.
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class ExamDetailsController : ControllerBase

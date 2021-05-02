@@ -1,5 +1,8 @@
 ﻿@import '~antd/es/style/themes/default.less';
 
+// Style when the timer shows an alert, the
+// timer should flash red for a few seconds and 
+// then keep red and bold
 .timer-warn {
   color: red;
   opacity: 1;
@@ -9,6 +12,7 @@
   animation-iteration-count: 3;
 }
 
+// Animation when the timer shows an alert
 @keyframes timerwarn {
   50% {
     opacity: 0;

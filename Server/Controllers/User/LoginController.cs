@@ -12,6 +12,9 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used by the web client for logging into the server. Can log in using either user ID, email or phone
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class LoginController : ControllerBase
@@ -42,10 +45,13 @@ namespace SmartProctor.Server.Controllers.User
             var claimsIdentity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
             
+            // Add the identity information to the cookies
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 new AuthenticationProperties
                 {
+                    // Indicates whether the auth cookie should be persistent, used for
+                    // "remember me" after login.
                     IsPersistent = model.Remember
                 });
             

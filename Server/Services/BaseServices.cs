@@ -9,6 +9,11 @@ using SmartProctor.Shared;
 
 namespace SmartProctor.Server.Services
 {
+    /// <summary>
+    /// The base interface of all the service tier (business logic) methods.
+    /// The methods in the interface simply invokes the underlying repository tier methods.
+    /// </summary>
+    /// <typeparam name="T">Entity type associated with the base methods</typeparam>
     public interface IBaseServices<T> where T : class,new()
     {
         IBaseRepository<T> BaseRepository { get; set; }
@@ -18,7 +23,6 @@ namespace SmartProctor.Server.Services
         T GetObject<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
         IList<T> GetObjectList<TK>(Expression<Func<T, bool>> where, Expression<Func<T, TK>> orderBy, OrderingType orderingType, string[] includes = null);
         int GetCount(Expression<Func<T, bool>> where, string[] includes = null);
-        decimal GetSum(Expression<Func<T, bool>> where, Func<T, decimal> sum, string[] includes = null);
         void TryDetectChange(T obj);
         void SaveObject(T obj);
         void DeleteObject(long id);
@@ -27,6 +31,10 @@ namespace SmartProctor.Server.Services
         void DeleteAll(IEnumerable<T> objects);
     }
     
+    /// <summary>
+    /// Implementation of <see cref="IBaseServices{T}"/>
+    /// </summary>
+    /// <typeparam name="T">Entity type associated with the base methods</typeparam>
     public class BaseServices<T> : IBaseServices<T> where T : class, new()
     {
         public IBaseRepository<T> BaseRepository { get; set; }
@@ -64,11 +72,6 @@ namespace SmartProctor.Server.Services
         public virtual int GetCount(Expression<Func<T, bool>> where, string[] includes = null)
         {
             return BaseRepository.ObjectCount(where, includes);
-        }
-
-        public virtual decimal GetSum(Expression<Func<T, bool>> where, Func<T, decimal> sum, string[] includes = null)
-        {
-            return BaseRepository.GetSum(where, sum, includes);
         }
 
         public virtual void TryDetectChange(T obj)

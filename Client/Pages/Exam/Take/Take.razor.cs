@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AntDesign;
 using BrowserInterop;
@@ -440,6 +441,34 @@ namespace SmartProctor.Client.Pages.Exam
             await _hubConnection.SendAsync("ExamEnded");
             await _hubConnection.StopAsync();
             NavManager.NavigateTo("/", true);
+        }
+        
+        private string ConvertExamDuration(int secs)
+        {
+            var hours = secs / 3600;
+            var minutes = (secs - hours * 3600) / 60;
+            var seconds = secs - minutes * 60 - hours * 3600;
+
+            var sb = new StringBuilder();
+            if (hours > 0)
+            {
+                sb.Append(hours);
+                sb.Append(" Hours ");
+            }
+
+            if (minutes > 0)
+            {
+                sb.Append(minutes);
+                sb.Append(" Minutes ");
+            }
+
+            if (seconds > 0)
+            {
+                sb.Append(seconds);
+                sb.Append(" Seconds ");
+            }
+
+            return sb.ToString();
         }
     }
 }

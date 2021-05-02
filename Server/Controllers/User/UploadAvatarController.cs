@@ -7,6 +7,10 @@ using SmartProctor.Server.Services;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used for uploading avatar image for the user, this will be used by a file upload input element,
+    /// so it should return status in HTTP status code.
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class UploadAvatarController : ControllerBase
@@ -25,6 +29,7 @@ namespace SmartProctor.Server.Controllers.User
         {
             if (User.Identity?.Name == null)
             {
+                // Not logged in 
                 return BadRequest();
             }
 
@@ -34,9 +39,11 @@ namespace SmartProctor.Server.Controllers.User
 
             if (!".bmp/.jpg/.jpeg/.png/.gif".Contains(extension))
             {
+                // Illegal file extension.
                 return BadRequest();
             }
 
+            // Generate file name, file name will be generate with the user ID and time.
             var fileName = "img/avatars/" +
                            Utils.MD5Helper.HashPassword(uid, DateTime.Now.ToString("yyyyMMddHHmmss")) 
                            + extension;
@@ -48,6 +55,7 @@ namespace SmartProctor.Server.Controllers.User
 
             var u = _userServices.GetObject(uid);
 
+            // Update the avatar path in user database
             u.Avatar = fileName;
             _userServices.SaveObject(u);
 

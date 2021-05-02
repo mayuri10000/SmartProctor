@@ -6,6 +6,11 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.Exam
 {
+    /// <summary>
+    /// This controller is used for fetching a list of exam for the given role of the current user.
+    /// Note that when role = 3, exam created by the current user will be returned, otherwise the role
+    /// is defined in <see cref="SmartProctor.Shared.Consts"/>
+    /// </summary>
     [ApiController]
     [Route("api/exam/[controller]")]
     public class GetExamsController : ControllerBase
@@ -30,10 +35,12 @@ namespace SmartProctor.Server.Controllers.Exam
 
             IList<ExamDetails> res;
             
+            // when role = 3, gets exam created by the current user
             if (role == 3)
             {
                 res = _services.GetCreatedExams(uid);
             }
+            // Otherwise use the role defined in Consts
             else
             {
                 res = _services.GetExamsForUser(uid, role);

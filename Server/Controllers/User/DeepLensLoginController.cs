@@ -11,6 +11,10 @@ using SmartProctor.Shared.Responses;
 
 namespace SmartProctor.Server.Controllers.User
 {
+    /// <summary>
+    /// Controller used by the AWS DeepLens edge computing client to log in to the server, should use a
+    /// token generated on the server.
+    /// </summary>
     [ApiController]
     [Route("api/user/[controller]")]
     public class DeepLensLoginController : ControllerBase
@@ -33,6 +37,7 @@ namespace SmartProctor.Server.Controllers.User
             
             var claims = new List<Claim>
             {
+                // The user name should end with {user name}_cam, 
                 new Claim(ClaimTypes.Name, uid + "_cam"),
                 new Claim(ClaimTypes.NameIdentifier, uid + "_cam"),
                 new Claim(ClaimTypes.Role, "DeepLens"),
@@ -41,6 +46,7 @@ namespace SmartProctor.Server.Controllers.User
             var claimsIdentity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
             
+            // Adds the identity information to the Cookies
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
             
