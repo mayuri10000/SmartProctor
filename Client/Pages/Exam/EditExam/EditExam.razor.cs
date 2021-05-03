@@ -202,7 +202,9 @@ namespace SmartProctor.Client.Pages.Exam
             {
                 await e.SaveQuestion();
             }
+
             _questions.RemoveAt(index);
+            Array.Resize(ref _questionEditors, _questions.Count);
             StateHasChanged();
         }
 

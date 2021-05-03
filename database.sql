@@ -3,7 +3,7 @@ create table answer
     user_id      varchar(20) not null,
     exam_id      int         not null,
     question_num int         not null,
-    answer_json  text        not null,
+    answer_json  longtext        not null,
     answer_time  datetime(6) null,
     primary key (user_id, exam_id, question_num)
 );

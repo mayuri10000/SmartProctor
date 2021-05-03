@@ -52,10 +52,16 @@ namespace SmartProctor.Client.Interops
             await _jsObj.InvokeVoidAsync("obtainCameraStream", mjpegUrl);
         }
 
-        public async ValueTask StartStreaming()
+        public async ValueTask StartStreamingDesktop()
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("startStreaming");
+            await _jsObj.InvokeVoidAsync("startStreamingDesktop");
+        }
+        
+        public async ValueTask StartStreamingCamera()
+        {
+            await Init();
+            await _jsObj.InvokeVoidAsync("startStreamingCamera");
         }
 
         public async ValueTask ReconnectToProctor(string proctor)

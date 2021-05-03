@@ -89,25 +89,33 @@
         }
         
 
-        public async startStreaming() {
+        public async startStreamingCamera() {
             for (let proctor in this.proctorConnections) {
                 let conn = this.proctorConnections[proctor];
-                this.desktopStream.getTracks().forEach((track) => {
-                    conn.desktopConnection.addTrack(track, this.desktopStream);
-                });
 
                 this.cameraStream.getTracks().forEach((track) => {
                     conn.cameraConnection.addTrack(track, this.cameraStream);
                 });
-
-                let desktopOffer = await conn.desktopConnection.createOffer();
-                await conn.desktopConnection.setLocalDescription(desktopOffer);
                 
                 let cameraOffer = await conn.cameraConnection.createOffer();
                 await conn.cameraConnection.setLocalDescription(cameraOffer)
 
                 // Send the local SDP through SignalR in .NET
                 await this.helper.invokeMethodAsync("_onCameraSdp", proctor, cameraOffer);
+            }
+        }
+        
+        public async startStreamingDesktop() {
+            for (let proctor in this.proctorConnections) {
+                let conn = this.proctorConnections[proctor];
+                this.desktopStream.getTracks().forEach((track) => {
+                    conn.desktopConnection.addTrack(track, this.desktopStream);
+                });
+
+                let desktopOffer = await conn.desktopConnection.createOffer();
+                await conn.desktopConnection.setLocalDescription(desktopOffer);
+                
+                // Send the local SDP through SignalR in .NET
                 await this.helper.invokeMethodAsync("_onDesktopSdp", proctor, desktopOffer);
             }
         }

@@ -175,7 +175,7 @@ var SmartProctor;
                 });
             });
         };
-        WebRTCClientTaker.prototype.startStreaming = function () {
+        WebRTCClientTaker.prototype.startStreamingCamera = function () {
             return __awaiter(this, void 0, void 0, function () {
                 var _loop_1, this_1, _a, _b, _i, proctor;
                 var _this = this;
@@ -183,38 +183,26 @@ var SmartProctor;
                     switch (_c.label) {
                         case 0:
                             _loop_1 = function (proctor) {
-                                var conn, desktopOffer, cameraOffer;
+                                var conn, cameraOffer;
                                 return __generator(this, function (_d) {
                                     switch (_d.label) {
                                         case 0:
                                             conn = this_1.proctorConnections[proctor];
-                                            this_1.desktopStream.getTracks().forEach(function (track) {
-                                                conn.desktopConnection.addTrack(track, _this.desktopStream);
-                                            });
                                             this_1.cameraStream.getTracks().forEach(function (track) {
                                                 conn.cameraConnection.addTrack(track, _this.cameraStream);
                                             });
-                                            return [4 /*yield*/, conn.desktopConnection.createOffer()];
-                                        case 1:
-                                            desktopOffer = _d.sent();
-                                            return [4 /*yield*/, conn.desktopConnection.setLocalDescription(desktopOffer)];
-                                        case 2:
-                                            _d.sent();
                                             return [4 /*yield*/, conn.cameraConnection.createOffer()];
-                                        case 3:
+                                        case 1:
                                             cameraOffer = _d.sent();
                                             return [4 /*yield*/, conn.cameraConnection.setLocalDescription(cameraOffer)
                                                 // Send the local SDP through SignalR in .NET
                                             ];
-                                        case 4:
+                                        case 2:
                                             _d.sent();
                                             // Send the local SDP through SignalR in .NET
                                             return [4 /*yield*/, this_1.helper.invokeMethodAsync("_onCameraSdp", proctor, cameraOffer)];
-                                        case 5:
+                                        case 3:
                                             // Send the local SDP through SignalR in .NET
-                                            _d.sent();
-                                            return [4 /*yield*/, this_1.helper.invokeMethodAsync("_onDesktopSdp", proctor, desktopOffer)];
-                                        case 6:
                                             _d.sent();
                                             return [2 /*return*/];
                                     }
@@ -230,6 +218,58 @@ var SmartProctor;
                             if (!(_i < _a.length)) return [3 /*break*/, 4];
                             proctor = _a[_i];
                             return [5 /*yield**/, _loop_1(proctor)];
+                        case 2:
+                            _c.sent();
+                            _c.label = 3;
+                        case 3:
+                            _i++;
+                            return [3 /*break*/, 1];
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        WebRTCClientTaker.prototype.startStreamingDesktop = function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var _loop_2, this_2, _a, _b, _i, proctor;
+                var _this = this;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            _loop_2 = function (proctor) {
+                                var conn, desktopOffer;
+                                return __generator(this, function (_d) {
+                                    switch (_d.label) {
+                                        case 0:
+                                            conn = this_2.proctorConnections[proctor];
+                                            this_2.desktopStream.getTracks().forEach(function (track) {
+                                                conn.desktopConnection.addTrack(track, _this.desktopStream);
+                                            });
+                                            return [4 /*yield*/, conn.desktopConnection.createOffer()];
+                                        case 1:
+                                            desktopOffer = _d.sent();
+                                            return [4 /*yield*/, conn.desktopConnection.setLocalDescription(desktopOffer)];
+                                        case 2:
+                                            _d.sent();
+                                            // Send the local SDP through SignalR in .NET
+                                            return [4 /*yield*/, this_2.helper.invokeMethodAsync("_onDesktopSdp", proctor, desktopOffer)];
+                                        case 3:
+                                            // Send the local SDP through SignalR in .NET
+                                            _d.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            };
+                            this_2 = this;
+                            _a = [];
+                            for (_b in this.proctorConnections)
+                                _a.push(_b);
+                            _i = 0;
+                            _c.label = 1;
+                        case 1:
+                            if (!(_i < _a.length)) return [3 /*break*/, 4];
+                            proctor = _a[_i];
+                            return [5 /*yield**/, _loop_2(proctor)];
                         case 2:
                             _c.sent();
                             _c.label = 3;

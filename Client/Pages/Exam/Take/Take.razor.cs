@@ -211,7 +211,8 @@ namespace SmartProctor.Client.Pages.Exam
             await _webRtcClient.SetDesktopVideoElement("desktop-video-dialog");
             if (_testPrepareModal.ShareScreenComplete(streamId))
             {
-                await _webRtcClient.StartStreaming();
+                await _webRtcClient.StartStreamingCamera();
+                await _webRtcClient.StartStreamingDesktop();
             }
         }
         
@@ -238,7 +239,7 @@ namespace SmartProctor.Client.Pages.Exam
                 {
                     if (_localDesktopVideoLoaded)
                         await _webRtcClient.SetDesktopVideoElement("local-desktop");
-                    await _webRtcClient.StartStreaming();
+                    await _webRtcClient.StartStreamingDesktop();
                     _inReshare = false;
                 }
                 else
