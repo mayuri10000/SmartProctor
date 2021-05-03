@@ -42,8 +42,8 @@
                                     }
                                     else
                                     {
-                                        <CountDown Title="Time remaining" 
-                                                   Value="@_nextExam.StartTime.AddMinutes(-15)" 
+                                        <CountDown Title="Time remaining"
+                                                   Value="@_nextExam.StartTime.AddMinutes(-15)"
                                                    OnFinish="() => _haveReadyExam = true"/>
                                     }
                                 </div>
@@ -63,7 +63,7 @@
                                 <Radio RadioButton Value="@("pending")" CheckedChanged="_ => OnSearchExam()">Pending</Radio>
                                 <Radio RadioButton Value="@("ended")" CheckedChanged="_ => OnSearchExam()">Ended</Radio>
                             </RadioGroup>
-                            <Search Class="extraContentSearch" Placeholder="Please Enter" @bind-Value="_searchKeyword" 
+                            <Search Class="extraContentSearch" Placeholder="Please Enter" @bind-Value="_searchKeyword"
                                     OnPressEnter="s => OnSearchExam()"/>
                         </div>
                     </Extra>

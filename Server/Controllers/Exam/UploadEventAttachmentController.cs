@@ -18,12 +18,10 @@ namespace SmartProctor.Server.Controllers.Exam
     public class UploadEventAttachmentController : ControllerBase
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IUserServices _userServices;
 
-        public UploadEventAttachmentController(IWebHostEnvironment webHostEnvironment, IUserServices userServices)
+        public UploadEventAttachmentController(IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
-            _userServices = userServices;
         }
         
         [HttpPost]

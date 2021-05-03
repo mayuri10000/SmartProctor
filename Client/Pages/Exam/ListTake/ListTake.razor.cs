@@ -63,14 +63,15 @@ namespace SmartProctor.Client.Pages.Exam
 
                 foreach (var e in _examList)
                 {
-                    if (e.StartTime < DateTime.Now && e.StartTime.AddSeconds(e.Duration) > DateTime.Now)
+                    if (e.StartTime < DateTime.Now && e.StartTime.AddSeconds(e.Duration) > DateTime.Now
+                                                   && e.BanReason == null)
                     {
                         _nextExam = e;
                         _haveOngoingExam = true;
                         break;
                     }
 
-                    if (e.StartTime > DateTime.Now)
+                    if (e.StartTime > DateTime.Now && e.BanReason == null)
                     {
                         if (_nextExam == null || (_nextExam.StartTime - DateTime.Now) >
                             (e.StartTime - DateTime.Now))
