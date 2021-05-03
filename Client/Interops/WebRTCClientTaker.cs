@@ -61,7 +61,7 @@ namespace SmartProctor.Client.Interops
         public async ValueTask ReconnectToProctor(string proctor)
         {
             await Init();
-            await _jsObj.InvokeVoidAsync("reconnectToProctor");
+            await _jsObj.InvokeVoidAsync("reconnectToProctor", proctor);
         }
 
         public async ValueTask SetDesktopVideoElement(string elementId)

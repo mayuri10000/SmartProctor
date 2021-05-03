@@ -3,8 +3,10 @@
 
 @{
     RenderFragment footer = @<div>
-                                <Button Disabled="@(currentStep == 1)" OnClick="Previous">Previous</Button>
-                                <Button
+                                <Button Disabled="@(currentStep == 0)" OnClick="Previous">Previous</Button>
+                                <Button Disabled="@((currentStep == 1 && !isDetected) || 
+                                                    (currentStep == 2 && !ethernetConnected && wirelessSSID == null) ||
+                                                    (currentStep == 3 && !isLoggedIn))"
                                     Type="primary"
                                     Style="@(currentStep == 4 ? "display:none" : "")"
                                     OnClick="Next">
@@ -17,7 +19,7 @@
                             </div>;
 }
 
-<Modal Title="Enter the test" Footer="footer" Visible="Visible" Style="width:800px; " DestroyOnClose>
+<Modal Title="Enter the test" Footer="footer" Visible="Visible" Style="width:1000px; " DestroyOnClose>
     <div style="@(currentStep == 0 ? "" : "display:none")">
         <Paragraph>
             To get your AWS DeepLens hardware connected, you should first enable mixed content in your browser. 
@@ -54,14 +56,18 @@
             Device network status:
             <div>
                 Wired network:&nbsp;&nbsp;
-                <Icon Type="check-circle" Theme="outline" Style="@(ethernetConnected ? "color:green" : "color:red")"/>
+                <Icon Type="@(ethernetConnected ? "check-circle" : "close-circle")" 
+                      Theme="outline" 
+                      Style="@(ethernetConnected ? "color:green" : "color:red")"/>
                 <label style="@(ethernetConnected ? "color:green" : "color:red")">
                     &nbsp;@(ethernetConnected ? "Connected" : "Not connected")
                 </label>
             </div>
             <div>
                 Wireless network:&nbsp;&nbsp;
-                <Icon Type="check-circle" Theme="outline" Style="@(wirelessSSID != null ? "color:green" : "color:red")"/>
+                <Icon Type="@(wirelessSSID != null ? "check-circle" : "close-circle")"
+                      Theme="outline"
+                      Style="@(wirelessSSID != null ? "color:green" : "color:red")"/>
                 <label style="@(wirelessSSID != null ? "color:green" : "color:red")">
                     &nbsp;@(wirelessSSID != null ? "Connected, SSID: " + wirelessSSID : "Not connected")
                 </label>

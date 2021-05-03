@@ -4,14 +4,14 @@
 <Drawer Width="300"
         Placement="right"
         Style="z-index: 999;"
-        Visible="Visible"
+        Visible="_visible"
         Closable="false"
         Title="@(ForProctoring ? (ChatWith == null ? "Broadcast message" : "Chat with @" + ChatWith) : "Chat with proctor")">
     <Handler>
-        @if (!ForProctoring || Visible)
+        @if (!ForProctoring || _visible)
         {
             <div class="proctor-chat-drawer-handle" @onclick="SetVisible">
-                @if (Visible)
+                @if (_visible)
                 {
                     <Icon Type="close" Theme="outline" Style="color: #fff; font-size: 20px;"/>
                 }

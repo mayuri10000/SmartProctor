@@ -45,13 +45,13 @@ namespace SmartProctor.Client.Pages.Exam
         /// <summary>
         /// Should display loading icon on the desktop video panel
         /// </summary>
-        [Parameter] public bool DesktopLoading { get; set; } = true;
+        private bool _desktopLoading = true;
 
         /// <summary>
         /// Should display loading icon on the camera video panel
         /// </summary>
-        [Parameter] public bool CameraLoading { get; set; } = true;
-        
+        private bool _cameraLoading = true;
+
         /// <summary>
         /// Should display ban icon on the video panel
         /// </summary>
@@ -91,6 +91,13 @@ namespace SmartProctor.Client.Pages.Exam
             _haveNewWarning = true;
         }
 
+        protected override async Task OnInitializedAsync()
+        {
+            await Task.Delay(500);
+            _showingDesktop = false;
+            await OnToggleCamera.InvokeAsync();
+        }
+
         /// <summary>
         /// Add warning message without showing the badge
         /// </summary>
@@ -99,6 +106,25 @@ namespace SmartProctor.Client.Pages.Exam
         {
             _messages.Add(eventItem);
         }
+
+        public void SetCameraLoading(bool loading)
+        {
+            _cameraLoading = loading;
+            StateHasChanged();
+        }
+
+        public void SetDesktopLoading(bool loading)
+        {
+            _desktopLoading = loading;
+            StateHasChanged();
+        }
+
+        public void SetBanned(bool banned)
+        {
+            Banned = banned;
+            StateHasChanged();
+        }
+
 
         /// <summary>
         /// Sets the message badge to show

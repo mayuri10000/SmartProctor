@@ -19,10 +19,8 @@ namespace SmartProctor.Client.Interops
         public event EventHandler<(string, RTCSessionDescriptionInit)> OnDesktopSdp;
         public event EventHandler<(string, string)> OnDesktopConnectionStateChange;
         public event EventHandler<(string, string)> OnCameraConnectionStateChange;
-        public event EventHandler<string> OnCameraMuted;
-        public event EventHandler<string> OnCameraUnmuted;
-        public event EventHandler<string> OnDesktopMuted;
-        public event EventHandler<string> OnDesktopUnmuted;
+        public event EventHandler<string> OnDesktopStream;
+        public event EventHandler<string> OnCameraStream;
 
 
         public WebRTCClientProctor(IJSRuntime jsRuntime, string[] testTakers)
@@ -119,32 +117,18 @@ namespace SmartProctor.Client.Interops
             OnCameraSdp?.Invoke(this, (testTaker, sdp));
             return ValueTask.CompletedTask;
         }
-
+        
         [JSInvokable]
-        public ValueTask _onCameraMuted(string testTaker)
+        public ValueTask _onDesktopStream(string testTaker)
         {
-            OnCameraMuted?.Invoke(this, testTaker);
+            OnDesktopStream?.Invoke(this, testTaker);
             return ValueTask.CompletedTask;
         }
-
+        
         [JSInvokable]
-        public ValueTask _onCameraUnmuted(string testTaker)
+        public ValueTask _onCameraStream(string testTaker)
         {
-            OnCameraUnmuted?.Invoke(this, testTaker);
-            return ValueTask.CompletedTask;
-        }
-
-        [JSInvokable]
-        public ValueTask _onDesktopMuted(string testTaker)
-        {
-            OnDesktopMuted?.Invoke(this, testTaker);
-            return ValueTask.CompletedTask;
-        }
-
-        [JSInvokable]
-        public ValueTask _onDesktopUnmuted(string testTaker)
-        {
-            OnDesktopUnmuted?.Invoke(this, testTaker);
+            OnCameraStream?.Invoke(this, testTaker);
             return ValueTask.CompletedTask;
         }
     }

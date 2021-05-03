@@ -10,7 +10,7 @@
         MenuRender="false">
         <RightContentRender>
             <RightContentExam Deadline="@_examDetails.StartTime.AddSeconds(_examDetails.Duration)" 
-                              OnEnded="ExitExam"
+                              OnEnded="() => ExitExam(true)"
                               OnCameraVideoVisibleChange="OnCameraVideoVisibleChange" 
                               OnDesktopVideoVisibleChange="OnDesktopVideoVisibleChange"/>
         </RightContentRender>

@@ -9,6 +9,7 @@ using BrowserInterop.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using SmartProctor.Client.Components;
 using SmartProctor.Client.Interops;
 using SmartProctor.Client.Services;
 using SmartProctor.Client.Utils;
@@ -55,6 +56,8 @@ namespace SmartProctor.Client.Pages.Exam
         
         private ExamDetailsResponseModel _examDetails;
         private WebRTCClientProctor _webRtcClient;
+
+        private ChatDrawer _chatDrawer;
         
         private HubConnection _hubConnection;
 
@@ -79,7 +82,6 @@ namespace SmartProctor.Client.Pages.Exam
         private List<EventItem> _broadcastMessages = new List<EventItem>();
         private IList<EventItem> _currentMessages;
         private string _currentChatTaker = null;
-        private bool _chatVisible = false;
         
         protected override async Task OnInitializedAsync()
         {
@@ -90,10 +92,10 @@ namespace SmartProctor.Client.Pages.Exam
                 await GetExamTakers();
                 await SetupSignalRClient();
                 SetupWebRTC();
-                await _hubConnection.SendAsync("ProctorJoin", ExamId);
                 StateHasChanged();
                 await Task.Delay(500);
                 await GetEvents();
+                await _hubConnection.SendAsync("ProctorJoin", ExamId);
             }
         }
 
@@ -238,10 +240,31 @@ namespace SmartProctor.Client.Pages.Exam
 
             // When the connection state changes, change whether the loading icon should be displayed
             _webRtcClient.OnDesktopConnectionStateChange += (_, e) =>
-                GetExamTakerVideoCard(e.Item1).DesktopLoading = e.Item2 != "connected";
+                GetExamTakerVideoCard(e.Item1).SetDesktopLoading(e.Item2 != "connected");
             
             _webRtcClient.OnCameraConnectionStateChange += (_, e) =>
-                GetExamTakerVideoCard(e.Item1).CameraLoading = e.Item2 != "connected";
+                GetExamTakerVideoCard(e.Item1).SetCameraLoading(e.Item2 != "connected");
+
+            /*
+            _webRtcClient.OnCameraStream += async (_, e) =>
+            {
+                if (!GetExamTakerVideoCard(e)?.IsShowingDesktop() ?? false)
+                {
+                    await Task.Delay(500);
+                    Console.WriteLine($"OnCameraStream({e})");
+                    await _webRtcClient.SetCameraVideoElem(e, e + "-video");
+                }
+            };
+
+            _webRtcClient.OnDesktopStream += async (_, e) =>
+            {
+                if (GetExamTakerVideoCard(e)?.IsShowingDesktop() ?? false)
+                {
+                    await Task.Delay(500);
+                    Console.WriteLine($"OnDesktopStream({e})");
+                    await _webRtcClient.SetDesktopVideoElem(e, e + "-video");
+                }
+            };*/
         }
 
         /// <summary>
@@ -314,7 +337,6 @@ namespace SmartProctor.Client.Pages.Exam
         /// <param name="testTaker"></param>
         private async Task OnToggleDesktop(string testTaker)
         {
-            Console.WriteLine($"OnToggleDesktop({testTaker})");
             await _webRtcClient.SetDesktopVideoElem(testTaker, testTaker + "-video");
         }
         
@@ -324,7 +346,6 @@ namespace SmartProctor.Client.Pages.Exam
         /// <param name="testTaker"></param>
         private async Task OnToggleCamera(string testTaker)
         {
-            Console.WriteLine($"OnToggleCamera({testTaker})");
             await _webRtcClient.SetCameraVideoElem(testTaker, testTaker + "-video");
         }
         
@@ -332,7 +353,7 @@ namespace SmartProctor.Client.Pages.Exam
         /// Callback when the ban button of the <see cref="ExamTakerVideoCard"/> component is clicked
         /// </summary>
         /// <param name="testTaker"></param>
-        private async Task BanTestTaker(string testTaker)
+        private void BanTestTaker(string testTaker)
         {
             _banTakerName = testTaker;
             _banModalVisible = true;
@@ -353,7 +374,7 @@ namespace SmartProctor.Client.Pages.Exam
                 });
 
                 // Shows the ban icon on the video panel
-                GetExamTakerVideoCard(_banTakerName).Banned = true;
+                GetExamTakerVideoCard(_banTakerName).SetBanned(true);
             }
             else
             {
@@ -395,7 +416,7 @@ namespace SmartProctor.Client.Pages.Exam
                 _currentMessages = _takerMessages[taker];
             }
 
-            _chatVisible = true;
+            _chatDrawer.Show();
         }
 
         /// <summary>

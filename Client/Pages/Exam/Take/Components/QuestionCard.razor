@@ -15,7 +15,6 @@
                         @for (var i = 0; i < choiceQuestion.Choices.Count; i++)
                         {
                             var index = i;
-                            Console.WriteLine(_choiceChecked == null);
                             <Checkbox @bind-Value="@_choiceChecked[index]" CheckedChange="OnSubmitAnswer">@choiceQuestion.Choices[index]</Checkbox>
                             <br/>
                         }

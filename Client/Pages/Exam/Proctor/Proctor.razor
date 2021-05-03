@@ -62,7 +62,7 @@
     <FooterRender>
     </FooterRender>
 </BasicLayout>
-<ChatDrawer Visible="@_chatVisible"
+<ChatDrawer @ref="@_chatDrawer"
             Messages="@_currentMessages"
             ForProctoring="true"
             ChatWith="@_currentChatTaker"

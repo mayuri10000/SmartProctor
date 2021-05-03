@@ -23,7 +23,7 @@
                 var cameraConnection = new RTCPeerConnection(null);
                 
                 this.testTakerConnections[testTaker] = {
-                    cameraVideoElem: document.getElementById(testTaker + "-video"),
+                    cameraVideoElem: document.getElementById(testTaker + '-video'),
                     desktopVideoElem: null,
                     desktopConnection: desktopConnection,
                     cameraConnection: cameraConnection,
@@ -31,26 +31,18 @@
                     cameraStream: null
                 };
 
-                desktopConnection.ontrack = (e) => {
+                desktopConnection.ontrack = async (e) => {
                     let track = e.track;
                     
-                    track.onmute = async (_) => {
-                        await this.helper.invokeMethodAsync("_onDesktopMuted", testTaker);
-                    };
-
-                    track.onunmute = async (_) => {
-                        await this.helper.invokeMethodAsync("_onDesktopUnmuted", testTaker);
-                    };
-                    
-                    if (this.testTakerConnections[testTaker].desktopVideoElem != null)
+                    if (this.testTakerConnections[testTaker].desktopVideoElem != null) {
                         // @ts-ignore
                         this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.streams[0];
+                    }
                     this.testTakerConnections[testTaker].desktopStream = e.streams[0];
-                    console.log("get desktop stream: " + testTaker);
+                    await this.helper.invokeMethodAsync("_onDesktopStream", testTaker);
                 };
                 
                 desktopConnection.onconnectionstatechange = async (e) => {
-                    console.log("connection state of " + testTaker + " changed to '" + desktopConnection.connectionState + "'");
                     await this.helper.invokeMethodAsync("_onDesktopConnectionStateChange", testTaker, desktopConnection.connectionState);
                 };
                 
@@ -59,25 +51,19 @@
                 }
 
                 // @ts-ignore
-                cameraConnection.ontrack= (e) => {
+                cameraConnection.ontrack= async (e) => {
                     let track = e.track;
-
-                    track.onmute = async (_) => {
-                        await this.helper.invokeMethodAsync("_onCameraMuted", testTaker);
-                    };
-
-                    track.onunmute = async (_) => {
-                        await this.helper.invokeMethodAsync("_onCameraUnmuted", testTaker);
-                    };
                     
-                    if (this.testTakerConnections[testTaker].cameraVideoElem != null)
+                    if (this.testTakerConnections[testTaker].cameraVideoElem != null) {
                         // @ts-ignore
                         this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.streams[0];
+                    }
                     this.testTakerConnections[testTaker].cameraStream = e.streams[0];
+                    await this.helper.invokeMethodAsync("_onCameraStream", testTaker);
                 };
 
                 cameraConnection.onconnectionstatechange = async (e) => {
-                    await this.helper.invokeMethodAsync("_onCameraConnectionStateChange", testTaker, desktopConnection.connectionState);
+                    await this.helper.invokeMethodAsync("_onCameraConnectionStateChange", testTaker, cameraConnection.connectionState);
                 };
 
                 cameraConnection.onicecandidate = async (e) => {
@@ -88,7 +74,6 @@
         
         public async onReceivedDesktopIceCandidate(testTaker: string, candidate: RTCIceCandidate) {
             await this.testTakerConnections[testTaker].desktopConnection.addIceCandidate(candidate);
-            console.log("received ICE candidate from " + testTaker + ".");
         }
         
         public async onReceivedDesktopSdp(testTaker: string, sdp: RTCSessionDescriptionInit) {
@@ -97,7 +82,6 @@
             let answer = await conn.createAnswer();
             await conn.setLocalDescription(answer);
             await this.helper.invokeMethodAsync("_onDesktopSdp", testTaker, answer);
-            console.log("received offer from " + testTaker + " and sending answer.");
         }
 
         public async onReceivedCameraIceCandidate(testTaker: string, candidate: RTCIceCandidate) {
@@ -117,6 +101,9 @@
                 // @ts-ignore
                 this.testTakerConnections[testTaker].desktopVideoElem.srcObject = null;
             this.testTakerConnections[testTaker].desktopVideoElem = document.getElementById(elementId);
+            if (this.testTakerConnections[testTaker].desktopVideoElem == null) {
+                return;
+            }
             // @ts-ignore
             this.testTakerConnections[testTaker].desktopVideoElem.srcObject = this.testTakerConnections[testTaker].desktopStream;
         }
@@ -126,6 +113,9 @@
                 // @ts-ignore
                 this.testTakerConnections[testTaker].cameraVideoElem.srcObject = null;
             this.testTakerConnections[testTaker].cameraVideoElem = document.getElementById(elementId);
+            if (this.testTakerConnections[testTaker].cameraVideoElem == null) {
+                return;
+            }
             // @ts-ignore
             this.testTakerConnections[testTaker].cameraVideoElem.srcObject = this.testTakerConnections[testTaker].cameraStream;
         }

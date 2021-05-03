@@ -364,7 +364,7 @@ namespace SmartProctor.Client.Pages.Exam
                         Title = "You have been banned by the proctor",
                         Content = "Reason: " + reason
                     });
-                    await ExitExam();
+                    await ExitExam(false);
                 });
 
             await _hubConnection.StartAsync();
@@ -436,9 +436,17 @@ namespace SmartProctor.Client.Pages.Exam
             _inPrepare = false;
         }
 
-        private async Task ExitExam()
+        private async Task ExitExam(bool showModal)
         {
-            await _hubConnection.SendAsync("ExamEnded");
+            if (showModal)
+            {
+                await Modal.InfoAsync(new ConfirmOptions()
+                {
+                    Content = "Exam finished, click 'OK' to exit"
+                });
+            }
+
+            await _testPrepareModal.ExamFinished();
             await _hubConnection.StopAsync();
             NavManager.NavigateTo("/", true);
         }

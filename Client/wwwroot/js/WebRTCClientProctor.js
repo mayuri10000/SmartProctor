@@ -57,47 +57,35 @@ var SmartProctor;
                         var desktopConnection = new RTCPeerConnection(null);
                         var cameraConnection = new RTCPeerConnection(null);
                         _this.testTakerConnections[testTaker] = {
-                            cameraVideoElem: document.getElementById(testTaker + "-video"),
+                            cameraVideoElem: document.getElementById(testTaker + '-video'),
                             desktopVideoElem: null,
                             desktopConnection: desktopConnection,
                             cameraConnection: cameraConnection,
                             desktopStream: null,
                             cameraStream: null
                         };
-                        desktopConnection.ontrack = function (e) {
-                            var track = e.track;
-                            track.onmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopMuted", testTaker)];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); };
-                            track.onunmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopUnmuted", testTaker)];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); };
-                            if (_this.testTakerConnections[testTaker].desktopVideoElem != null)
-                                // @ts-ignore
-                                _this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.streams[0];
-                            _this.testTakerConnections[testTaker].desktopStream = e.streams[0];
-                            console.log("get desktop stream: " + testTaker);
-                        };
-                        desktopConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
+                        desktopConnection.ontrack = function (e) { return __awaiter(_this, void 0, void 0, function () {
+                            var track;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        console.log("connection state of " + testTaker + " changed to '" + desktopConnection.connectionState + "'");
-                                        return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopConnectionStateChange", testTaker, desktopConnection.connectionState)];
+                                        track = e.track;
+                                        if (this.testTakerConnections[testTaker].desktopVideoElem != null) {
+                                            // @ts-ignore
+                                            this.testTakerConnections[testTaker].desktopVideoElem.srcObject = e.streams[0];
+                                        }
+                                        this.testTakerConnections[testTaker].desktopStream = e.streams[0];
+                                        return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopStream", testTaker)];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); };
+                        desktopConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopConnectionStateChange", testTaker, desktopConnection.connectionState)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
@@ -115,37 +103,28 @@ var SmartProctor;
                             });
                         }); };
                         // @ts-ignore
-                        cameraConnection.ontrack = function (e) {
-                            var track = e.track;
-                            track.onmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraMuted", testTaker)];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); };
-                            track.onunmute = function (_) { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraUnmuted", testTaker)];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); };
-                            if (_this.testTakerConnections[testTaker].cameraVideoElem != null)
-                                // @ts-ignore
-                                _this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.streams[0];
-                            _this.testTakerConnections[testTaker].cameraStream = e.streams[0];
-                        };
+                        cameraConnection.ontrack = function (e) { return __awaiter(_this, void 0, void 0, function () {
+                            var track;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        track = e.track;
+                                        if (this.testTakerConnections[testTaker].cameraVideoElem != null) {
+                                            // @ts-ignore
+                                            this.testTakerConnections[testTaker].cameraVideoElem.srcObject = e.streams[0];
+                                        }
+                                        this.testTakerConnections[testTaker].cameraStream = e.streams[0];
+                                        return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraStream", testTaker)];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); };
                         cameraConnection.onconnectionstatechange = function (e) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraConnectionStateChange", testTaker, desktopConnection.connectionState)];
+                                    case 0: return [4 /*yield*/, this.helper.invokeMethodAsync("_onCameraConnectionStateChange", testTaker, cameraConnection.connectionState)];
                                     case 1:
                                         _a.sent();
                                         return [2 /*return*/];
@@ -174,7 +153,6 @@ var SmartProctor;
                         case 0: return [4 /*yield*/, this.testTakerConnections[testTaker].desktopConnection.addIceCandidate(candidate)];
                         case 1:
                             _a.sent();
-                            console.log("received ICE candidate from " + testTaker + ".");
                             return [2 /*return*/];
                     }
                 });
@@ -199,7 +177,6 @@ var SmartProctor;
                             return [4 /*yield*/, this.helper.invokeMethodAsync("_onDesktopSdp", testTaker, answer)];
                         case 4:
                             _a.sent();
-                            console.log("received offer from " + testTaker + " and sending answer.");
                             return [2 /*return*/];
                     }
                 });
@@ -248,6 +225,9 @@ var SmartProctor;
                         // @ts-ignore
                         this.testTakerConnections[testTaker].desktopVideoElem.srcObject = null;
                     this.testTakerConnections[testTaker].desktopVideoElem = document.getElementById(elementId);
+                    if (this.testTakerConnections[testTaker].desktopVideoElem == null) {
+                        return [2 /*return*/];
+                    }
                     // @ts-ignore
                     this.testTakerConnections[testTaker].desktopVideoElem.srcObject = this.testTakerConnections[testTaker].desktopStream;
                     return [2 /*return*/];
@@ -261,6 +241,9 @@ var SmartProctor;
                         // @ts-ignore
                         this.testTakerConnections[testTaker].cameraVideoElem.srcObject = null;
                     this.testTakerConnections[testTaker].cameraVideoElem = document.getElementById(elementId);
+                    if (this.testTakerConnections[testTaker].cameraVideoElem == null) {
+                        return [2 /*return*/];
+                    }
                     // @ts-ignore
                     this.testTakerConnections[testTaker].cameraVideoElem.srcObject = this.testTakerConnections[testTaker].cameraStream;
                     return [2 /*return*/];

@@ -35,8 +35,7 @@ namespace SmartProctor.Client.Components
         /// <summary>
         /// Whether the drawer is visible
         /// </summary>
-        [Parameter]
-        public bool Visible { get; set; }
+        private bool _visible;
         
         /// <summary>
         /// Callback when a message is about to send
@@ -47,13 +46,19 @@ namespace SmartProctor.Client.Components
         private string _message = "";     // Current message, binds to the input box
         private int _newMessageCount = 0; // New message count, displayed on the badge of the handle
 
+        public void Show()
+        {
+            _visible = true;
+            _newMessageCount = 0;
+        }
+        
         /// <summary>
         /// Called when the handle is clicked
         /// </summary>
         private void SetVisible()
         {
-           Visible = !Visible;
-           if (Visible)
+           _visible = !_visible;
+           if (_visible)
            {
                _newMessageCount = 0;
            }
