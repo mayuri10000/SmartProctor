@@ -36,7 +36,7 @@ namespace SmartProctor.Client.Interops
                 _dotRef = DotNetObjectReference.Create<WebRTCClientProctor>(this);
                 var module = await _jsRuntime.InvokeAsync<IJSObjectReference>(
                     "import", "./js/WebRTCClientProctor.js");
-                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef, _testTakers);
+                _jsObj = await module.InvokeAsync<IJSObjectReference>("create", _dotRef, WebRTCConfig.ICEServers, _testTakers);
             }
         }
 

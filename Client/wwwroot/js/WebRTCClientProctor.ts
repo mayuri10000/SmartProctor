@@ -15,12 +15,19 @@
     export class WebRTCClientProctor {
         public helper;
         private testTakerConnections: { [userName: string]: TestTakerConnection } = {};
+        private rtcConfig: RTCConfiguration;
         
-        public async init(helper, testTakers: string[]) {
+        public async init(helper, iceServers: string[], testTakers: string[]) {
             this.helper = helper;
+            if (iceServers != null) {
+                this.rtcConfig = {iceServers: [{urls: iceServers}]};
+            } else {
+                this.rtcConfig = null;
+            }
+            
             testTakers.forEach((testTaker) => {
-                var desktopConnection = new RTCPeerConnection(null);
-                var cameraConnection = new RTCPeerConnection(null);
+                var desktopConnection = new RTCPeerConnection(this.rtcConfig);
+                var cameraConnection = new RTCPeerConnection(this.rtcConfig);
                 
                 this.testTakerConnections[testTaker] = {
                     cameraVideoElem: document.getElementById(testTaker + '-video'),
@@ -124,10 +131,10 @@
 
 let webRTCClientProctor: SmartProctor.WebRTCClientProctor;
 
-export function create(helper, testTakers: string[]) {
+export function create(helper, iceServers: string[], testTakers: string[]) {
     if (webRTCClientProctor == null) {
         webRTCClientProctor = new SmartProctor.WebRTCClientProctor();
-        webRTCClientProctor.init(helper, testTakers);
+        webRTCClientProctor.init(helper, iceServers, testTakers);
     }
 
     return webRTCClientProctor;

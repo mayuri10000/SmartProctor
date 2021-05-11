@@ -48,14 +48,20 @@ var SmartProctor;
         function WebRTCClientProctor() {
             this.testTakerConnections = {};
         }
-        WebRTCClientProctor.prototype.init = function (helper, testTakers) {
+        WebRTCClientProctor.prototype.init = function (helper, iceServers, testTakers) {
             return __awaiter(this, void 0, void 0, function () {
                 var _this = this;
                 return __generator(this, function (_a) {
                     this.helper = helper;
+                    if (iceServers != null) {
+                        this.rtcConfig = { iceServers: [{ urls: iceServers }] };
+                    }
+                    else {
+                        this.rtcConfig = null;
+                    }
                     testTakers.forEach(function (testTaker) {
-                        var desktopConnection = new RTCPeerConnection(null);
-                        var cameraConnection = new RTCPeerConnection(null);
+                        var desktopConnection = new RTCPeerConnection(_this.rtcConfig);
+                        var cameraConnection = new RTCPeerConnection(_this.rtcConfig);
                         _this.testTakerConnections[testTaker] = {
                             cameraVideoElem: document.getElementById(testTaker + '-video'),
                             desktopVideoElem: null,
@@ -255,10 +261,10 @@ var SmartProctor;
     SmartProctor.WebRTCClientProctor = WebRTCClientProctor;
 })(SmartProctor || (SmartProctor = {}));
 var webRTCClientProctor;
-export function create(helper, testTakers) {
+export function create(helper, iceServers, testTakers) {
     if (webRTCClientProctor == null) {
         webRTCClientProctor = new SmartProctor.WebRTCClientProctor();
-        webRTCClientProctor.init(helper, testTakers);
+        webRTCClientProctor.init(helper, iceServers, testTakers);
     }
     return webRTCClientProctor;
 }
